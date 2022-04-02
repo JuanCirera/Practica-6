@@ -1,4 +1,7 @@
 import utilidades.Fecha;
+
+import java.util.Calendar;
+
 /**
  * Clase que gestiona la información de una persona tipo administrativo, con información específica.
  * */
@@ -10,13 +13,24 @@ public class Administrativo extends Persona{
     //FUNCIONES-METODOS
 
     @Override
-    public int diasPorMes(int month) {
-        return super.diasPorMes(month);
+    /**
+     * Devuelve el número de dias trabajados en un mes introducido
+     * @param mes del que sacar el número de dias
+     * @reurn cont - total de trabajados
+     * */
+    public int diasPorMes(int mes) {
+        int cont=0;
+        for (Fecha i:diasTrabajados){
+            if(i.getMonth()==mes){
+                cont++;
+            }
+        }
+        return cont;
     }
 
     @Override
     public void mostrarEstado() {
-        super.mostrarEstado();
+        System.out.println(dni+", "+nombre+" "+apellido1+" "+apellido2);
     }
 
     private boolean addDiaTrabajado(Fecha dt){
@@ -27,6 +41,16 @@ public class Administrativo extends Persona{
         return false;
     }
 
-    //TODO: validar fechaNac > 18 and < 65
 
+    @Override
+    public boolean validarFechaNac(Fecha fechaNac) {
+        Calendar calendar = Calendar.getInstance();
+        int actual=calendar.get(Calendar.YEAR);
+        //Se llama al atributo año del objeto fecha que se haya creado y se hace la comprobacion
+        if(actual - fechaNac.getYear()>18 && actual - fechaNac.getYear()<65){
+            return true;
+        }else {
+            return false;
+        }
+    }
 }
