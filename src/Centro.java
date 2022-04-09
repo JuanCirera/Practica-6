@@ -21,13 +21,26 @@ public class Centro implements Estadistica{
     protected int limiteConsultas;
     protected int contMedicos;
     protected int contAdministrativos;
+    protected static int contCentros;
 
     //CONSTRUCTOR
     public Centro(String nombreCentro, String direccionCentro, int identificador){
         this.nombreCentro=nombreCentro;
         this.direccionCentro=direccionCentro;
         this.identificador=identificador;
+        contCentros++;
     }
+
+    //SETTERS-GETTERS
+
+    public int getID() {
+        return identificador;
+    }
+
+    public String getNombre() {
+        return nombreCentro;
+    }
+
 
     //FUNCIONES-METODOS
 
@@ -40,4 +53,6 @@ public class Centro implements Estadistica{
     public void mostrarEstado() {
 
     }
+
+
 }

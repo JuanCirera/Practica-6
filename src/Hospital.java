@@ -13,6 +13,8 @@ public class Hospital extends Centro{
         super(nombreCentro, direccionCentro, identificador);
         this.plantas=plantas;
         this.habitacionesPorPlanta=habitacionesPorPlanta;
+        trabajadores=new Persona[5]; //Inicializo este array para poder meter el personal al inicio
+        consultas=new Paciente[5]; //Lo mismo para este aunque no se van a crear pacientes al inicio
     }
 
     //FUNCIONES-METODOS
@@ -35,9 +37,9 @@ public class Hospital extends Centro{
     /**
      * Funcion que crea un nuevo objeto medico de forma manual o aleatoria
      * @param aleatorio - true, el objeto se crea automáticamente, false, se piden los datos por teclado.
-     * @return Medico
+     * @return void
      * */
-    public Medico addMedico(boolean aleatorio){
+    protected void addMedico(boolean aleatorio){
         if(aleatorio){
             String dni = Faker.generarNIF_NIE();
             int id = Faker.devolverEnteros(false, trabajadores.length);
@@ -49,7 +51,11 @@ public class Hospital extends Centro{
             String especialidad=Faker.devolverEspecialidad();
 
             Medico m=new Medico(dni, id, n, ap1, ap2, sexo, fNac, especialidad);
-            return m;
+            for(Persona i: trabajadores){
+                if(i==null){
+                    i=m;
+                }
+            }
 
         }else{
             String sexo, especialidad;
@@ -75,7 +81,11 @@ public class Hospital extends Centro{
             }while(!Medico.validarEspecialidad(especialidad));
 
             Medico m=new Medico(dni, id, n, ap1, ap2, sexo, fNac, especialidad);
-            return m;
+            for(Persona i: trabajadores){
+                if(i==null){
+                    i=m;
+                }
+            }
         }
     }
 
@@ -83,9 +93,9 @@ public class Hospital extends Centro{
     /**
      * Funcion que crea un nuevo objeto administrativo de forma manual o aleatoria
      * @param aleatorio - true, el objeto se crea automáticamente, false, se piden los datos por teclado.
-     * @return Administrativo
+     * @return void
      * */
-    public Administrativo addAdmin(boolean aleatorio){
+    protected void addAdmin(boolean aleatorio){
         if(aleatorio){
             String dni = Faker.generarNIF_NIE();
             int id = Faker.devolverEnteros(false, trabajadores.length);
@@ -97,7 +107,11 @@ public class Hospital extends Centro{
             String area=Faker.devolverArea();
 
             Administrativo a=new Administrativo(dni, id, n, ap1, ap2, sexo, fNac, area);
-            return a;
+            for(Persona i: trabajadores){
+                if(i==null){
+                    i=a;
+                }
+            }
 
         }else {
             String sexo,area;
@@ -123,7 +137,11 @@ public class Hospital extends Centro{
             }while(!Administrativo.validarArea(area));
 
             Administrativo a=new Administrativo(dni, id, n, ap1, ap2, sexo, fNac, area);
-            return a;
+            for(Persona i: trabajadores){
+                if(i==null){
+                    i=a;
+                }
+            }
         }
     }
 

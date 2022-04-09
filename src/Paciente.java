@@ -9,7 +9,8 @@ public class Paciente extends Persona{
 
     //CONSTRUCTOR
     //Inicializa el array con 5 posiciones
-    public Paciente(){
+    public Paciente(String dni, int identificador, String nombre, String apellido1, String apellido2, String sexo, Fecha fechaNac){
+        super(dni, identificador, nombre, apellido1, apellido2, sexo, fechaNac);
         visitasMedicas=new Fecha[5];
     }
 

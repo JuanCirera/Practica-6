@@ -1,5 +1,6 @@
 import utilidades.Faker;
 import utilidades.Fecha;
+import utilidades.GestionArray;
 import utilidades.PeticionDatos;
 
 import java.io.File;
@@ -58,7 +59,12 @@ public class GestionMedica {
             case 1:
                 System.out.println(ANSI_BBLUE+hcs.toUpperCase()+ANSI_RESET);
                 //TODO:Mostrar los hospitales (ID, nombre)
-                //TODO: Segun el hospital elegido mostrar:
+                for(Centro i:centrosMedicos){
+                    if(i!=null) {
+                        System.out.println(i.getID() + " " + i.getNombre());
+                    }
+                }
+                opcionMenu= PeticionDatos.pedirEnteroPositivo(false, "> Elige un centro (ID): ");
                 System.out.println(" "); //Espacio en blanco
                 opcionMenu = PeticionDatos.pedirEnteroPositivo(true, """ 
                     ║ 1-> Mostrar información                                      
@@ -66,6 +72,7 @@ public class GestionMedica {
                     ║ 3-> Volver al menú                                                                                   
                     ╚ > """);
                 System.out.println(" "); //Espacio en blanco
+                //TODO: Segun el ID elegido:
                 if(opcionMenu==1){
                     //TODO:Mostrar datos del hospital seleccionado
                 }else if(opcionMenu==2){
@@ -208,11 +215,28 @@ public class GestionMedica {
                 return false;
             }
         }else{
-            dir.mkdir();
-            subDir1.mkdir();
-            subDir2.mkdir();
+//            dir.mkdir(); TODO: Hacer esto cuando se vaya a cerrar el programa
+//            subDir1.mkdir();
+//            subDir2.mkdir();
             return false;
         }
+    }
+
+
+    /**
+     * Comprueba si un identificador de Centro ya existe
+     * @param id - identificador de Centro a comprobar
+     * @return boolean - true, si coincide con alguno, false si no existe
+     * */
+    private static boolean checkID(int id){
+        for(Centro c: centrosMedicos){
+            if(c!=null && c.getID()==id){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        return false;
     }
 
 
@@ -222,64 +246,75 @@ public class GestionMedica {
      * @param clinica - true, si es de tipo clinica
      * */
     private static void nuevoCentro(boolean hospital, boolean clinica, boolean init){
-        String n=Faker.devolverHospitales();
-        String dir="C/Felicidad, 7";
-        int id=Faker.devolverEnteros(false,centrosMedicos.length);
 
         if(hospital){
-
-            int plantas=Faker.devolverEnteros(false,10);
-            int hab=Faker.devolverEnteros(false,20);
-
             //Si el programa inicia por primera vez se crean 2 Hospitales con 2 Medicos y 2 Admins
             if(init){
                 for(int i=0;i<2;i++) {
+                    int id;
+                    String n=Faker.devolverHospitales();
+                    String dir="C/Felicidad, 7";
+                    do {
+                        id = Faker.devolverEnteros(false, centrosMedicos.length);
+                    }while(checkID(id));
+                    int plantas=Faker.devolverEnteros(false,10);
+                    int hab=Faker.devolverEnteros(false,20);
+
                     Hospital h = new Hospital(n, dir, id, plantas, hab); // 1 hospital por vuelta
                     //Una vez creado el objeto se guarda en una posicion vacía del array centrosMedicos[]
-                    for(int p=0;p<centrosMedicos.length;i++) {
-                        if(centrosMedicos[p]!=null) {
-                            centrosMedicos[p]=h;
-                        }
-                    }
-                    for(int x=0;x<2;i++) { // 2 médicos por vuelta
-                        h.addMedico(true);
-                    }
-                    for(int y=0;y<2;i++) { // 2 Admins por vuelta
-                        h.addAdmin(true);
-                    }
+                    centrosMedicos[Centro.contCentros-1]=h;
+//                    for(int x=0;x<2;i++) { // 2 médicos por vuelta
+//                        h.addMedico(true);
+//                    }
+//                    for(int y=0;y<2;i++) { // 2 Admins por vuelta
+//                        h.addAdmin(true);
+//                    }
                 }
 
             }else{ //Si el programa ya se había ejecutado antes, solo se creara un hospital cada vez que se llame a esta funcion
+                String n=PeticionDatos.pedirCadena("> nombre: ");
+                String dir=PeticionDatos.pedirCadena("> dirección: ");
+                int id=PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
+                int plantas=PeticionDatos.pedirEnteroPositivo(false, "> plantas: ");
+                int hab=PeticionDatos.pedirEnteroPositivo(false, "> habitaciones: ");
                 Hospital h=new Hospital(n,dir,id,plantas,hab);
-                for(int i=0;i<centrosMedicos.length;i++) {
-                    if(centrosMedicos[i]!=null) {
-                        centrosMedicos[i]=h;
+
+                for(Centro p: centrosMedicos) {
+                    if(p==null) {
+                        p=h;
                     }
                 }
             }
 
         }else if(clinica){
-
             if(init){
+                String n=Faker.devolverHospitales();
+                String dir="C/Felicidad, 7";
+                int id=Faker.devolverEnteros(false,centrosMedicos.length);
+
                 for(int i=0;i<2;i++) {
                     Clinica c=new Clinica(n,dir,id);
-                    for(int p=0;p<centrosMedicos.length;i++) {
-                        if(centrosMedicos[p]!=null) {
-                            centrosMedicos[p]=c;
+                    for(Centro p: centrosMedicos) {
+                        if(p==null) {
+                            p=c;
                         }
                     }
-                    for(int x=0;x<2;i++) { // 2 médicos por vuelta
-                        c.addMedico(true);
-                    }
-                    for(int y=0;y<2;i++) { // 2 Admins por vuelta
-                        c.addAdmin(true);
-                    }
+//                    for(int x=0;x<2;i++) { // 2 médicos por vuelta
+//                        c.addMedico(true);
+//                    }
+//                    for(int y=0;y<2;i++) { // 2 Admins por vuelta
+//                        c.addAdmin(true);
+//                    }
                 }
             }else{
+                String n=PeticionDatos.pedirCadena("> nombre: ");
+                String dir=PeticionDatos.pedirCadena("> dirección: ");
+                int id=PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
+
                 Clinica c=new Clinica(n,dir,id);
-                for(int i=0;i<centrosMedicos.length;i++) {
-                    if(centrosMedicos[i]!=null) {
-                        centrosMedicos[i]=c;
+                for(Centro i: centrosMedicos) {
+                    if(i==null) {
+                        i=c;
                     }
                 }
             }
@@ -287,41 +322,15 @@ public class GestionMedica {
     }
 
 
-//    /**
-//     * Funcion que crea un nuevo objeto Persona segun sea medico, admin o paciente
-//     * @param medico - true, Si el objeto se quiere crear de tipo medico
-//     * @param admin - true, si es de tipo administrativo
-//     * @param paciente - true, si es un objeto paciente
-//     * */
-//    private static void nuevaPersona(boolean medico, boolean admin, boolean paciente){
-//
-//        if(medico){
-//            Hospital.add
-//
-//        }else if(admin){
-//            String area=Faker.devolverArea();
-//            Administrativo a=new Administrativo(dni, id, n, ap1, ap2, sexo, fNac, area);
-//
-//        }else if(paciente){
-//
-//            Paciente p=new Paciente();
-//        }
-//    }
-
-
     /**
      * Esta función va a crear objetos aleatorios por defecto para que la aplicación funcione
      * */
     private static void estadoPorDefecto(){
         //Hospitales
-        for(int i=0;i<2;i++){
-            nuevoCentro(true,false, true);
-        }
-        //Clínicas
-        for(int i=0;i<2;i++){
-            nuevoCentro(false,true, true);
-        }
+        nuevoCentro(true,false, true);
 
+        //Clínicas
+        nuevoCentro(false,true, true);
     }
 
     /**
