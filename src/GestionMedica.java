@@ -1,3 +1,4 @@
+import utilidades.Faker;
 import utilidades.Fecha;
 import utilidades.PeticionDatos;
 
@@ -19,6 +20,8 @@ public class GestionMedica {
     public static final String ANSI_CYAN = "\u001B[36m";
 
     private static int opcionMenu;
+
+    private static Centro centrosMedicos[]=new Centro[5];
 
     /**
      * Muestra el menu de inicio con las opciones del programa
@@ -90,7 +93,11 @@ public class GestionMedica {
         }
     }
 
-
+    /**
+     * Gestiona las operaciones sobre los objetos persona
+     * @param personal - si el objeto persona a gestionar es un medico/administrativo
+     * @param paciente - si el objeto paciente es un paciente
+     * */
     private static void gestionarPersona(boolean personal, boolean paciente){
         String dni=PeticionDatos.pedirNIF_NIE("> DNI: ");
         //TODO:Si este dni existe en cualquiera de los arrays de persona, se muestra:
@@ -98,7 +105,8 @@ public class GestionMedica {
         opcionMenu = PeticionDatos.pedirEnteroPositivo(true, """ 
                 ║ 1-> Modificar datos                                      
                 ║ 2-> Modificar ubicación
-                ║ 3-> Despedir                                                                                   
+                ║ 3-> Añadir día    
+                ║ 4-> Despedir                                                                                   
                 ╚ > """);
         System.out.println(" "); //Espacio en blanco
 
@@ -108,7 +116,7 @@ public class GestionMedica {
                 String nombre=PeticionDatos.pedirCadena( "> nombre: ");
                 String apellido1=PeticionDatos.pedirCadena( "> primer apellido: ");
                 String apellido2=PeticionDatos.pedirCadena( "> segundo apellido: ");
-                String genero=PeticionDatos.pedirCadena( "> genero: ");
+                String genero=PeticionDatos.pedirCadena( "> sexo: ");
     //            Fecha fecha=PeticionDatos.pedirCadena( "> fecha nacimiento: "); TODO: modificar esto para que se pueda pedir todo junto
                 //TODO: Hacer los set para cada atributo
                 break;
@@ -133,6 +141,8 @@ public class GestionMedica {
                 }
                 break;
             case 3:
+                //TODO: llamar a la funcion addDiaTrabajado/addVisita del objeto en cuestion
+            case 4:
                 //TODO: guardar el objeto en cuestion en un archivo del que no se lea al iniciar, y poner su poosicion en el array a null.
                 break;
             default:
@@ -140,10 +150,12 @@ public class GestionMedica {
         }
     }
 
+
     private static void estadisticasCentrosMedicos(){
         int mes=PeticionDatos.pedirEnteroPositivo(false, "> mes: ");
         //TODO: mostrar centros, segun el elegido mostrar sus estadisticas
     }
+
 
     private static void estadisticasPersonas(){
         //TODO: mostrar centros
@@ -203,17 +215,113 @@ public class GestionMedica {
         }
     }
 
+
+    /**
+     * Funcion que crea un nuevo objeto Centro segun sea hospital o clinica
+     * @param hospital - true, Si el objeto se quiere crear de tipo hospital
+     * @param clinica - true, si es de tipo clinica
+     * */
+    private static void nuevoCentro(boolean hospital, boolean clinica, boolean init){
+        String n=Faker.devolverHospitales();
+        String dir="C/Felicidad, 7";
+        int id=Faker.devolverEnteros(false,centrosMedicos.length);
+
+        if(hospital){
+
+            int plantas=Faker.devolverEnteros(false,10);
+            int hab=Faker.devolverEnteros(false,20);
+
+            //Si el programa inicia por primera vez se crean 2 Hospitales con 2 Medicos y 2 Admins
+            if(init){
+                for(int i=0;i<2;i++) {
+                    Hospital h = new Hospital(n, dir, id, plantas, hab); // 1 hospital por vuelta
+                    //Una vez creado el objeto se guarda en una posicion vacía del array centrosMedicos[]
+                    for(int p=0;p<centrosMedicos.length;i++) {
+                        if(centrosMedicos[p]!=null) {
+                            centrosMedicos[p]=h;
+                        }
+                    }
+                    for(int x=0;x<2;i++) { // 2 médicos por vuelta
+                        h.addMedico(true);
+                    }
+                    for(int y=0;y<2;i++) { // 2 Admins por vuelta
+                        h.addAdmin(true);
+                    }
+                }
+
+            }else{ //Si el programa ya se había ejecutado antes, solo se creara un hospital cada vez que se llame a esta funcion
+                Hospital h=new Hospital(n,dir,id,plantas,hab);
+                for(int i=0;i<centrosMedicos.length;i++) {
+                    if(centrosMedicos[i]!=null) {
+                        centrosMedicos[i]=h;
+                    }
+                }
+            }
+
+        }else if(clinica){
+
+            if(init){
+                for(int i=0;i<2;i++) {
+                    Clinica c=new Clinica(n,dir,id);
+                    for(int p=0;p<centrosMedicos.length;i++) {
+                        if(centrosMedicos[p]!=null) {
+                            centrosMedicos[p]=c;
+                        }
+                    }
+                    for(int x=0;x<2;i++) { // 2 médicos por vuelta
+                        c.addMedico(true);
+                    }
+                    for(int y=0;y<2;i++) { // 2 Admins por vuelta
+                        c.addAdmin(true);
+                    }
+                }
+            }else{
+                Clinica c=new Clinica(n,dir,id);
+                for(int i=0;i<centrosMedicos.length;i++) {
+                    if(centrosMedicos[i]!=null) {
+                        centrosMedicos[i]=c;
+                    }
+                }
+            }
+        }
+    }
+
+
+//    /**
+//     * Funcion que crea un nuevo objeto Persona segun sea medico, admin o paciente
+//     * @param medico - true, Si el objeto se quiere crear de tipo medico
+//     * @param admin - true, si es de tipo administrativo
+//     * @param paciente - true, si es un objeto paciente
+//     * */
+//    private static void nuevaPersona(boolean medico, boolean admin, boolean paciente){
+//
+//        if(medico){
+//            Hospital.add
+//
+//        }else if(admin){
+//            String area=Faker.devolverArea();
+//            Administrativo a=new Administrativo(dni, id, n, ap1, ap2, sexo, fNac, area);
+//
+//        }else if(paciente){
+//
+//            Paciente p=new Paciente();
+//        }
+//    }
+
+
     /**
      * Esta función va a crear objetos aleatorios por defecto para que la aplicación funcione
      * */
     private static void estadoPorDefecto(){
         //Hospitales
-        Hospital h1=new Hospital();
-        Hospital h2=new Hospital();
+        for(int i=0;i<2;i++){
+            nuevoCentro(true,false, true);
+        }
         //Clínicas
-        Clinica c1=new Clinica();
-        //Medicos
-        //Admins
+        for(int i=0;i<2;i++){
+            nuevoCentro(false,true, true);
+        }
+
     }
 
     /**

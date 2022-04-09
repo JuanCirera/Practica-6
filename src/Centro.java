@@ -2,15 +2,32 @@
  * Clase para definir la información genérica de un centro médico
  * */
 public class Centro implements Estadistica{
+    //CONSTANTES
+    protected static final String ANSI_RESET = "\u001B[0m";
+    protected static final String ANSI_GREEN = "\u001B[32m";
+    protected static final String ANSI_BGREEN = "\u001B[32;1m";
+    protected static final String ANSI_BLUE = "\u001B[34m";
+    protected static final String ANSI_BBLUE = "\u001B[34;1m";
+    protected static final String ANSI_RED = "\u001B[31m";
+    protected static final String ANSI_YELLOW = "\u001B[33m";
+    protected static final String ANSI_CYAN = "\u001B[36m";
+
     //ATRIBUTOS
     protected String nombreCentro;
     protected String direccionCentro;
     protected int identificador;
-    private Paciente consultas[];
-    private Persona trabajadores[];
+    protected Paciente consultas[];
+    protected Persona trabajadores[];
     protected int limiteConsultas;
     protected int contMedicos;
     protected int contAdministrativos;
+
+    //CONSTRUCTOR
+    public Centro(String nombreCentro, String direccionCentro, int identificador){
+        this.nombreCentro=nombreCentro;
+        this.direccionCentro=direccionCentro;
+        this.identificador=identificador;
+    }
 
     //FUNCIONES-METODOS
 

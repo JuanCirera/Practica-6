@@ -8,12 +8,23 @@ import java.util.Calendar;
 public class Persona implements Estadistica{
     //ATRIBUTOS
     protected String dni;
+    protected int identificador;
     protected String nombre;
     protected String apellido1;
     protected String apellido2;
-    protected String genero;
-    protected int identificador;
+    protected String sexo;
     protected Fecha fechaNac;
+
+    //CONSTRUCTOR
+    public Persona(String dni, int id, String nombre, String ap1, String ap2, String sexo, Fecha f){
+        this.dni=dni;
+        this.identificador=id;
+        this.nombre=nombre;
+        this.apellido1=ap1;
+        this.apellido2=ap2;
+        this.sexo=sexo;
+        this.fechaNac=f;
+    }
 
     //FUNCIONES-METODOS
 
@@ -32,7 +43,7 @@ public class Persona implements Estadistica{
      * @param fechaNac - objeto fecha que se necesita comprobar
      * @return boolean - true si el año es correcto, false si no cumple la condicion (120 años)
      * */
-    public boolean validarFechaNac(Fecha fechaNac){
+    protected boolean validarFechaNac(Fecha fechaNac){
         //Estas dos líneas son para obtener el año actual
         Calendar calendar = Calendar.getInstance();
         int actual=calendar.get(Calendar.YEAR);
@@ -44,13 +55,14 @@ public class Persona implements Estadistica{
         }
     }
 
+
     /**
-     * Funcion de clase que comprueba si el género de una persona es válido.
-     * @param genero introducido
-     * @return boolean - Devuelve true si coincide con masculino/femenino y false si no coincide con ninguno.
+     * Funcion de clase que comprueba si el sexo de una persona es válido.
+     * @param sexo introducido
+     * @return boolean - Devuelve true si coincide con hombre/mujer y false si no coincide con ninguno.
      * */
-    private static boolean validarGenero(String genero){
-        if (genero.equals("masculino") || genero.equals("femenino")){
+    protected static boolean validarGenero(String sexo){
+        if (sexo.equals("hombre") || sexo.equals("mujer")){
             return true;
         }else {
             return false;
