@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 /**
  * Clase para definir la información genérica de un centro médico
  * */
@@ -19,9 +21,9 @@ public class Centro implements Estadistica{
     protected Paciente consultas[];
     protected Persona trabajadores[];
     protected int limiteConsultas;
-    protected int contMedicos;
-    protected int contAdministrativos;
-    protected static int contCentros;
+    protected int contMedicos=0;
+    protected int contAdministrativos=0;
+    protected static int contCentros=0;
 
     //CONSTRUCTOR
     public Centro(String nombreCentro, String direccionCentro, int identificador){
@@ -31,8 +33,21 @@ public class Centro implements Estadistica{
         contCentros++;
     }
 
-    //SETTERS-GETTERS
+    //SETTERS
 
+    protected void setID(int identificador) {
+        this.identificador = identificador;
+    }
+
+    public void setNombreCentro(String nombreCentro) {
+        this.nombreCentro = nombreCentro;
+    }
+
+    public void setDireccion(String direccionCentro) {
+        this.direccionCentro = direccionCentro;
+    }
+
+    //GETTERS
     public int getID() {
         return identificador;
     }
@@ -55,4 +70,13 @@ public class Centro implements Estadistica{
     }
 
 
+    @Override
+    public String toString() {
+        int trabajadores=contMedicos+contAdministrativos;
+        return  ANSI_BGREEN+"ID " + identificador +ANSI_RESET+ '\n' +
+                nombreCentro + '\n' +
+                direccionCentro + '\n' +
+                limiteConsultas + " consultas" + '\n' +
+                trabajadores + " trabajadores";
+    }
 }

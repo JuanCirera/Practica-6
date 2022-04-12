@@ -2,11 +2,15 @@ import utilidades.Faker;
 import utilidades.Fecha;
 import utilidades.PeticionDatos;
 
+import java.util.Arrays;
+
 public class Hospital extends Centro{
     //ATRIBUTOS
     private int plantas;
     private int habitacionesPorPlanta;
-    private Paciente habitaciones[];
+    private Paciente habitaciones[][];
+    private int contHabitaciones=0;
+    protected int totalTrabajadores=0;
 
     //CONSTRUCTOR
     public Hospital(String nombreCentro, String direccionCentro, int identificador, int plantas, int habitacionesPorPlanta){
@@ -24,9 +28,17 @@ public class Hospital extends Centro{
         return super.diasPorMes(month);
     }
 
+
     @Override
     public void mostrarEstado() {
-        super.mostrarEstado();
+        for(Paciente p:consultas){
+            if(p!=null){
+                System.out.println(p.getDni()+", "+p.getNombre()+" "+p.getApellido1()+" "+p.getApellido2());
+            }else{
+                System.out.println(ANSI_BGREEN+"Libre"+ANSI_RESET);
+            }
+        }
+        //TODO: Falta mostrar la planta y habitacion con los datos del paciente(igual que arriba)
     }
 
     private static void addPaciente(Paciente enf, int consulta){}
@@ -39,53 +51,72 @@ public class Hospital extends Centro{
      * @param aleatorio - true, el objeto se crea automáticamente, false, se piden los datos por teclado.
      * @return void
      * */
-    protected void addMedico(boolean aleatorio){
-        if(aleatorio){
-            String dni = Faker.generarNIF_NIE();
-            int id = Faker.devolverEnteros(false, trabajadores.length);
-            String n = Faker.devolverNombre();
-            String ap1 = Faker.devolverApellidos();
-            String ap2 = Faker.devolverApellidos();
-            String sexo = Faker.devolverSexo();
-            Fecha fNac = new Fecha(); // Si se crean aleatorios he decidido que tengan la fecha por defecto, todo a 0.
-            String especialidad=Faker.devolverEspecialidad();
+    protected void addMedico(boolean aleatorio, Hospital h){
+        try {
+            if (aleatorio) {
+                String dni;
+                do {
+                    dni = Faker.generarNIF_NIE();
+                }while (GestionMedica.checkDNI(dni));
+                int id;
+                do {
+                    id = Faker.devolverEnteros(false, trabajadores.length);
+                }while(checkWorkerID(id));
+                String n = Faker.devolverNombre();
+                String ap1 = Faker.devolverApellidos();
+                String ap2 = Faker.devolverApellidos();
+                String sexo = Faker.devolverSexo(); //Aqui no necesito controlar nada porque esta funcion solo devuelve dos posibles cadenas
+                Fecha fNac = new Fecha(); // Si se crean aleatorios he decidido que tengan la fecha por defecto, 0-0-0.
+                String especialidad = Faker.devolverEspecialidad();
 
-            Medico m=new Medico(dni, id, n, ap1, ap2, sexo, fNac, especialidad);
-            for(Persona i: trabajadores){
-                if(i==null){
-                    i=m;
+                Medico m = new Medico(dni, id, n, ap1, ap2, sexo, fNac, especialidad);
+                contMedicos++;
+                totalTrabajadores=contMedicos+contAdministrativos;
+                if(totalTrabajadores>trabajadores.length){
+                    if(aumentarTrabajadores(h)) {
+                        trabajadores[totalTrabajadores - 1] = m;
+                    }else {
+                        System.out.println("-_-");
+                    }
+                }else{
+                    trabajadores[totalTrabajadores - 1] = m;
                 }
+
+            } else {
+                String sexo, especialidad;
+                String dni = PeticionDatos.pedirNIF_NIE("> dni: ");
+                int id;
+                do{
+                    id = PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
+                }while(checkWorkerID(id));
+                String n = PeticionDatos.pedirCadena("> nombre: ");
+                String ap1 = PeticionDatos.pedirCadena("> primer apellido: ");
+                String ap2 = PeticionDatos.pedirCadena("> segundo apellido: ");
+                //Aqui si lo controlo porque se introduce manualmente
+                do {
+                    sexo = PeticionDatos.pedirCadena("> sexo: ");
+                    if (!Persona.validarGenero(sexo)) {
+                        System.out.println(ANSI_RED + "Error. El dato introducido no es correcto." + ANSI_RESET);
+                    }
+                } while (!Persona.validarGenero(sexo));
+                Fecha fNac = new Fecha(PeticionDatos.pedirEnteroPositivo(true, "> dia:"), //En manual si que pide los datos de la fecha
+                        PeticionDatos.pedirEnteroPositivo(true, "> mes:"),
+                        PeticionDatos.pedirEnteroPositivo(true, "> año:"));
+                do {
+                    especialidad = PeticionDatos.pedirCadena("> especialidad: ");
+                    if (!Medico.validarEspecialidad(especialidad)) {
+                        System.out.println(ANSI_RED + "Error. El dato introducido no es correcto." + ANSI_RESET);
+                    }
+                } while (!Medico.validarEspecialidad(especialidad));
+
+                Medico m = new Medico(dni, id, n, ap1, ap2, sexo, fNac, especialidad);
+                contMedicos++;
+                trabajadores[(contMedicos+contAdministrativos)- 1] = m;
             }
-
-        }else{
-            String sexo, especialidad;
-            String dni = PeticionDatos.pedirNIF_NIE("> dni: ");
-            int id = PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
-            String n = PeticionDatos.pedirCadena("> nombre: ");
-            String ap1 = PeticionDatos.pedirCadena("> primer apellido: ");
-            String ap2 = PeticionDatos.pedirCadena("> segundo apellido: ");
-            do {
-                sexo = PeticionDatos.pedirCadena("> sexo: ");
-                if(!Persona.validarGenero(sexo)){
-                    System.out.println(ANSI_RED+"Error. El dato introducido no es correcto."+ANSI_RESET);
-                }
-            }while(!Persona.validarGenero(sexo));
-            Fecha fNac = new Fecha(PeticionDatos.pedirEnteroPositivo(true, "> dia:"), //En manual si que pide los datos de la fecha
-                    PeticionDatos.pedirEnteroPositivo(true, "> mes:"),
-                    PeticionDatos.pedirEnteroPositivo(true, "> año:"));
-            do {
-                especialidad = PeticionDatos.pedirCadena("> especialidad: ");
-                if(!Medico.validarEspecialidad(especialidad)){
-                    System.out.println(ANSI_RED+"Error. El dato introducido no es correcto."+ANSI_RESET);
-                }
-            }while(!Medico.validarEspecialidad(especialidad));
-
-            Medico m=new Medico(dni, id, n, ap1, ap2, sexo, fNac, especialidad);
-            for(Persona i: trabajadores){
-                if(i==null){
-                    i=m;
-                }
-            }
+        }catch (ArrayIndexOutOfBoundsException e){
+            System.out.println(ANSI_RED+"Error. Se ha llegado al máximo de trabajadores"+ANSI_RESET);
+        }catch (NullPointerException e){
+            System.out.println(ANSI_YELLOW+"Aviso. No existen trabajadores"+ANSI_RESET);
         }
     }
 
@@ -95,57 +126,121 @@ public class Hospital extends Centro{
      * @param aleatorio - true, el objeto se crea automáticamente, false, se piden los datos por teclado.
      * @return void
      * */
-    protected void addAdmin(boolean aleatorio){
-        if(aleatorio){
-            String dni = Faker.generarNIF_NIE();
-            int id = Faker.devolverEnteros(false, trabajadores.length);
-            String n = Faker.devolverNombre();
-            String ap1 = Faker.devolverApellidos();
-            String ap2 = Faker.devolverApellidos();
-            String sexo = Faker.devolverSexo();
-            Fecha fNac = new Fecha(); // Si se crean aleatorios he decidido que tengan la fecha por defecto, todo a 0.
-            String area=Faker.devolverArea();
+    protected void addAdmin(boolean aleatorio, Hospital h){
+        try {
+            if (aleatorio) {
+                String dni;
+                do {
+                    dni = Faker.generarNIF_NIE();
+                }while (GestionMedica.checkDNI(dni));
+                int id;
+                do {
+                    id = Faker.devolverEnteros(false, trabajadores.length);
+                }while(checkWorkerID(id));
+                String n = Faker.devolverNombre();
+                String ap1 = Faker.devolverApellidos();
+                String ap2 = Faker.devolverApellidos();
+                String sexo = Faker.devolverSexo();
+                Fecha fNac = new Fecha(); // Si se crean aleatorios he decidido que tengan la fecha por defecto, 0-0-0.
+                String area = Faker.devolverArea();
 
-            Administrativo a=new Administrativo(dni, id, n, ap1, ap2, sexo, fNac, area);
-            for(Persona i: trabajadores){
-                if(i==null){
-                    i=a;
+                Administrativo a = new Administrativo(dni, id, n, ap1, ap2, sexo, fNac, area);
+                contAdministrativos++;
+                totalTrabajadores=contMedicos+contAdministrativos;
+                if(totalTrabajadores>trabajadores.length){
+                    if(aumentarTrabajadores(h)) {
+                        trabajadores[totalTrabajadores - 1] = a;
+                    }else {
+                        System.out.println("-_-");
+                    }
+                }else{
+                    trabajadores[totalTrabajadores - 1] = a;
                 }
+
+            } else {
+                String sexo, area;
+                String dni = PeticionDatos.pedirNIF_NIE("> dni: ");
+                int id;
+                do{
+                    id = PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
+                }while(checkWorkerID(id));
+                String n = PeticionDatos.pedirCadena("> nombre: ");
+                String ap1 = PeticionDatos.pedirCadena("> primer apellido: ");
+                String ap2 = PeticionDatos.pedirCadena("> segundo apellido: ");
+                do {
+                    sexo = PeticionDatos.pedirCadena("> sexo: ");
+                    if (!Persona.validarGenero(sexo)) {
+                        System.out.println(ANSI_RED + "Error. El dato introducido no es correcto." + ANSI_RESET);
+                    }
+                } while (!Persona.validarGenero(sexo));
+                Fecha fNac = new Fecha(PeticionDatos.pedirEnteroPositivo(true, "> dia:"), //En manual si que pide los datos de la fecha
+                        PeticionDatos.pedirEnteroPositivo(true, "> mes:"),
+                        PeticionDatos.pedirEnteroPositivo(true, "> año:"));
+                do {
+                    area = PeticionDatos.pedirCadena("> área: ");
+                    if (!Persona.validarGenero(sexo)) {
+                        System.out.println(ANSI_RED + "Error. El dato introducido no es correcto." + ANSI_RESET);
+                    }
+                } while (!Administrativo.validarArea(area));
+
+                Administrativo a = new Administrativo(dni, id, n, ap1, ap2, sexo, fNac, area);
+                contAdministrativos++;
+                trabajadores[(contMedicos+contAdministrativos)- 1] = a;
             }
-
-        }else {
-            String sexo,area;
-            String dni = PeticionDatos.pedirNIF_NIE("> dni: ");
-            int id = PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
-            String n = PeticionDatos.pedirCadena("> nombre: ");
-            String ap1 = PeticionDatos.pedirCadena("> primer apellido: ");
-            String ap2 = PeticionDatos.pedirCadena("> segundo apellido: ");
-            do {
-                sexo = PeticionDatos.pedirCadena("> sexo: ");
-                if (!Persona.validarGenero(sexo)) {
-                    System.out.println(ANSI_RED + "Error. El dato introducido no es correcto." + ANSI_RESET);
-                }
-            } while (!Persona.validarGenero(sexo));
-            Fecha fNac = new Fecha(PeticionDatos.pedirEnteroPositivo(true, "> dia:"), //En manual si que pide los datos de la fecha
-                    PeticionDatos.pedirEnteroPositivo(true, "> mes:"),
-                    PeticionDatos.pedirEnteroPositivo(true, "> año:"));
-            do{
-                area = PeticionDatos.pedirCadena("> área: ");
-                if (!Persona.validarGenero(sexo)) {
-                    System.out.println(ANSI_RED + "Error. El dato introducido no es correcto." + ANSI_RESET);
-                }
-            }while(!Administrativo.validarArea(area));
-
-            Administrativo a=new Administrativo(dni, id, n, ap1, ap2, sexo, fNac, area);
-            for(Persona i: trabajadores){
-                if(i==null){
-                    i=a;
-                }
-            }
+        }catch (ArrayIndexOutOfBoundsException e){
+            System.out.println(ANSI_RED+"Error. Se ha llegado al máximo de trabajadores"+ANSI_RESET);
+        }catch (NullPointerException e){
+            System.out.println(ANSI_YELLOW+"Aviso. No existen trabajadores"+ANSI_RESET);
         }
     }
 
     public void removePersonal(){
         //TODO
+    }
+
+
+    /**
+     * Funcion que comprueba si el id de un trabajador existe ya
+     * @param id - identificador del objeto Persona, medico o admin
+     * @return boolean - true si lo encuentra, false si no coincide con ninguno
+     * */
+    private boolean checkWorkerID(int id){
+        int contTrabajadores=contMedicos+contAdministrativos;
+        if(contTrabajadores>=1) {
+            for (int i = 0; i < contTrabajadores; i++) {
+                if (trabajadores[i] != null) {
+                    if (trabajadores[i].getID() == id) {
+                        return true;
+                    }
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    private boolean aumentarTrabajadores(Centro h){
+        //Se crea un nuevo array de tipo Cetro con el doble de la longitud del array centrosMedicos actual.
+        Persona trabajadoresCopia[] = new Persona[h.trabajadores.length * 2];
+        //Despues apuntamos el antiguo array al nuevo espacio en memoria.
+        h.trabajadores = trabajadoresCopia;
+        if (h.trabajadores.length == trabajadoresCopia.length) {
+            return true;
+        }
+        return false;
+    }
+
+    //El array habitaciones y consultas no lo aumento porque no lo creo necesario, si un hospital tiene un número limitado de habitaciones cuando se llegue
+    //al límite simplemente no se pueden meter más pacientes, lo mismo para las consultas.
+
+
+    @Override
+    public String toString() {
+        return super.toString() + "\n" +
+                plantas + " plantas" + "\n" +
+                habitacionesPorPlanta + " habitaciones por planta" + "\n" +
+                contHabitaciones + " ocupadas";
     }
 }

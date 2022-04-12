@@ -26,6 +26,31 @@ public class Persona implements Estadistica{
         this.fechaNac=f;
     }
 
+    //SETTERS
+
+    //GETTERS
+
+    public int getID() {
+        return identificador;
+    }
+
+    public String getDni() {
+        return dni;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getApellido1() {
+        return apellido1;
+    }
+
+    public String getApellido2() {
+        return apellido2;
+    }
+
+
     //FUNCIONES-METODOS
 
     @Override
@@ -72,8 +97,8 @@ public class Persona implements Estadistica{
 
     @Override
     public String toString() {
-        return "dni='" + dni + '\'' +
-                ", nombre='" + nombre + '\'' +
-                ", apellidos='" + apellido1 + ", " + apellido2 + '\'';
+        return identificador + " " +
+                nombre + " " +
+                apellido1 + ", " + apellido2;
     }
 }

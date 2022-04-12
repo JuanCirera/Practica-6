@@ -29,7 +29,7 @@ public class Administrativo extends Persona{
     public int diasPorMes(int mes) {
         int cont=0;
         for (Fecha i:diasTrabajados){
-            if(i.getMonth()==mes){
+            if(i!=null && i.getMonth()==mes){
                 cont++;
             }
         }
