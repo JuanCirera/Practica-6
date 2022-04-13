@@ -8,7 +8,7 @@ public class Hospital extends Centro{
     //ATRIBUTOS
     private int plantas;
     private int habitacionesPorPlanta;
-    private Paciente habitaciones[][];
+    private Paciente habitaciones[][]; //[planta][habitación]
     private int contHabitaciones=0;
     protected int totalTrabajadores=0;
 
@@ -19,31 +19,104 @@ public class Hospital extends Centro{
         this.habitacionesPorPlanta=habitacionesPorPlanta;
         trabajadores=new Persona[5]; //Inicializo este array para poder meter el personal al inicio
         consultas=new Paciente[5]; //Lo mismo para este aunque no se van a crear pacientes al inicio
+        habitaciones=new Paciente[plantas][habitacionesPorPlanta]; //El limite de ambas dimensiones será lo que haya almacenado en cada uno de los dos atributos
     }
+
 
     //FUNCIONES-METODOS
 
     @Override
     public int diasPorMes(int month) {
-        return super.diasPorMes(month);
+        int cont=0;
+        //Consulta
+        for(Paciente p: consultas){
+            if(p!=null) {
+                for (Fecha f : p.visitasMedicas) {
+                    //Si el mes del objeto guardado coincide con el mes pasado por parámetro
+                    if (f != null && f.getMonth() == month) {
+                        cont++; //Se incrementa en 1 el total
+                    }
+                }
+            }
+        }
+        //Habitacion
+        //Aqui he tenido que usar un for normal para el bidimensional porque con el for each me estaba rayando, no sabia como llamar a visitasMedicas
+        for(int i=0;i<habitaciones.length;i++){
+            for(int x=0;x<habitaciones[i].length;x++){
+                if(habitaciones[i][x]!=null){
+                    for(Fecha f: habitaciones[i][x].visitasMedicas){
+                        if (f != null && f.getMonth() == month) {
+                            cont++;
+                        }
+                    }
+                }
+            }
+        }
+        //Despues de sumar todas las coincidencias(si existen) se devuelve el total.
+        return cont;
     }
 
 
     @Override
     public void mostrarEstado() {
+        System.out.println(ANSI_BBLUE+"CONSULTAS"+ANSI_RESET);
+        int cont=0;
         for(Paciente p:consultas){
+            cont++;
             if(p!=null){
-                System.out.println(p.getDni()+", "+p.getNombre()+" "+p.getApellido1()+" "+p.getApellido2());
+                System.out.println("Consulta "+cont+": "+p.getDni()+", "+p.getNombre()+" "+p.getApellido1()+" "+p.getApellido2());
             }else{
-                System.out.println(ANSI_BGREEN+"Libre"+ANSI_RESET);
+                System.out.println(ANSI_BGREEN+cont+" Libre"+ANSI_RESET);
             }
         }
-        //TODO: Falta mostrar la planta y habitacion con los datos del paciente(igual que arriba)
+        System.out.println(" ");
+        System.out.println(ANSI_BBLUE+"HABITACIONES"+ANSI_RESET);
+        for(int i=0;i<habitaciones.length;i++){
+            for(int x=0;x<habitaciones[i].length;x++){
+                if(habitaciones[i][x]!=null){
+                    System.out.println("Planta "+i+", habitación "+x+": "+"hay uno metio");
+                }
+            }
+        }
     }
 
-    private static void addPaciente(Paciente enf, int consulta){}
-    private static void addPaciente(Paciente enf, int planta, int habitacion){}
-    private static void removePaciente(Paciente enf){}
+
+    /**
+     * Funcion para añadir un paciente al array consultas
+     * @param enf - objeto paciente a añadir
+     * @param consulta - numero de consulta donde meterlo
+     * */
+    protected void addPaciente(Paciente enf, int consulta){
+        if(consultas[consulta]==null) {
+            consultas[consulta] = enf; //El paciente solo se coloca si la consulta esta vacía
+        }else {
+            System.out.println(ANSI_RED+"Error. Esta consulta está ocupada."+ANSI_RESET);
+        }
+    }
+
+
+    /**
+     * Funcion para añadir un paciente al array consultas
+     * @param enf - objeto paciente a añadir
+     * @param planta - numero de planta
+     * @param habitacion - numero de habitación donde meter al paciente
+     * */
+    protected void addPaciente(Paciente enf, int planta, int habitacion){
+        if(habitaciones[planta][habitacion]==null){
+            habitaciones[planta][habitacion]=enf;
+        }else{
+            System.out.println(ANSI_RED+"Error. Esta habitación está ocupada."+ANSI_RESET);
+        }
+    }
+
+
+    /**
+     * Funcion para eliminar un paciente
+     * @param enf - objeto paciente a eliminar
+     * */
+    private static void removePaciente(Paciente enf){
+        //TODO: de donde lo elimino???
+    }
 
 
     /**

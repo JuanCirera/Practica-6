@@ -44,7 +44,37 @@ public class GestionMedica {
     }
 
 
-    //TODO: analizar si estas funcion se puede mejorar
+    private static void mostrarCentros(boolean hospital, boolean clinica) {
+        for(Centro c:centrosMedicos){
+            if(hospital && c!=null && c instanceof Hospital) {
+                Hospital h=(Hospital) c;
+                System.out.println(h.getID() + " " + h.getNombre());
+            }else if(clinica && c!=null && c instanceof Clinica){
+                Clinica cl=(Clinica) c;
+                System.out.println(cl.getID() + " " + cl.getNombre());
+            }
+        }
+    }
+
+
+    /**
+     * Elimina el centro que coincida con el id pasado por parámetro.
+     * @param id del centro a borrar
+     * @return boolean - true, si se ha borrado con éxito, false si el id no existe
+     * */
+    private static boolean removeCentro(int id){
+        //He probado a usar un for each pero solo se hace un set null al objeto en sí, la posicion del array se queda igual, es raro, por eso he usado un for normal.
+        for(int i=0;i<centrosMedicos.length;i++){
+            if(centrosMedicos[i]!=null && centrosMedicos[i].getID()==id){
+                centrosMedicos[i]=null;
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    //TODO: analizar si estas funcion se puede mejorar, tiene muchas cosas duplicadas
     private static void gestionarCentro(boolean hospital, boolean clinica){
 //        int idCentro;
         String hcs="",hc="";
@@ -52,24 +82,27 @@ public class GestionMedica {
         if(hospital){hcs="hospitales";hc="hospital";
         } else if(clinica){hcs="clínicas";hc="clínica";}
 
-        System.out.println(" "); //Espacio en blanco
         System.out.println("╔═ "+ANSI_BBLUE+"Inicio/Gestionar "+hc+ANSI_RESET);
-        opcionMenu = PeticionDatos.pedirEnteroPositivo(true, "║ 1-> Mostrar "+hcs+"\n"+"║ 2-> Crear "+hc+"\n"+"║ 3-> Volver al menu"+"\n"+"╚ > ");
+        opcionMenu = PeticionDatos.pedirEnteroPositivo(true, "║ 1-> Mostrar "+hcs+"\n"+"║ 2-> Crear "+hc+"\n"+"║ 3-> Eliminar "+hc+"\n"+"║ 4-> Volver al menu"+"\n"+"╚ > ");
         System.out.println(" "); //Espacio en blanco
 
         switch (opcionMenu){
             case 1:
                 System.out.println(ANSI_BBLUE+hcs.toUpperCase()+ANSI_RESET);
-
-                for(Centro c:centrosMedicos){
-                    if(hospital && c!=null && c instanceof Hospital) {
-                        Hospital h=(Hospital) c;
-                        System.out.println(h.getID() + " " + h.getNombre());
-                    }else if(clinica && c!=null && c instanceof Clinica){
-                        Clinica cl=(Clinica) c;
-                        System.out.println(cl.getID() + " " + cl.getNombre());
-                    }
+                if(hospital) {
+                    mostrarCentros(true, false);
+                }else{
+                    mostrarCentros(false, true);
                 }
+//                for(Centro c:centrosMedicos){
+//                    if(hospital && c!=null && c instanceof Hospital) {
+//                        Hospital h=(Hospital) c;
+//                        System.out.println(h.getID() + " " + h.getNombre());
+//                    }else if(clinica && c!=null && c instanceof Clinica){
+//                        Clinica cl=(Clinica) c;
+//                        System.out.println(cl.getID() + " " + cl.getNombre());
+//                    }
+//                }
 
                 idCentro= PeticionDatos.pedirEnteroPositivo(false, ANSI_YELLOW+"Elige un centro (ID): "+ANSI_RESET);
 
@@ -78,48 +111,111 @@ public class GestionMedica {
                         Hospital h = (Hospital) c;
 
                         if (h.getID() == idCentro) {
-                            System.out.println(" "); //Espacio en blanco
-                            System.out.println("╔═ "+ANSI_BBLUE+"Inicio/Gestionar Hospital/"+h.getNombre()+ANSI_RESET);
-                            opcionMenu = PeticionDatos.pedirEnteroPositivo(true, """ 
-                                    ║ 1-> Mostrar información                                      
-                                    ║ 2-> Modificar datos
-                                    ║ 3-> Volver al menú                                                                                   
-                                    ╚ > """);
-                            System.out.println(" "); //Espacio en blanco
+                            do {
+                                System.out.println(" "); //Espacio en blanco
+                                System.out.println("╔═ " + ANSI_BBLUE + "Inicio/Gestionar Hospital/" + h.getNombre() + ANSI_RESET);
+                                opcionMenu = PeticionDatos.pedirEnteroPositivo(true, """ 
+                                        ║ 1-> Mostrar información                                      
+                                        ║ 2-> Modificar datos
+                                        ║ 3-> Volver al menú                                                                                   
+                                        ╚ > """);
+                                System.out.println(" "); //Espacio en blanco
 
-                            if (opcionMenu == 1) {
+                                if (opcionMenu == 1) {
                                     System.out.println(ANSI_BBLUE + "Datos del centro:" + ANSI_RESET);
                                     System.out.println(h.toString());
 
-                            } else if (opcionMenu == 2) {
-                                int id;
-                                do {
-                                    id = PeticionDatos.pedirEnteroPositivo(false, "> ID "+"("+idCentro+")"+": ");
-                                }while(checkID(id));
-                                String nombre = PeticionDatos.pedirCadena("> nombre: ");
-                                String direccion = PeticionDatos.pedirCadenaLimite(true, true, 70, "> dirección: ");
-    //                            int consultas = PeticionDatos.pedirEnteroPositivo(false, "> nº de consultas: ");
-    //                            int trabajadores = PeticionDatos.pedirEnteroPositivo(false, "> nº de trabajadores: ");
+                                } else if (opcionMenu == 2) {
+                                    //El id no tiene sentido cambiarlo, para eso es mejor eliminarlo entero
+//                                    int id;
+//                                    do {
+//                                        id = PeticionDatos.pedirEnteroPositivo(false, "> ID " + "(" + idCentro + ")" + ": ");
+//                                    } while (checkID(id));
+                                    String nombre = PeticionDatos.pedirCadenaLimite(false, true, 70, "> nombre: ");
+                                    String direccion = PeticionDatos.pedirCadenaLimite(true, true, 70, "> dirección: ");
 
-                                h.setID(id);
-                                h.setNombreCentro(nombre);
-                                h.setDireccion(direccion);
-                            }
+//                                    h.setID(id);
+                                    h.setNombreCentro(nombre);
+                                    h.setDireccion(direccion);
+                                }else if(opcionMenu==3){
+                                    System.out.println(ANSI_YELLOW+"Volviendo al inicio..."+ANSI_RESET);
+                                    mostrarMenu();
+                                }
+                            }while (opcionMenu!=3); //Mientras no se introduzca 3 no se vuelve al menu de inicio, asi da más control al usuario
+                        }
+                    }else if(c != null && c instanceof Clinica){
+                        Clinica cl=(Clinica) c;
+                        if (cl.getID() == idCentro) {
+                            do {
+                                System.out.println(" "); //Espacio en blanco
+                                System.out.println("╔═ " + ANSI_BBLUE + "Inicio/Gestionar Clínica/" + cl.getNombre() + ANSI_RESET);
+                                opcionMenu = PeticionDatos.pedirEnteroPositivo(true, """ 
+                                        ║ 1-> Mostrar información                                      
+                                        ║ 2-> Modificar datos
+                                        ║ 3-> Volver al menú                                                                                   
+                                        ╚ > """);
+                                System.out.println(" "); //Espacio en blanco
+
+                                if (opcionMenu == 1) {
+                                    System.out.println(ANSI_BBLUE + "Datos del centro:" + ANSI_RESET);
+                                    System.out.println(cl.toString());
+
+                                } else if (opcionMenu == 2) {
+                                    String nombre = PeticionDatos.pedirCadenaLimite(false, true, 70, "> nombre: ");
+                                    String direccion = PeticionDatos.pedirCadenaLimite(true, true, 70, "> dirección: ");
+
+                                    cl.setNombreCentro(nombre);
+                                    cl.setDireccion(direccion);
+                                }else if(opcionMenu==3){
+                                    System.out.println(ANSI_YELLOW+"Volviendo al inicio..."+ANSI_RESET);
+                                    mostrarMenu();
+                                }
+                            }while (opcionMenu!=3); //Mientras no se introduzca 3 no se vuelve al menu de inicio, asi da más control al usuario
                         }
                     }
                 }
-//                System.out.println(ANSI_YELLOW+"Volviendo al inicio..."+ANSI_RESET);
                 break;
             case 2:
-                int id=PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
-                String nombre=PeticionDatos.pedirCadena( "> nombre: ");
-                String direccion=PeticionDatos.pedirCadena( "> dirección: ");
-                int consultas=PeticionDatos.pedirEnteroPositivo( false, "> nº de consultas: ");
-                int trabajadores=PeticionDatos.pedirEnteroPositivo( false, "> nº de trabajadores: ");
-                //TODO: Crear nuevo objeto de tipo hospital y guardarlo en array
-
+                int id, plantas=0, habitaciones=0;
+                String nombre, direccion;
+                do {
+                    id = PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
+                }while (checkID(id));
+                nombre=PeticionDatos.pedirCadena( "> nombre: ");
+                direccion=PeticionDatos.pedirCadenaLimite( true, true, 70, "> dirección: ");
+                if(hospital) {
+                    plantas = PeticionDatos.pedirEnteroPositivo(false, "> plantas: ");
+                    habitaciones = PeticionDatos.pedirEnteroPositivo(false, "> habitaciones por planta: ");
+                    Hospital hManual=new Hospital(nombre, direccion, id, plantas, habitaciones);
+                    if(Centro.contCentros>centrosMedicos.length){
+                        aumentarCentrosMedicos();
+                        centrosMedicos[Centro.contCentros-1]=hManual;
+                    }
+                    centrosMedicos[Centro.contCentros-1]=hManual;
+                }else{
+                    Clinica cManual=new Clinica(nombre, direccion, id);
+                    if(Centro.contCentros>centrosMedicos.length){
+                        aumentarCentrosMedicos();
+                        centrosMedicos[Centro.contCentros-1]=cManual;
+                    }
+                    centrosMedicos[Centro.contCentros-1]=cManual;
+                }
                 break;
             case 3:
+                //TODO: eliminar centro
+                System.out.println(ANSI_BBLUE+hcs.toUpperCase()+ANSI_RESET);
+                if(hospital) {
+                    mostrarCentros(true, false);
+                }else{
+                    mostrarCentros(false, true);
+                }
+                idCentro= PeticionDatos.pedirEnteroPositivo(false, ANSI_YELLOW+"Elige un centro (ID): "+ANSI_RESET);
+                if(removeCentro(idCentro)){
+                    System.out.println(" ");
+                    System.out.println(ANSI_BGREEN+"Eliminado con éxito"+ANSI_RESET);
+                }
+                break;
+            case 4:
                 System.out.println(ANSI_YELLOW+"Volviendo al inicio..."+ANSI_RESET);
                 break;
             default:
@@ -236,7 +332,7 @@ public class GestionMedica {
             for(Centro c:centrosMedicos){
                 if(c!=null && c.getID()==idCentro){
                     System.out.println(" "); //LINEA
-                    System.out.println("╔═ "+ANSI_BBLUE+"Inicio/Estadísticas del mes "+mes+"/"+c.getNombre()+ANSI_RESET);
+                    System.out.println("=> "+ANSI_BBLUE+"Inicio/Estadísticas del mes "+mes+"/"+c.getNombre()+ANSI_RESET);
                     c.mostrarEstado();
                     System.out.println(c.diasPorMes(mes));
                 }
@@ -509,7 +605,11 @@ public class GestionMedica {
     private static void aumentarCentrosMedicos(){
         //Se crea un nuevo array de tipo Cetro con el doble de la longitud del array centrosMedicos actual.
         Centro centrosMedicosCopia[]=new Centro[centrosMedicos.length*2];
-        //Despues apuntamos el antiguo array al nuevo espacio en memoria.
+        //Despues hay que guardar los datos del array viejo en la copia para no perderlos
+        for(int i=0;i<centrosMedicos.length;i++){
+            centrosMedicosCopia[i]=centrosMedicos[i];
+        }
+        //Po último apuntamos el antiguo array al nuevo espacio en memoria.
         centrosMedicos=centrosMedicosCopia;
     }
 

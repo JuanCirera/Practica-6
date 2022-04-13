@@ -17,23 +17,57 @@ public class Clinica extends Centro{
     //FUNCIONES_METODOS
     @Override
     public int diasPorMes(int month) {
-        return super.diasPorMes(month);
+        int cont=0;
+        //Consulta
+        for(Paciente p: consultas){
+            if(p!=null) {
+                for (Fecha f : p.visitasMedicas) {
+                    //Si el mes del objeto guardado coincide con el mes pasado por parámetro
+                    if (f != null && f.getMonth() == month) {
+                        cont++; //Se incrementa en 1 el total
+                    }
+                }
+            }
+        }
+        return cont;
     }
 
 
     @Override
     public void mostrarEstado() {
+        int cont=0;
         for(Paciente p:consultas){
+            cont++;
             if(p!=null){
-                System.out.println(p.getDni()+", "+p.getNombre()+" "+p.getApellido1()+" "+p.getApellido2());
+                System.out.println("Consulta "+cont+": "+p.getDni()+", "+p.getNombre()+" "+p.getApellido1()+" "+p.getApellido2());
             }else{
-                System.out.println(ANSI_BGREEN+"Libre"+ANSI_RESET);
+                System.out.println(ANSI_BGREEN+cont+" Libre"+ANSI_RESET);
             }
         }
     }
 
-    private static void addPaciente(Paciente enf, int consulta){}
-    private static void removePaciente(Paciente enf){}
+
+    /**
+     * Funcion para añadir un paciente al array consultas
+     * @param enf - objeto paciente a añadir
+     * @param consulta - numero de consulta donde meterlo
+     * */
+    protected void addPaciente(Paciente enf, int consulta){
+        if(consultas[consulta]==null) {
+            consultas[consulta] = enf; //El paciente solo se coloca si la consulta esta vacía
+        }else {
+            System.out.println(ANSI_RED+"Error. Esta consulta está ocupada."+ANSI_RESET);
+        }
+    }
+
+
+    /**
+     * Funcion para eliminar un paciente
+     * @param enf - objeto paciente a eliminar
+     * */
+    private static void removePaciente(Paciente enf){
+        //TODO: de donde lo elimino???
+    }
 
 
     /**
