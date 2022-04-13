@@ -2,8 +2,6 @@ import utilidades.Faker;
 import utilidades.Fecha;
 import utilidades.PeticionDatos;
 
-import java.util.Arrays;
-
 public class Hospital extends Centro{
     //ATRIBUTOS
     private int plantas;

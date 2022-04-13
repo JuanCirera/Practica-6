@@ -28,6 +28,30 @@ public class Persona implements Estadistica{
 
     //SETTERS
 
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setApellido1(String apellido1) {
+        this.apellido1 = apellido1;
+    }
+
+    public void setApellido2(String apellido2) {
+        this.apellido2 = apellido2;
+    }
+
+    public void setFechaNac(Fecha fechaNac) {
+        this.fechaNac = fechaNac;
+    }
+
+    public void setSexo(String sexo) {
+        this.sexo = sexo;
+    }
+
     //GETTERS
 
     public int getID() {
@@ -48,6 +72,14 @@ public class Persona implements Estadistica{
 
     public String getApellido2() {
         return apellido2;
+    }
+
+    public String getSexo() {
+        return sexo;
+    }
+
+    public Fecha getFechaNac() {
+        return fechaNac;
     }
 
 

@@ -56,6 +56,10 @@ public class Centro implements Estadistica{
         return nombreCentro;
     }
 
+    public String getDireccionCentro() {
+        return direccionCentro;
+    }
+
 
     //FUNCIONES-METODOS
 

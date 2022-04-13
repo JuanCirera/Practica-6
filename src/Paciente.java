@@ -39,6 +39,7 @@ public class Paciente extends Persona{
     }
 
 
+
     /**
      * Añade una visita al array visitasMedicas si cumple las condiciones
      * @param visita - objeto de tipo Fecha
