@@ -62,11 +62,26 @@ public class Clinica extends Centro{
 
 
     /**
-     * Funcion para eliminar un paciente
+     * Funcion para eliminar un paciente, en este caso solo de una consulta
      * @param enf - objeto paciente a eliminar
      * */
-    private static void removePaciente(Paciente enf){
-        //TODO: de donde lo elimino???
+    protected boolean removePaciente(Paciente enf){
+        for (int i = 0; i < consultas.length; i++) {
+            if (consultas[i] != null && consultas[i] == enf) {
+                consultas[i] = null;
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * Funcion para eliminar un trabajador
+     * @param worker - objeto persona a eliminar
+     * */
+    public void removePersonal(Persona worker){
+        //TODO
     }
 
 

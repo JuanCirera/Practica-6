@@ -45,7 +45,7 @@ public class Paciente extends Persona{
      * @param visita - objeto de tipo Fecha
      * @return boolean - true si la fecha de visita se ha añadido correctamente al array, false si la fecha ya existe
      * */
-    private boolean addVisita(Fecha visita){
+    protected boolean addVisita(Fecha visita){
         //Solo se comprueba que el año sea mayor que el de nacimiento porque la comprobación de que no
         // pase la fecha actual ya se hace en la clase Fecha
         if(visita.getYear() > fechaNac.getYear()){

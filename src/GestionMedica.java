@@ -19,15 +19,16 @@ public class GestionMedica {
     public static final String ANSI_YELLOW = "\u001B[33m";
     public static final String ANSI_CYAN = "\u001B[36m";
 
+    //ATRIBUTOS
     private static int opcionMenu, idCentro, idPersona; //Estos dos atributos son para controlar opciones del menu principal y submenus.
 
     private static Centro centrosMedicos[]=new Centro[5];
+
 
     /**
      * Muestra el menu de inicio con las opciones del programa
      */
     private static void mostrarMenu() {
-
         System.out.println(" "); //Espacio en blanco
         System.out.println("╔══════════════════════════"+ANSI_BGREEN+" GESTIÓN MÉDICA ═╬═"+ANSI_RESET);
         opcionMenu = PeticionDatos.pedirEnteroPositivo(true, """ 
@@ -43,6 +44,7 @@ public class GestionMedica {
     }
 
 
+    //Esta funcion y los booleanos en vez de ser una solucion me ha creado más problemas, le he metido por parámetro esto a casi todas las funciones, algo no cuadra...
     private static void mostrarCentros(/*boolean hospital, boolean clinica*/) {
         for(Centro c:centrosMedicos){
             if(/*hospital &&*/ c!=null /*&& c instanceof Hospital*/) {
@@ -54,6 +56,28 @@ public class GestionMedica {
 //                Clinica cl=(Clinica) c;
 //                System.out.println(cl.getID() + " " + cl.getNombre());
 //            }
+            //Lo dejo comentado para ver como era
+        }
+    }
+
+
+    //De momento lo dejo asi, ya por lo menos no me desquicio al ver lo de arriba
+    private static void mostrarHospitales(){
+        for(Centro c:centrosMedicos){
+            if(c!=null && c instanceof Hospital) {
+                Hospital h=(Hospital) c;
+                System.out.println(h.getID() + " " + h.getNombre());
+            }
+        }
+    }
+
+
+    private static void mostrarClinicas(){
+        for(Centro c:centrosMedicos){
+            if(c!=null && c instanceof Clinica) {
+                Clinica cl=(Clinica) c;
+                System.out.println(cl.getID() + " " + cl.getNombre());
+            }
         }
     }
 
@@ -61,21 +85,114 @@ public class GestionMedica {
     /**
      * Elimina el centro que coincida con el id pasado por parámetro.
      * @param id del centro a borrar
-     * @return boolean - true, si se ha borrado con éxito, false si el id no existe
+     * @return boolean - true, si se ha borrado con éxito, false si encuentra mínimo una persona
      * */
     private static boolean removeCentro(int id){
         //He probado a usar un for each pero solo se hace un set null al objeto en sí, la posicion del array se queda igual, es raro, por eso he usado un for normal.
-        for(int i=0;i<centrosMedicos.length;i++){
-            if(centrosMedicos[i]!=null && centrosMedicos[i].getID()==id){
-                centrosMedicos[i]=null;
-                return true;
+        //No se trata de eliminar un objeto, sino de VACIAR la posición de un ARRAY.
+
+        //Booleanos para hacer la comprobacion final antes de vaciar la posicion
+        boolean consultasVacias=true, habitacionesVacias=true, sinTrabajadores=true;
+
+        //Se comprueba cada uno de los arrays pertenecientes a Centro que guarden objetos persona
+        for(int a=0;a<centrosMedicos.length;a++) {
+            if (centrosMedicos[a] != null && centrosMedicos[a].getID() == id) {
+                //CONSULTAS (PACIENTES)
+                for (int i = 0; i < centrosMedicos[a].consultas.length; i++) {
+                    if(centrosMedicos[a].consultas[i]!=null){
+                        consultasVacias=false;
+                    }
+                }
+                //TRABAJADORES
+                for (int y = 0; y < centrosMedicos[a].trabajadores.length; y++) {
+                    if (centrosMedicos[a].trabajadores[y] != null) {
+                        sinTrabajadores=false;
+                    }
+                }
+                //HABITACIONES (PACIENTES)
+                if (centrosMedicos[a] instanceof Hospital) {
+                    Hospital h = (Hospital) centrosMedicos[a];
+                    for (int x = 0; x < h.habitaciones.length; x++) {
+                        for (int z = 0; z < h.habitaciones[x].length; z++) {
+                            if (h.habitaciones[x][z] != null) {
+                                habitacionesVacias=false; //Y se devuelve false como que ha encontrado una persona y no puede eliminarlo
+                            }
+                        }
+                    }
+                }
+                if(centrosMedicos[a] instanceof Hospital){ //Este es especial para hospital
+                    if(consultasVacias && habitacionesVacias && sinTrabajadores){
+                        centrosMedicos[a]=null;
+                        return true;
+                    }
+                }else if(centrosMedicos[a] instanceof Clinica){
+                    if (consultasVacias && sinTrabajadores) {
+                        //Si los arrays no han encontrado ni una posicion que NO sea nula, pues la posicion donde se encuentra el centro se setea a null
+                        centrosMedicos[a] = null;
+                        return true;
+                    }
+                }
             }
         }
+//        System.out.println(" ");//Linea
+//        centroSubMenu1();
         return false;
     }
 
 
-    //Estas funciones se entienden mejor si se ve el esquema del menu, pero no sé cómo llamarlas aqui para que se entienda que hacen
+    //Gracias a esta funcion me quito tener que estar a cada momento comprobando que objeto es el que tiene la id que se tiene que introducir cada dos por tres.
+    /**
+     * Esta funcion obtiene mediante un id el objeto centro y lo devuelve si coincide con éste.
+     * @param id del objeto centro que se quiere obtener.
+     * @return Centro - objeto centro que se necesita para realizar alguna operación con él.
+     * */
+    private static Centro whichCenter(int id){
+        Centro thisCenter=null; //Declaro aqui el objeto a null porque la función se empeña en devolverlo fuera del for...
+        for(Centro c: centrosMedicos){
+            if(c!=null && c.getID()==id){
+                thisCenter=c;
+            }
+        }
+        return thisCenter;
+    }
+
+
+    /**
+     * Esta funcion obtiene mediante un DNI el objeto persona y lo devuelve si coincide con éste.
+     * @param dni del objeto centro que se quiere obtener.
+     * @return Persona - objeto persona que se necesita para realizar alguna operación con él.
+     * */
+    private static Persona whichPerson(String dni){
+        Persona thisPerson=null;
+        for(Centro c: centrosMedicos){
+            if (c != null) {
+                for (Persona p : c.consultas) {
+                    if (p != null && p.getDni().equals(dni)) {
+                        thisPerson = p;
+                    }
+                }
+                for (Persona p: c.trabajadores){
+                    if (p != null && p.getDni().equals(dni)) {
+                        thisPerson = p;
+                    }
+                }
+                if(c instanceof Hospital) {
+                    Hospital h=(Hospital) c;
+                    for (int i=0;i<h.habitaciones.length;i++) {
+                        for(int x=0;x<h.habitaciones[i].length;x++) {
+                            if (h.habitaciones[i][x] != null && h.habitaciones[i][x].getDni().equals(dni)) {
+                                thisPerson = h.habitaciones[i][x];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return thisPerson;
+    }
+
+
+    //Estas funciones se entienden mejor si se ve el esquema del menu, creo que más o menos se entienden llamándolas asi
     /**
      * Muestra el primer submenu de gestion centros
      * */
@@ -123,15 +240,19 @@ public class GestionMedica {
         if(hospital){hcs="hospitales";hc="hospital";
         } else if(clinica){hcs="clínicas";hc="clínica";}
 
+        //Se muestra el primer submenu de la Opción 1-2
         centroSubMenu1(hc, hcs);
 
         switch (opcionMenu){
+            //** MOSTRAR CENTROS **
             case 1:
                 System.out.println(ANSI_BBLUE+hcs.toUpperCase()+ANSI_RESET);
                 if(hospital) {
 //                    mostrarCentros(true, false);
+                    mostrarHospitales();
                 }else{
 //                    mostrarCentros(false, true);
+                    mostrarClinicas();
                 }
 
                 idCentro= PeticionDatos.pedirEnteroPositivo(false, ANSI_YELLOW+"> Elige un centro (ID): "+ANSI_RESET);
@@ -142,6 +263,7 @@ public class GestionMedica {
 
                         if (h.getID() == idCentro) {
                             do {
+                                //Se muestra el segundo submenu
                                 opcion=centroSubMenu2("Hospital", h);
                                 switch (opcion){
                                     case 1:
@@ -163,7 +285,6 @@ public class GestionMedica {
                         }
                     }else if(c != null && c instanceof Clinica){
                         Clinica cl=(Clinica) c;
-
                         if (cl.getID() == idCentro) {
                             do {
                                 opcion=centroSubMenu2("Clínica", cl);
@@ -188,43 +309,29 @@ public class GestionMedica {
                     }
                 }
                 break;
+            //** CREAR CENTRO **
             case 2:
-                int id, plantas=0, habitaciones=0;
-                String nombre, direccion;
-                do {
-                    id = PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
-                }while (checkCenterID(id));
-                nombre=PeticionDatos.pedirCadena( "> nombre: ");
-                direccion=PeticionDatos.pedirCadenaLimite( true, true, 70, "> dirección: ");
                 if(hospital) {
-                    plantas = PeticionDatos.pedirEnteroPositivo(false, "> plantas: ");
-                    habitaciones = PeticionDatos.pedirEnteroPositivo(false, "> habitaciones por planta: ");
-                    Hospital hManual=new Hospital(nombre, direccion, id, plantas, habitaciones);
-                    if(Centro.contCentros>centrosMedicos.length){
-                        aumentarCentrosMedicos();
-                        centrosMedicos[Centro.contCentros-1]=hManual;
-                    }
-                    centrosMedicos[Centro.contCentros-1]=hManual;
+                    nuevoCentro(true, false, false);
                 }else{
-                    Clinica cManual=new Clinica(nombre, direccion, id);
-                    if(Centro.contCentros>centrosMedicos.length){
-                        aumentarCentrosMedicos();
-                        centrosMedicos[Centro.contCentros-1]=cManual;
-                    }
-                    centrosMedicos[Centro.contCentros-1]=cManual;
+                    nuevoCentro(false, true, false);
                 }
                 break;
+            //** ELIMINAR CENTRO **
             case 3:
                 System.out.println(ANSI_BBLUE+hcs.toUpperCase()+ANSI_RESET);
                 if(hospital) {
-//                    mostrarCentros(true, false);
+                    mostrarHospitales();
                 }else{
-//                    mostrarCentros(false, true);
+                    mostrarClinicas();
                 }
                 idCentro= PeticionDatos.pedirEnteroPositivo(false, ANSI_YELLOW+"Elige un centro (ID): "+ANSI_RESET);
                 if(removeCentro(idCentro)){
-                    System.out.println(" ");
+                    System.out.println(" ");//linea
                     System.out.println(ANSI_BGREEN+"Eliminado con éxito"+ANSI_RESET);
+                }else{
+                    System.out.println(" ");//linea
+                    System.out.println(ANSI_YELLOW + "Aviso. El centro elegido contiene personas, no puede ser eliminado." + ANSI_RESET);
                 }
                 break;
             case 4:
@@ -253,7 +360,12 @@ public class GestionMedica {
     }
 
 
-    private static void modificarPersona(Persona p, String dni){
+    /**
+     * Funcion que actualiza los datos de una persona en concreto usando su DNI
+     * @param dni de la persona que se quiere modificar.
+     * */
+    private static void modificarPersona(String dni){
+        Persona p=whichPerson(dni);
         String n = PeticionDatos.pedirCadena("> nombre "+"("+p.getNombre()+")"+": ");
         String ap1 = PeticionDatos.pedirCadena("> primer apellido "+"("+p.getApellido1()+")"+": ");
         String ap2 = PeticionDatos.pedirCadena("> segundo apellido "+"("+p.getApellido2()+")"+": ");
@@ -321,11 +433,31 @@ public class GestionMedica {
 
 
     /**
+     * Funcion que comprueba el centro donde trabaja una persona de tipo medico o admin
+     * @param dni del objeto persona.
+     * @return Centro - objeto centro donde trabaja esa persona.
+     * */
+    private static Centro whereWorking(String dni){
+        Centro workingHere=null;
+        for(Centro c:centrosMedicos){
+            if(c!=null){
+                for(Persona p: c.trabajadores){
+                    if(p!=null && p.getDni().equals(dni)){
+                        workingHere=c;
+                    }
+                }
+            }
+        }
+        return workingHere;
+    }
+
+
+    /**
      * Gestiona las operaciones sobre los objetos persona
      * @param personal - si el objeto persona a gestionar es un medico/administrativo
      * @param paciente - si el objeto paciente es un paciente
      * */
-    private static void gestionarPersona(boolean personal, boolean paciente){
+    private static void gestionarPersona(/*boolean personal, boolean paciente*/){
 
         String dni= PeticionDatos.pedirNIF_NIE("> DNI: ");
 
@@ -333,17 +465,66 @@ public class GestionMedica {
             int opcion;
             do {
                 opcion = personaSubMenu1();
+                Persona p=whichPerson(dni);
+
                 switch (opcion) {
                     case 1:
-//                    modificarPersona(p,dni);
+                        modificarPersona(dni);
                         break;
                     case 2:
                         moverPersona(dni);
                         break;
                     case 3:
-                        //TODO: llamar a la funcion addDiaTrabajado/addVisita del objeto en cuestion
+                        System.out.println(ANSI_BBLUE+"Introduce la fecha completa del día a añadir"+ANSI_RESET);
+                        int day=PeticionDatos.pedirEnteroPositivo(false, "> día: ");
+                        int month=PeticionDatos.pedirEnteroPositivo(false, "> mes: ");
+                        int year=PeticionDatos.pedirEnteroPositivo(false, "> año: ");
+                        Fecha f=null;
+
+                        if(p instanceof Paciente){
+                            Paciente paciente=(Paciente) p;
+                            f = new Fecha(day, month, year);
+                            paciente.addVisita(f);
+                        }else if(p instanceof Medico){
+                            Medico m=(Medico) p;
+                            //Compruebo si la fecha introducida corresponde a un dia laborable o no. En mi caso solo compruebo los fines de semana, creo
+                            //que para esto es más que suficiente
+                            if(!Fecha.isWeekend(day,month,year)) {
+                                f = new Fecha(day, month, year);
+                            }else{
+                                System.out.println("Aviso. La fecha introducida no es un día laborable");
+                            }
+                            m.addDiaTrabajado(f);
+                        }else{
+                            Administrativo admin=(Administrativo) p;
+                            if(!Fecha.isWeekend(day,month,year)) {
+                                f = new Fecha(day, month, year);
+                            }else{
+                                System.out.println("Aviso. La fecha introducida no es un día laborable");
+                            }
+                            admin.addDiaTrabajado(f);
+                        }
                     case 4:
-                        //TODO: guardar el objeto en cuestion en un archivo del que no se lea al iniciar, y poner su poosicion en el array a null.
+                        //TODO: guardar el objeto en cuestion en un archivo del que no se lea al iniciar, y poner su posicion en el array a null.
+                        //TODO: mandar esto a una funcion??
+                        //PERSONAL
+                        Centro c=whereWorking(dni);
+                        if(c instanceof Hospital){
+                            Hospital h=(Hospital) c;
+                            h.removePersonal(whichPerson(dni));
+                        }else{
+                            Clinica cl=(Clinica) c;
+                            cl.removePersonal(whichPerson(dni));
+                        }
+                        //PACIENTES
+                        //TODO: whereAdmitted()
+                        if(c instanceof Hospital){
+                            Hospital h=(Hospital) c;
+                            h.removePaciente(whichPerson(dni));
+                        }else{
+                            Clinica cl=(Clinica) c;
+                            cl.removePaciente(whichPerson(dni));
+                        }
                         break;
                     case 5:
                         System.out.println(ANSI_YELLOW + "Volviendo al inicio..." + ANSI_RESET);
@@ -365,7 +546,7 @@ public class GestionMedica {
         }
     }
 
-
+    //TODO:Arreglar esto que me da algo de verlo XD
     private static void nuevaPersona(boolean paciente, boolean medico, boolean admin, String dni){
         //Peticion de datos
         int id;
@@ -629,12 +810,15 @@ public class GestionMedica {
                 }
 
             }else{ //Si el programa ya se había ejecutado antes, solo se creara un hospital cada vez que se llame a esta funcion
-                String n=PeticionDatos.pedirCadena("> nombre: ");
-                String dir=PeticionDatos.pedirCadena("> dirección: ");
                 int id;
                 do{
                     id=PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
+                    if(checkCenterID(id)){
+                        System.out.println(ANSI_YELLOW+"Aviso. El id introducido ya está registrado."+ANSI_RESET);
+                    }
                 }while(checkCenterID(id));
+                String n=PeticionDatos.pedirCadena("> nombre: ");
+                String dir=PeticionDatos.pedirCadena("> dirección: ");
                 int plantas=PeticionDatos.pedirEnteroPositivo(false, "> plantas: ");
                 int hab=PeticionDatos.pedirEnteroPositivo(false, "> habitaciones: ");
                 Hospital h=new Hospital(n,dir,id,plantas,hab);
@@ -664,9 +848,15 @@ public class GestionMedica {
                     }
                 }
             }else{
+                int id;
+                do{
+                    id=PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
+                    if(checkCenterID(id)){
+                        System.out.println(ANSI_YELLOW+"Aviso. El id introducido ya está registrado."+ANSI_RESET);
+                    }
+                }while(checkCenterID(id));
                 String n=PeticionDatos.pedirCadena("> nombre: ");
                 String dir=PeticionDatos.pedirCadena("> dirección: ");
-                int id=PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
 
                 Clinica c=new Clinica(n,dir,id);
                 centrosMedicos[Centro.contCentros-1]=c;

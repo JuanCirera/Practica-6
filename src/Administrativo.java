@@ -47,7 +47,7 @@ public class Administrativo extends Persona{
      * @param dt - objeto de tipo Fecha con el dia trabajado
      * @return boolean - true si la fecha no existe y es válida (lunes-viernes), false si la fecha existe ya o es inválida (sábado-domingo)
      * */
-    private boolean addDiaTrabajado(Fecha dt){
+    protected boolean addDiaTrabajado(Fecha dt){
         int cont=0;
         if((dt.getYear() - fechaNac.getYear()) > 22 && (dt.getYear() - fechaNac.getYear()) < 70){
             for(Fecha i:diasTrabajados){

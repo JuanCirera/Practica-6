@@ -6,7 +6,7 @@ public class Hospital extends Centro{
     //ATRIBUTOS
     private int plantas;
     private int habitacionesPorPlanta;
-    private Paciente habitaciones[][]; //[planta][habitación]
+    protected Paciente habitaciones[][]; //[planta][habitación]
     private int contHabitaciones=0;
     protected int totalTrabajadores=0;
 
@@ -111,9 +111,33 @@ public class Hospital extends Centro{
     /**
      * Funcion para eliminar un paciente
      * @param enf - objeto paciente a eliminar
+     * @return boolean - true si lo consigue eliminar, false si no encuentra el objeto en ningun array
      * */
-    private static void removePaciente(Paciente enf){
-        //TODO: de donde lo elimino???
+    protected boolean removePaciente(Paciente enf) {
+        for (int i = 0; i < consultas.length; i++) {
+            if (consultas[i] != null && consultas[i] == enf) {
+                consultas[i] = null;
+                return true;
+            }
+        }
+        for (int i = 0; i < habitaciones.length; i++) {
+            for (int x = 0; x < habitaciones[i].length; x++) {
+                if (habitaciones[i][x] != null && habitaciones[i][x] == enf) {
+                    habitaciones[i][x] = null;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * Funcion para eliminar un trabajador
+     * @param worker - objeto persona a eliminar
+     * */
+    public void removePersonal(Persona worker){
+        //TODO: tener en cuenta si es medico o admin???
     }
 
 
@@ -265,9 +289,6 @@ public class Hospital extends Centro{
         }
     }
 
-    public void removePersonal(){
-        //TODO
-    }
 
 
     /**
