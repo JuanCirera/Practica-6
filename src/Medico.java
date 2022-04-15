@@ -73,7 +73,7 @@ public class Medico extends Persona{
      * */
     public static boolean validarEspecialidad(String especialidad){
         especialidad.toLowerCase();
-        if(especialidad.equals("traumatología") || especialidad.equals("dermatología") || especialidad.equals("oftalmología") || especialidad.equals("neurología")) {
+        if(especialidad.equals("traumatologia") || especialidad.equals("dermatologia") || especialidad.equals("oftalmologia") || especialidad.equals("neurologia")) {
             return true;
         }else {
             return false;

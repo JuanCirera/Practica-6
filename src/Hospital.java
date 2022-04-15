@@ -83,13 +83,16 @@ public class Hospital extends Centro{
      * Funcion para añadir un paciente al array consultas
      * @param enf - objeto paciente a añadir
      * @param consulta - numero de consulta donde meterlo
+     * @return boolean - true si el paciente se ha guardado con éxito, false si no.
      * */
-    protected void addPaciente(Paciente enf, int consulta){
+    protected boolean addPaciente(Paciente enf, int consulta){
         if(consultas[consulta]==null) {
             consultas[consulta] = enf; //El paciente solo se coloca si la consulta esta vacía
+            return true;
         }else {
             System.out.println(ANSI_RED+"Error. Esta consulta está ocupada."+ANSI_RESET);
         }
+        return false;
     }
 
 
@@ -98,13 +101,16 @@ public class Hospital extends Centro{
      * @param enf - objeto paciente a añadir
      * @param planta - numero de planta
      * @param habitacion - numero de habitación donde meter al paciente
+     * @return boolean - true si el paciente se ha guardado con éxito, false si no.
      * */
-    protected void addPaciente(Paciente enf, int planta, int habitacion){
+    protected boolean addPaciente(Paciente enf, int planta, int habitacion){
         if(habitaciones[planta][habitacion]==null){
             habitaciones[planta][habitacion]=enf;
+            return true;
         }else{
             System.out.println(ANSI_RED+"Error. Esta habitación está ocupada."+ANSI_RESET);
         }
+        return false;
     }
 
 
@@ -133,26 +139,37 @@ public class Hospital extends Centro{
 
 
     /**
-     * Funcion para eliminar un trabajador
-     * @param worker - objeto persona a eliminar
+     * Funcion para eliminar un trabajador, no importa si es medico o admin.
+     * @param worker - objeto persona a eliminar.
+     * @return boolean - true si la posicion se ha podido "vaciar", false si no.
      * */
-    public void removePersonal(Persona worker){
-        //TODO: tener en cuenta si es medico o admin???
+    protected boolean removePersonal(Persona worker){
+        for (int i = 0; i < trabajadores.length; i++) {
+            if (trabajadores[i] != null && trabajadores[i] == worker) {
+                trabajadores[i] = null;
+                return true;
+            }
+        }
+        //TODO: Pero y si la persona tamb es un paciente?
+        return false;
     }
 
 
     /**
      * Funcion que crea un nuevo objeto medico de forma manual o aleatoria
      * @param aleatorio - true, el objeto se crea automáticamente, false, se piden los datos por teclado.
-     * @return void
+     * @return boolean - true si se ha creado u guardado correctamente el objeto, false si no.
      * */
-    protected void addMedico(boolean aleatorio, Hospital h){
+    protected boolean addMedico(boolean aleatorio, Hospital h, String dni){
         try {
+            //** ALEATORIO **
             if (aleatorio) {
-                String dni;
-                do {
-                    dni = Faker.generarNIF_NIE();
-                }while (GestionMedica.checkDNI(dni));
+                String sexo;
+                //El dni he decidido que se pasa por parámetro, para asi poder pasar el dni que se introduce cuando se gestiona una persona (opción 3-4)
+//                do {
+//                    dniA = Faker.generarNIF_NIE();
+//                }while (GestionMedica.checkDNI(dniA));
+                //PETICIÓN DE DATOS
                 int id;
                 do {
                     id = Faker.devolverEnteros(false, trabajadores.length);
@@ -160,29 +177,38 @@ public class Hospital extends Centro{
                 String n = Faker.devolverNombre();
                 String ap1 = Faker.devolverApellidos();
                 String ap2 = Faker.devolverApellidos();
-                String sexo = Faker.devolverSexo(); //Aqui no necesito controlar nada porque esta funcion solo devuelve dos posibles cadenas
+                do {
+                    sexo = Faker.devolverSexo(); //Aqui no necesito controlar nada porque esta funcion solo devuelve dos posibles cadenas
+                }while (!Persona.validarGenero(sexo));
                 Fecha fNac = new Fecha(); // Si se crean aleatorios he decidido que tengan la fecha por defecto, 0-0-0.
                 String especialidad = Faker.devolverEspecialidad();
 
                 Medico m = new Medico(dni, id, n, ap1, ap2, sexo, fNac, especialidad);
                 contMedicos++;
                 totalTrabajadores=contMedicos+contAdministrativos;
+                //** GUARDAR **
+                //Cuando el array trabajadores se llene se llamara a la funcion aumentarTrabajadores() que le duplicará los espacios.
                 if(totalTrabajadores>trabajadores.length){
                     if(aumentarTrabajadores(h)) {
                         trabajadores[totalTrabajadores - 1] = m;
+                        return true;
                     }else {
-                        System.out.println("-_-");
+                        System.out.println(ANSI_RED+"Error Crítico. El array trabajadores de este centro no se puede redimensionar."+ANSI_RESET);
                     }
-                }else{
+                }else{//Si al array aun le queda sitio
                     trabajadores[totalTrabajadores - 1] = m;
+                    return true;
                 }
-
+            // ** MANUAL **
             } else {
+                //PETICIÓN DE DATOS
                 String sexo, especialidad;
-                String dni = PeticionDatos.pedirNIF_NIE("> dni: ");
                 int id;
                 do{
                     id = PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
+                    if(checkWorkerID(id)){
+                        System.out.println(ANSI_RED + "Aviso. El id introducido ya está registrado." + ANSI_RESET);
+                    }
                 }while(checkWorkerID(id));
                 String n = PeticionDatos.pedirCadena("> nombre: ");
                 String ap1 = PeticionDatos.pedirCadena("> primer apellido: ");
@@ -206,28 +232,38 @@ public class Hospital extends Centro{
 
                 Medico m = new Medico(dni, id, n, ap1, ap2, sexo, fNac, especialidad);
                 contMedicos++;
-                trabajadores[(contMedicos+contAdministrativos)- 1] = m;
+                totalTrabajadores=contMedicos+contAdministrativos;
+                //** GUARDAR **
+                if(totalTrabajadores>trabajadores.length){
+                    if(aumentarTrabajadores(h)) {
+                        trabajadores[totalTrabajadores - 1] = m;
+                        return true;
+                    }else {
+                        System.out.println(ANSI_RED+"Error Crítico. El array trabajadores de este centro no se puede redimensionar."+ANSI_RESET);
+                    }
+                }else{
+                    trabajadores[totalTrabajadores - 1] = m;
+                    return true;
+                }
             }
         }catch (ArrayIndexOutOfBoundsException e){
             System.out.println(ANSI_RED+"Error. Se ha llegado al máximo de trabajadores"+ANSI_RESET);
         }catch (NullPointerException e){
             System.out.println(ANSI_YELLOW+"Aviso. No existen trabajadores"+ANSI_RESET);
         }
+        return false;
     }
 
 
     /**
      * Funcion que crea un nuevo objeto administrativo de forma manual o aleatoria
      * @param aleatorio - true, el objeto se crea automáticamente, false, se piden los datos por teclado.
-     * @return void
+     * @return boolean - true si se ha creado u guardado correctamente el objeto, false si no.
      * */
-    protected void addAdmin(boolean aleatorio, Hospital h){
+    protected boolean addAdmin(boolean aleatorio, Hospital h, String dni){
         try {
             if (aleatorio) {
-                String dni;
-                do {
-                    dni = Faker.generarNIF_NIE();
-                }while (GestionMedica.checkDNI(dni));
+                //PETICIÓN DE DATOS
                 int id;
                 do {
                     id = Faker.devolverEnteros(false, trabajadores.length);
@@ -242,22 +278,28 @@ public class Hospital extends Centro{
                 Administrativo a = new Administrativo(dni, id, n, ap1, ap2, sexo, fNac, area);
                 contAdministrativos++;
                 totalTrabajadores=contMedicos+contAdministrativos;
+                //** GUARDAR **
                 if(totalTrabajadores>trabajadores.length){
                     if(aumentarTrabajadores(h)) {
                         trabajadores[totalTrabajadores - 1] = a;
+                        return true;
                     }else {
-                        System.out.println("-_-");
+                        System.out.println(ANSI_RED+"Error Crítico. El array trabajadores de este centro no se puede redimensionar."+ANSI_RESET);
                     }
                 }else{
                     trabajadores[totalTrabajadores - 1] = a;
+                    return true;
                 }
 
             } else {
+                //PETICIÓN DE DATOS
                 String sexo, area;
-                String dni = PeticionDatos.pedirNIF_NIE("> dni: ");
                 int id;
                 do{
                     id = PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
+                    if(checkWorkerID(id)){
+                        System.out.println(ANSI_RED + "Aviso. El id introducido ya está registrado." + ANSI_RESET);
+                    }
                 }while(checkWorkerID(id));
                 String n = PeticionDatos.pedirCadena("> nombre: ");
                 String ap1 = PeticionDatos.pedirCadena("> primer apellido: ");
@@ -280,13 +322,26 @@ public class Hospital extends Centro{
 
                 Administrativo a = new Administrativo(dni, id, n, ap1, ap2, sexo, fNac, area);
                 contAdministrativos++;
-                trabajadores[(contMedicos+contAdministrativos)- 1] = a;
+                totalTrabajadores=contMedicos+contAdministrativos;
+                //** GUARDAR **
+                if(totalTrabajadores>trabajadores.length){
+                    if(aumentarTrabajadores(h)) {
+                        trabajadores[totalTrabajadores - 1] = a;
+                        return true;
+                    }else {
+                        System.out.println(ANSI_RED+"Error Crítico. El array trabajadores de este centro no se puede redimensionar."+ANSI_RESET);
+                    }
+                }else{
+                    trabajadores[totalTrabajadores - 1] = a;
+                    return true;
+                }
             }
         }catch (ArrayIndexOutOfBoundsException e){
             System.out.println(ANSI_RED+"Error. Se ha llegado al máximo de trabajadores"+ANSI_RESET);
         }catch (NullPointerException e){
             System.out.println(ANSI_YELLOW+"Aviso. No existen trabajadores"+ANSI_RESET);
         }
+        return false;
     }
 
 
@@ -297,9 +352,8 @@ public class Hospital extends Centro{
      * @return boolean - true si lo encuentra, false si no coincide con ninguno
      * */
     private boolean checkWorkerID(int id){
-        int contTrabajadores=contMedicos+contAdministrativos;
-        if(contTrabajadores>=1) {
-            for (int i = 0; i < contTrabajadores; i++) {
+        if(totalTrabajadores>=1) {
+            for (int i = 0; i < totalTrabajadores; i++) {
                 if (trabajadores[i] != null) {
                     if (trabajadores[i].getID() == id) {
                         return true;

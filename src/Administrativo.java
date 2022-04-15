@@ -68,7 +68,7 @@ public class Administrativo extends Persona{
 
     public static boolean validarArea(String area){
         area.toLowerCase();
-        if(area.equals("traumatología") || area.equals("dermatología") || area.equals("oftalmología") || area.equals("neurología") || area.equals("urgencias") || area.equals("quirofano") || area.equals("administracion")) {
+        if(area.equals("traumatología") || area.equals("dermatologia") || area.equals("oftalmologia") || area.equals("neurologia") || area.equals("urgencias") || area.equals("quirofano") || area.equals("administracion")) {
             return true;
         }else {
             return false;
