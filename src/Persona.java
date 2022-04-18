@@ -130,6 +130,7 @@ public class Persona implements Estadistica{
     @Override
     public String toString() {
         return identificador + " " +
+                dni + " "+
                 nombre + " " +
                 apellido1 + ", " + apellido2;
     }

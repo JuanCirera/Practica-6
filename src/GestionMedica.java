@@ -44,7 +44,7 @@ public class GestionMedica {
                     ║ 6-> Mostrar estadísticas de las personas                    
                     ║ 0-> Salir                                                   
                     ╚ Elige una opción: """);
-            System.out.println(" "); //Espacio en blanco
+//            System.out.println(" "); //Espacio en blanco
 
             switch (opcionInicio) {
                 case 1:
@@ -55,10 +55,10 @@ public class GestionMedica {
                     gestionarCentro(false, true);
                     break;
                 case 3:
-                    gestionarPersona();
+                    gestionarPersona(2);
                     break;
                 case 4:
-                    gestionarPersona();
+                    gestionarPersona(1);
                     break;
                 case 5:
                     estadisticas(true,false);
@@ -89,6 +89,7 @@ public class GestionMedica {
 
     //Esta funcion y los booleanos en vez de ser una solucion me ha creado más problemas, le he metido por parámetro esto a casi todas las funciones, algo no cuadra...
     private static void mostrarCentros(/*boolean hospital, boolean clinica*/) {
+        ordenarPorIDcentro(centrosMedicos);
         for(Centro c:centrosMedicos){
             if(/*hospital &&*/ c!=null /*&& c instanceof Hospital*/) {
 //                Hospital h=(Hospital) c;
@@ -104,8 +105,40 @@ public class GestionMedica {
     }
 
 
+    /**
+     * Muestra las consultas de un centro, si estan vacías como si hay alguien dentro, mostrando sus datos
+     * @param c - objeto centro del que sacar las consultas
+     * */
+    private static void mostrarConsultas(Centro c) {
+        int cont=0;
+
+        if(c instanceof Hospital) {
+            Hospital h=(Hospital) c;
+            for (Paciente p : h.consultas) {
+                cont++;
+                if (p != null) {
+                    System.out.println("Consulta " + cont + ": " + p.toString());
+                } else {
+                    System.out.println("Consulta " + cont + " - " + ANSI_BGREEN + "Libre" + ANSI_RESET);
+                }
+            }
+        }else{
+            Clinica cl=(Clinica) c;
+            for (Paciente p : cl.consultas) {
+                cont++;
+                if (p != null) {
+                    System.out.println("Consulta " + cont + ": " + p.toString());
+                } else {
+                    System.out.println("Consulta " + cont + " - " + ANSI_BGREEN + "Libre" + ANSI_RESET);
+                }
+            }
+        }
+    }
+
+
     //De momento lo dejo asi, ya por lo menos no me desquicio al ver lo de arriba
     private static void mostrarHospitales(){
+        ordenarPorIDcentro(centrosMedicos);
         for(Centro c:centrosMedicos){
             if(c!=null && c instanceof Hospital) {
                 Hospital h=(Hospital) c;
@@ -116,6 +149,7 @@ public class GestionMedica {
 
 
     private static void mostrarClinicas(){
+        ordenarPorIDcentro(centrosMedicos);
         for(Centro c:centrosMedicos){
             if(c!=null && c instanceof Clinica) {
                 Clinica cl=(Clinica) c;
@@ -208,10 +242,12 @@ public class GestionMedica {
      * */
     private static int whichConsulta(String dni, Centro c){
         int thisConsulta=0, cont=0; //Declaro aqui el objeto a null porque la función se empeña en devolverlo fuera del for...
-        for(Paciente p: c.consultas){
-            cont++;
-            if(p!=null && p.getDni().equals(dni)){
-                thisConsulta=cont;
+        if(c!=null) {
+            for (Paciente p : c.consultas) {
+                cont++;
+                if (p != null && p.getDni().equals(dni)) {
+                    thisConsulta = cont;
+                }
             }
         }
         return thisConsulta;
@@ -253,14 +289,49 @@ public class GestionMedica {
     }
 
 
+    /**
+     * Esta funcion obtiene mediante un ID el objeto persona y lo devuelve si coincide con éste.
+     * @param idPersona del objeto persona que se quiere obtener.
+     * @return Persona - objeto persona que se necesita para realizar alguna operación con él.
+     * */
+    private static Persona whichPerson(int idPersona){
+        Persona thisPerson=null;
+        for(Centro c: centrosMedicos){
+            if (c != null) {
+                for (Persona p : c.consultas) {
+                    if (p != null && p.getID()==idPersona) {
+                        thisPerson = p;
+                    }
+                }
+                for (Persona p: c.trabajadores){
+                    if (p != null && p.getID()==idPersona) {
+                        thisPerson = p;
+                    }
+                }
+                if(c instanceof Hospital) {
+                    Hospital h=(Hospital) c;
+                    for (int i=0;i<h.habitaciones.length;i++) {
+                        for(int x=0;x<h.habitaciones[i].length;x++) {
+                            if (h.habitaciones[i][x] != null && h.habitaciones[i][x].getID()==idPersona) {
+                                thisPerson = h.habitaciones[i][x];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return thisPerson;
+    }
+
+
     //Estas funciones se entienden mejor si se ve el esquema del menu, creo que más o menos se entienden llamándolas asi
     /**
      * Muestra el primer submenu de gestion centros
      * */
     private static int centroSubMenu1(String hc, String hcs){
+        System.out.println(" "); //Espacio en blanco
         System.out.println("╔═ "+ANSI_BBLUE+"Inicio/Gestionar "+hc+ANSI_RESET);
         int opcion = PeticionDatos.pedirEnteroPositivo(true, "║ 1-> Mostrar "+hcs+"\n"+"║ 2-> Crear "+hc+"\n"+"║ 3-> Eliminar "+hc+"\n"+"║ 4-> Volver al menu"+"\n"+"╚ > ");
-        System.out.println(" "); //Espacio en blanco
         return opcion;
     }
 
@@ -276,7 +347,7 @@ public class GestionMedica {
                                         ║ 2-> Modificar datos
                                         ║ 3-> Volver al menú                                                                                   
                                         ╚ > """);
-        System.out.println(" "); //Espacio en blanco
+//        System.out.println(" "); //Espacio en blanco
         return opcion;
     }
 
@@ -427,10 +498,12 @@ public class GestionMedica {
 
     /**
      * Funcion que actualiza los datos de una persona en concreto usando su DNI
-     * @param dni de la persona que se quiere modificar.
+     * @param dniA de la persona que se quiere modificar.
      * */
-    private static void modificarPersona(String dni){
-        Persona p=whichPerson(dni);
+    private static void modificarPersona(String dniA){
+        Persona p=whichPerson(dniA); //Saco el objeto persona mediante su dni, asi puedo acceder a sus getters/setters
+
+        String dni=PeticionDatos.pedirNIF_NIE("> DNI "+"("+p.getDni()+")"+": ");
         String n = PeticionDatos.pedirCadena("> nombre "+"("+p.getNombre()+")"+": ");
         String ap1 = PeticionDatos.pedirCadena("> primer apellido "+"("+p.getApellido1()+")"+": ");
         String ap2 = PeticionDatos.pedirCadena("> segundo apellido "+"("+p.getApellido2()+")"+": ");
@@ -451,21 +524,195 @@ public class GestionMedica {
 
 
     /**
-     * Muestra un menu para gestionar una persona en caso de que ya exista.
+     * Muestra un menu para mostrar las personas existentes o crear nuevas.
      * @return int - opcion elegida
      * */
-    private static int personaSubMenu1(){
+    private static int personaSubMenu1(int tipo){
+        String t="", ts="";
+        if(tipo==1){
+            t="paciente";
+            ts="pacientes";
+        }else{
+            t="trabajador";
+            ts="trabajadores";
+        }
+        System.out.println(" ");
+        System.out.println("╔═ " + ANSI_BBLUE + "Inicio/Gestionar "+t+ ANSI_RESET);
+        int opcion = PeticionDatos.pedirEnteroPositivo(true, "║ 1-> Mostrar "+ts+"\n"+"║ 2-> Crear "+t+"\n"+"║ 3-> Volver"+"\n"+"╚ > ");
 //        System.out.println(" "); //Espacio en blanco
-        int opcion = PeticionDatos.pedirEnteroPositivo(true, """ 
-                    ║ 1-> Modificar datos                                      
-                    ║ 2-> Modificar ubicación
-                    ║ 3-> Añadir día    
-                    ║ 4-> Despedir
-                    ║ 5-> Volver                                                                                 
-                    ╚ > """);
-        System.out.println(" "); //Espacio en blanco
         return opcion;
     }
+
+
+    /**
+     * Muestra un menu para gestionar una persona en caso de que ya exista.
+     * @param p objeto persona a gestionar.
+//     * @return int - opcion elegida.
+     * */
+    private static void personaSubMenu2(Persona p){
+        int opcion=0;
+        Centro c;
+        String dni=p.getDni();
+        do {
+            System.out.println(" ");//linea
+            System.out.println("╔═ " + ANSI_BBLUE + "Inicio/Gestionar Persona/"+p.getNombre()+ ANSI_RESET);
+            opcion = PeticionDatos.pedirEnteroPositivo(true, """ 
+                        ║ 1-> Modificar datos                                      
+                        ║ 2-> Modificar ubicación
+                        ║ 3-> Añadir día    
+                        ║ 4-> Despedir
+                        ║ 5-> Volver                                                                                 
+                        ╚ > """);
+            System.out.println(" "); //Espacio en blanco
+//            return opcion;
+
+            switch (opcion) {
+                case 1:
+                    modificarPersona(dni);
+                    break;
+                case 2:
+                    moverPersona(dni);
+                    break;
+                case 3:
+                    System.out.println(ANSI_BBLUE+"Introduce la fecha completa del día a añadir"+ANSI_RESET);
+                    int day=PeticionDatos.pedirEnteroPositivo(false, "> día: ");
+                    int month=PeticionDatos.pedirEnteroPositivo(false, "> mes: ");
+                    int year=PeticionDatos.pedirEnteroPositivo(false, "> año: ");
+                    Fecha f=null;
+
+                    if(p instanceof Paciente){
+                        Paciente paciente=(Paciente) p;
+                        f = new Fecha(day, month, year);
+                        paciente.addVisita(f);
+                    }else if(p instanceof Medico){
+                        Medico m=(Medico) p;
+                        //Compruebo si la fecha introducida corresponde a un dia laborable o no. En mi caso solo compruebo los fines de semana, creo
+                        //que para esto es más que suficiente
+//                            if(!Fecha.isWeekend(day,month,year)) {
+                            f = new Fecha(day, month, year);
+//                            }else{
+//                                System.out.println(ANSI_YELLOW+"Aviso. La fecha introducida no es un día laborable"+ANSI_RESET);
+//                            }
+                        if(m.addDiaTrabajado(f)){
+                            System.out.println(ANSI_BGREEN+"Día añadido correctamente."+ANSI_RESET);
+                        }else{
+                            System.out.println(ANSI_YELLOW+"Aviso. La fecha introducida no es un día laborable."+ANSI_RESET);
+                        }
+                    }else{
+                        Administrativo admin=(Administrativo) p;
+//                            if(!Fecha.isWeekend(day,month,year)) {
+                            f = new Fecha(day, month, year);
+//                            }else{
+//                                System.out.println(ANSI_YELLOW+"Aviso. La fecha introducida no es un día laborable"+ANSI_RESET);
+//                            }
+                        if(admin.addDiaTrabajado(f)){
+                            System.out.println(ANSI_BGREEN+"Día añadido correctamente."+ANSI_RESET);
+                        }else{
+                            System.out.println(ANSI_YELLOW+"Aviso. La fecha introducida no es un día laborable."+ANSI_RESET);
+                        }
+                    }
+                    break;
+                case 4:
+                    //TODO: guardar el objeto en cuestion en un archivo del que no se lea al iniciar
+                    //PERSONAL
+                    c=whereWorking(dni);
+                    if(c instanceof Hospital){
+                        Hospital h=(Hospital) c;
+                        h.removePersonal(whichPerson(dni));
+                    }else{
+                        Clinica cl=(Clinica) c;
+                        cl.removePersonal(whichPerson(dni));
+                    }
+                    //PACIENTES
+                    c=whereAdmitted(dni); //Se busca en que centro está la persona a la que pertenece ese dni
+                    //Aqui tengo que liar esto porque whichPerson devuelve un objeto Persona y me hace falta un Paciente
+                    Persona cualquiera=whichPerson(dni);
+                    Paciente paciente=null;
+                    if(cualquiera instanceof Paciente) {
+                        paciente=(Paciente) cualquiera;
+                    }
+                    if(c instanceof Hospital){ //Si el centro es un hospital, se "elimina" de sus arrays
+                        Hospital h=(Hospital) c;
+                        h.removePaciente(paciente);
+                    }else{ //Si no se elimina del array consultas de clinica
+                        Clinica cl=(Clinica) c;
+                        cl.removePaciente(paciente);
+                    }
+                    break;
+                case 5:
+                    System.out.println(" ");
+                    System.out.println(ANSI_YELLOW + "Volviendo al inicio..." + ANSI_RESET);
+                    menuInicio();
+                    break;
+                default:
+                    System.out.println(ANSI_RED + "Error. Elige una de las opciones listadas." + ANSI_RESET);
+                    break;
+            }
+        }while (opcion!=5);
+    }
+
+
+
+    private static int pedirConsulta(Centro c){
+        int consulta;
+        do {
+            consulta = PeticionDatos.pedirEnteroPositivo(false, "> consulta: ");
+            if(!checkConsulta(consulta, c)){
+                System.out.println(ANSI_YELLOW+"Aviso. La consulta está ocupada."+ANSI_RESET);
+            }
+        }while (!checkConsulta(consulta, c));
+
+        return consulta;
+    }
+
+
+    //Dejo esto comentado para recordar que tengo que apuntar cada funcion que cree o puede ser que escriba una nueva por no acordarme de que ya existe.
+
+//    /**
+//     * Asigna a un objeto Paciente a una consulta o a una habitacion de un objeto Hospital
+//     * @param p - paciente a añadir
+//     * @param h - hospital
+//     * @return booelan
+//     * */
+//    private static boolean assignPatientTo(Paciente p, Hospital h){
+//        int opcion=0;
+//        System.out.println(" ");//linea
+//        System.out.println("╔═ " + ANSI_BBLUE + ".../Asignar centro/"+h.getNombre()+ ANSI_RESET);
+//        opcion = PeticionDatos.pedirEnteroPositivo(true, """
+//                        ║ 1-> Consulta
+//                        ║ 2-> Planta
+//                        ║ 3-> Volver
+//                        ╚ > """);
+//        System.out.println(" "); //Espacio en blanco
+//        switch (opcion){
+//            case 1:
+//                //TODO: mostrar consultas para saber cual esta libre, buscar donde se pida una ocnsulta y sustiruir por la funcion
+//                for(int y=0;y<h.consultas.length;y++){
+////            cont++;
+//                    if(h.consultas[y]!=null){
+//                        System.out.println("Consulta "+y+": "+h.consultas[y].getDni()+", "+h.consultas[y].getNombre()+" "+
+//                                h.consultas[y].getApellido1()+" "+h.consultas[y].getApellido2());
+//                    }else{
+//                        System.out.println(ANSI_BGREEN+y+" Libre"+ANSI_RESET);
+//                    }
+//                }
+//                h.addPaciente(p, pedirConsulta(h));
+//                return true;
+////                break;
+//            case 2:
+//                int planta=PeticionDatos.pedirEnteroPositivo(false, "> planta: ");
+//                int habitacion=PeticionDatos.pedirEnteroPositivo(false, "> habitación: ");
+//                h.addPaciente(p, planta, habitacion);
+//                return true;
+////                break;
+//            case 3:
+//                System.out.println(" ");
+//                System.out.println(ANSI_YELLOW + "Volviendo al inicio..." + ANSI_RESET);
+//                menuInicio();
+////                return false;
+//        }
+//        return false;
+//    }
 
 
     /**
@@ -473,34 +720,62 @@ public class GestionMedica {
      * @return int - opcion elegida
      * */
     private static void moverPersona(String dni){
-        System.out.println(" "); //Espacio en blanco
-        int opcion = PeticionDatos.pedirEnteroPositivo(true, """ 
-                            ║ 1-> Cambiar de consulta                                     
-                            ║ 2-> Cambiar de hospital
-                            ║ 3-> Volver                                                                           
-                            ╚ > """);
-        System.out.println(" "); //Espacio en blanco
+        int opcion=0;
+        do {
+            System.out.println(" "); //Espacio en blanco
+            System.out.println("╔═ " + ANSI_BBLUE + "Inicio/Gestionar Persona/Cambiar ubicación" + ANSI_RESET);
+            opcion = PeticionDatos.pedirEnteroPositivo(true, """ 
+                    ║ 1-> Cambiar de consulta
+                    ║ 2-> Cambiar de habitación                                  
+                    ║ 3-> Cambiar de centro
+                    ║ 4-> Volver                                                                           
+                    ╚ > """);
+            System.out.println(" "); //Espacio en blanco
 
-        switch (opcion) {
-            case 1:
-                Persona p=whichPerson(dni);
-                Centro c=whereAdmitted(dni);
+            switch (opcion) {
+                case 1:
+                    Persona p = whichPerson(dni);
+                    Paciente paciente=null, nuevoPaciente=null;
+                    Centro c=null;
+                    if(p instanceof Paciente) {
+                        paciente=(Paciente) p;
+                        c = whereAdmitted(dni);
+                    }else{
+                        //Si la persona es un trabajador obviamente no es un paciente a la vez por lo que creo un objeto paciente con los datos
+                        //del trabajador y asi poder añadirlo a una consulta
+                        c=whereWorking(dni);
+                        nuevoPaciente=new Paciente(p.getDni(), p.getID(), p.getNombre(), p.getApellido1(), p.getApellido2(), p.getSexo(), p.getFechaNac());
+                    }
 
-                System.out.println("Actualmente en consulta " + whichConsulta(dni, c));
-                int nuevaConsulta = PeticionDatos.pedirEnteroPositivo(false, "> nueva consulta: ");
-                //TODO: Guardar el objeto en la nueva posicion y poner a null la vieja
-                break;
-            case 2:
-                System.out.println("Actualmente en " + whereAdmitted(dni));
-                int nuevoCentro = PeticionDatos.pedirEnteroPositivo(false, "> nuevo centro(ID): ");
-                //TODO: mover del array del hospital en el que este al array del nuevo hospital
-                break;
-            case 3:
-                System.out.println(" ");
-                System.out.println(ANSI_YELLOW+"Volviendo al inicio..."+ANSI_RESET);
-                menuInicio();
-                break;
-        }
+                    int antiguaConsulta=whichConsulta(dni, c);
+
+                    System.out.println("Actualmente en consulta " + antiguaConsulta);
+                    int nuevaConsulta = PeticionDatos.pedirEnteroPositivo(false, "> nueva consulta: ");
+                    if(p instanceof Paciente) {
+                        c.consultas[nuevaConsulta-1] = paciente;
+                    }else {
+                        c.consultas[nuevaConsulta-1] = nuevoPaciente;
+                    }
+                    c.consultas[antiguaConsulta] = null;
+                    //TODO: No se mueve de posicion el maldito objeto, le ha gustado la 2
+                    break;
+                case 2:
+                    System.out.println("Actualmente en " + whereAdmitted(dni));
+                    mostrarCentros();
+                    int nuevoCentro = PeticionDatos.pedirEnteroPositivo(false, "> nuevo centro(ID): ");
+
+                    //TODO: mover del array del hospital en el que este al array del nuevo hospital
+                    break;
+                case 3:
+                    //TODO: mover de habitacion
+                    break;
+                case 4:
+                    System.out.println(" ");
+                    System.out.println(ANSI_YELLOW + "Volviendo al inicio..." + ANSI_RESET);
+                    menuInicio();
+                    break;
+            }
+        }while (opcion!=4);
     }
 
 
@@ -560,145 +835,154 @@ public class GestionMedica {
 //     * @param personal - si el objeto persona a gestionar es un medico/administrativo
 //     * @param paciente - si el objeto paciente es un paciente
      * */
-    private static void gestionarPersona(/*boolean personal, boolean paciente*/){
+    private static void gestionarPersona(int tipo){
 
-        String dni= PeticionDatos.pedirNIF_NIE("> DNI: ");
+        int opcion=0;
+        do {
+            opcion = personaSubMenu1(tipo);
 
-        if(checkDNI(dni)) {
-            int opcion;
-            do {
-                System.out.println(" ");//linea
-                System.out.println("╔═ " + ANSI_BBLUE + "Inicio/Gestionar Persona/"+whichPerson(dni).getNombre()+ ANSI_RESET);
-                opcion = personaSubMenu1();
-                Persona p=whichPerson(dni);
-                Centro c;
-                switch (opcion) {
-                    case 1:
-                        modificarPersona(dni);
-                        break;
-                    case 2:
-                        System.out.println("╔═ "+ANSI_BBLUE+"Inicio/Gestionar Persona/Cambiar ubicación"+ANSI_RESET);
-                        moverPersona(dni);
-                        break;
-                    case 3:
-                        System.out.println(ANSI_BBLUE+"Introduce la fecha completa del día a añadir"+ANSI_RESET);
-                        int day=PeticionDatos.pedirEnteroPositivo(false, "> día: ");
-                        int month=PeticionDatos.pedirEnteroPositivo(false, "> mes: ");
-                        int year=PeticionDatos.pedirEnteroPositivo(false, "> año: ");
-                        Fecha f=null;
+            switch (opcion) {
+                case 1:
+                    mostrarPersonas(tipo);
+                    break;
+                case 2:
+                    System.out.println(" ");
+                    String dni=PeticionDatos.pedirNIF_NIE("> DNI: ");
+                    if(checkDNI(dni)){
+                        personaSubMenu2(whichPerson(dni));
 
-                        if(p instanceof Paciente){
-                            Paciente paciente=(Paciente) p;
-                            f = new Fecha(day, month, year);
-                            paciente.addVisita(f);
-                        }else if(p instanceof Medico){
-                            Medico m=(Medico) p;
-                            //Compruebo si la fecha introducida corresponde a un dia laborable o no. En mi caso solo compruebo los fines de semana, creo
-                            //que para esto es más que suficiente
-//                            if(!Fecha.isWeekend(day,month,year)) {
-                                f = new Fecha(day, month, year);
-//                            }else{
-//                                System.out.println(ANSI_YELLOW+"Aviso. La fecha introducida no es un día laborable"+ANSI_RESET);
-//                            }
-                            if(m.addDiaTrabajado(f)){
-                                System.out.println(ANSI_BGREEN+"Día añadido correctamente."+ANSI_RESET);
-                            }else{
-                                System.out.println(ANSI_YELLOW+"Aviso. La fecha introducida no es un día laborable."+ANSI_RESET);
+                    }else{
+                        System.out.println(ANSI_YELLOW+"El dni introducido no está registrado."+ANSI_RESET);
+                        char respuesta=Character.toUpperCase(PeticionDatos.pedirCaracter("> ¿Desea crear una nueva persona? S/N: "));
+                        if(respuesta=='S'){
+                            if(tipo==2 || tipo==3) {
+                                System.out.println(" ");
+                                System.out.println("2. Médico" + "\n" + "3. Administrativo");
+                                int workerType = PeticionDatos.pedirEnteroPositivo(false, "> Elige una opción: ");
+                                nuevaPersona(false, workerType);
+                            }else {
+                                nuevaPersona(false, tipo);
                             }
                         }else{
-                            Administrativo admin=(Administrativo) p;
-//                            if(!Fecha.isWeekend(day,month,year)) {
-                                f = new Fecha(day, month, year);
-//                            }else{
-//                                System.out.println(ANSI_YELLOW+"Aviso. La fecha introducida no es un día laborable"+ANSI_RESET);
-//                            }
-                            if(admin.addDiaTrabajado(f)){
-                                System.out.println(ANSI_BGREEN+"Día añadido correctamente."+ANSI_RESET);
-                            }else{
-                                System.out.println(ANSI_YELLOW+"Aviso. La fecha introducida no es un día laborable."+ANSI_RESET);
-                            }
+                            System.out.println(" ");
+                            System.out.println(ANSI_YELLOW+"Volviendo al inicio..."+ANSI_RESET);
+                            menuInicio();
+                            break;
                         }
-                        break;
-                    case 4:
-                        //TODO: guardar el objeto en cuestion en un archivo del que no se lea al iniciar
-                        //PERSONAL
-                        c=whereWorking(dni);
-                        if(c instanceof Hospital){
-                            Hospital h=(Hospital) c;
-                            h.removePersonal(whichPerson(dni));
-                        }else{
-                            Clinica cl=(Clinica) c;
-                            cl.removePersonal(whichPerson(dni));
-                        }
-                        //PACIENTES
-                        c=whereAdmitted(dni); //Se busca en que centro está la persona a la que pertenece ese dni
-                        //Aqui tengo que liar esto porque whichPerson devuelve un objeto Persona y me hace falta un Paciente
-                        Persona cualquiera=whichPerson(dni);
-                        Paciente paciente=null;
-                        if(cualquiera instanceof Paciente) {
-                            paciente=(Paciente) cualquiera;
-                        }
-                        if(c instanceof Hospital){ //Si el centro es un hospital, se "elimina" de sus arrays
-                            Hospital h=(Hospital) c;
-                            h.removePaciente(paciente);
-                        }else{ //Si no se elimina del array consultas de clinica
-                            Clinica cl=(Clinica) c;
-                            cl.removePaciente(paciente);
-                        }
-                        break;
-                    case 5:
-                        System.out.println(" ");
-                        System.out.println(ANSI_YELLOW + "Volviendo al inicio..." + ANSI_RESET);
-                        break;
-                    default:
-                        System.out.println(ANSI_RED + "Error. Elige una de las opciones listadas." + ANSI_RESET);
-                        break;
-                }
-            }while (opcion!=5);
-        }else{ //Si el dni no existe
-            System.out.println(ANSI_YELLOW+"Aviso. El dni introducido no está registrado."+ANSI_RESET);
-            char respuesta=Character.toUpperCase(PeticionDatos.pedirCaracter("> ¿Desea crear una nueva persona? S/N: "));
-            if(respuesta=='S'){
-                //Se necesita saber donde se va a crear la nueva persona, por eso se listan los centros y se elige uno
-                System.out.println(" ");
-                System.out.println(ANSI_BBLUE+"CENTROS"+ANSI_RESET);
-                mostrarCentros();
-                int idCentro=PeticionDatos.pedirEnteroPositivo(false, "> Elige un centro(ID): ");
-                //Se muestra un menu con los tipos de personas que devuelve un entero, ya con ese último dato se puede crear la persona.
-                System.out.println(" ");
-                System.out.println("╔═ " + ANSI_BBLUE + "Inicio/Gestionar Persona/Tipo de persona" + ANSI_RESET);
-                //Se llama a nuevaPersona y se le pasa un entero, el dni introducido al principio y el objeto Centro elegido.
-                nuevaPersona(tipoPersona(), dni, whichCenter(idCentro));
-            }else{
-                System.out.println(" ");
-                System.out.println(ANSI_YELLOW + "Volviendo al inicio..." + ANSI_RESET);
-                menuInicio();
+                    }
+                    break;
+                case 3:
+                    System.out.println(" ");
+                    System.out.println(ANSI_YELLOW + "Volviendo al inicio..." + ANSI_RESET);
+                    break;
             }
-        }
+        }while (opcion!=3);
+
     }
 
 
     /**
-     * Funcion que crea un nuevo objeto Persona, dando a elegir el tipo de persona y el centro donde va a colocarse.
-     * @param tipo de objeto persona
-     * @param dni
-     * @param centroMedico
+     * Funcion que crea un nuevo objeto Persona y llamar a su funcion add correspondiente
+     * @param tipo de objeto persona, 1(Paciente) 2(Médico) 3(Admin)
      * */
-    private static void nuevaPersona(int tipo, String dni, Centro centroMedico){
-        //Peticion de datos
-        int id, day, month, year, nConsulta, nPlanta, nHabitacion;
-        Paciente p=null;
-        if(tipo==1) {
+    private static Persona nuevaPersona(boolean aleatorio, int tipo) {
+        //** PETICIÓN DE DATOS **
+        int id=0;
+        String especialidad="", area="", dni="", n="", ap1="", ap2="", sexo="";
+        Fecha fNac=null;
+        Paciente p = null;
+        Medico m=null;
+        Administrativo a=null;
+
+        //ALEATORIOS
+        if(aleatorio) {
+            Centro.totalTrabajadores++;
             do {
-                id = PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
-                if (checkPersonID(id)) {
-                    System.out.println(ANSI_YELLOW + "Aviso. El id introducido ya esta registrado." + ANSI_RESET);
-                }
+                id = Faker.devolverEnteros(false, Centro.totalTrabajadores+1);
             } while (checkPersonID(id));
-            String n = PeticionDatos.pedirCadenaLimite(false, true, 70, "> nombre: ");
-            String ap1 = PeticionDatos.pedirCadenaLimite(false, true, 70, "> primer apellido: ");
-            String ap2 = PeticionDatos.pedirCadenaLimite(false, true, 70, "> segundo apellido: ");
-            String sexo;
+
+            do{
+                dni=Faker.generarNIF_NIE();
+            }while (checkDNI(dni));
+            n = Faker.devolverNombre();
+            ap1 = Faker.devolverApellidos();
+            ap2 = Faker.devolverApellidos();
+            sexo = Faker.devolverSexo();
+            fNac = new Fecha(); // Si se crean aleatorios he decidido que tengan la fecha por defecto, 0-0-0.
+            //De forma aleatoria solo se pueden crear trabajadores, como el enunciado no dice nada de los pacientes, se queda asi.
+            if (tipo == 2) {
+                do {
+                    especialidad = Faker.devolverEspecialidad();
+                } while (!Medico.validarEspecialidad(especialidad));
+
+                m = new Medico(dni, id, n, ap1, ap2, sexo, fNac, especialidad);
+                return m;
+
+            } else if (tipo == 3) {
+                do {
+                    area = Faker.devolverArea();
+                } while (!Administrativo.validarArea(area));
+
+                a = new Administrativo(dni, id, n, ap1, ap2, sexo, fNac, area);
+                return a;
+            }
+
+        }else {
+            //MANUALES
+            do {
+                System.out.println(" ");
+                dni = PeticionDatos.pedirNIF_NIE( "> DNI: ");
+                if (checkPersonID(id)) {
+                    System.out.println(ANSI_YELLOW + "Aviso. El dni introducido ya esta registrado." + ANSI_RESET);
+                }
+            } while (checkDNI(dni));
+
+            if(tipo==1) {
+                do {
+                    id = PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
+
+                    if (checkPersonID(id)) {
+                        if(whichPerson(id) instanceof Medico || whichPerson(id) instanceof Administrativo) {
+                            char respuesta = Character.toUpperCase(PeticionDatos.pedirCaracter(ANSI_CYAN + "El ID introducido está registrado como trabajador. ¿Desea ingresarlo? S/N: " + ANSI_RESET));
+                            Persona w=whichPerson(id); //Guardo el objeto persona en w
+
+                            if (respuesta == 'S') {
+                                System.out.println(w.toString()); //Muestro sus datos
+                                //Se crea un paciente con los datos de la persona que ya existía (trabajador), siempre y cuando no sea otro paciente
+                                Paciente paciente=new Paciente(w.getDni(), w.getID(), w.getNombre(), w.getApellido1(), w.getApellido2(), w.getSexo(), w.getFechaNac());
+                                //Se asigna a un centro
+                                addPatientTo(paciente); //LLamo a la funcion que asigna a un paciente a consulta o planta en un Hospital
+                                System.out.println(" ");
+                                menuInicio();
+
+                            }else{
+                                personaSubMenu2(w);
+
+                            }
+                            break;
+
+                        }else{
+                            System.out.println(ANSI_YELLOW+"El ID introducido ya está registrado como paciente."+ANSI_RESET);
+                            System.out.println(" ");
+                            System.out.println(whichPerson(id).toString());
+                            personaSubMenu2(whichPerson(id));
+                        }
+                    }
+                }while (checkPersonID(id));
+
+            }else{
+                do {
+//                    System.out.println(" ");
+                    id = PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
+                    if (checkPersonID(id)) {
+                        System.out.println(ANSI_YELLOW + "Aviso. El id introducido ya esta registrado." + ANSI_RESET);
+                    }
+                } while (checkPersonID(id));
+            }
+
+            n = PeticionDatos.pedirCadenaLimite(false, true, 70, "> nombre: ");
+            ap1 = PeticionDatos.pedirCadenaLimite(false, true, 70, "> primer apellido: ");
+            ap2 = PeticionDatos.pedirCadenaLimite(false, true, 70, "> segundo apellido: ");
             do {
                 sexo = PeticionDatos.pedirCadena("> sexo: ");
                 if (!Persona.validarGenero(sexo)) {
@@ -706,84 +990,153 @@ public class GestionMedica {
                 }
             } while (!Persona.validarGenero(sexo));
 
-            day = PeticionDatos.pedirEnteroPositivo(false, "> día: ");
-            month = PeticionDatos.pedirEnteroPositivo(false, "> mes: ");
-            year = PeticionDatos.pedirEnteroPositivo(false, "> año: ");
-            Fecha f = new Fecha(day, month, year);
+            int day = PeticionDatos.pedirEnteroPositivo(false, "> día: ");
+            int month = PeticionDatos.pedirEnteroPositivo(false, "> mes: ");
+            int year = PeticionDatos.pedirEnteroPositivo(false, "> año: ");
+            fNac = new Fecha(day, month, year);
 
-            p = new Paciente(dni, id, n, ap1, ap2, sexo, f);
-        }
+            if (tipo == 2) {
+                do {
+                    especialidad = PeticionDatos.pedirCadena("> especialidad: ");
+                    if (!Medico.validarEspecialidad(especialidad)) {
+                        System.out.println(ANSI_RED + "Error. El dato introducido no es correcto." + ANSI_RESET);
+                    }
+                } while (!Medico.validarEspecialidad(especialidad));
+            } else if (tipo == 3) {
+                do {
+                    area = PeticionDatos.pedirCadena("> área: ");
+                    if (!Persona.validarGenero(sexo)) {
+                        System.out.println(ANSI_RED + "Error. El dato introducido no es correcto." + ANSI_RESET);
+                    }
+                } while (!Administrativo.validarArea(area));
+            }
 
-        if(centroMedico instanceof Hospital){
-            Hospital h=(Hospital) centroMedico;
+            // ** CREACIÓN DE LOS OBJETOS **
             if(tipo==1){
-                System.out.println(" "); //Espacio en blanco
-                System.out.println("╔═ " + ANSI_BBLUE + "Inicio/Gestionar Persona/"+h.getNombre()+"/Ubicación" + ANSI_RESET);
-                int opcion = PeticionDatos.pedirEnteroPositivo(true, """
-                ║ 1-> Consulta
-                ║ 2-> Planta
-                ╚ > """);
-                System.out.println(" "); //Espacio en blanco
-                switch (opcion){
-                    case 1:
-                        do{
-                            nConsulta=PeticionDatos.pedirEnteroPositivo(false, "> Número de consulta: ");
-                            if(!checkConsulta(nConsulta, h)){
-                                System.out.println(ANSI_YELLOW+"Aviso. La consulta introducida está ocupada."+ANSI_RESET);
-                            }
-                        }while (!checkConsulta(nConsulta, h));
-
-                        if(h.addPaciente(p, nConsulta)){ //Meto la llamada a la funcion en el if y asi aprovecho para informar del resultado
-                            System.out.println(ANSI_BGREEN+"Paciente creado correctamente"+ANSI_RESET);
-                        }
-                        break;
-                    case 2:
-                        do{
-                            nPlanta=PeticionDatos.pedirEnteroPositivo(false, "> Planta: ");
-                            nHabitacion=PeticionDatos.pedirEnteroPositivo(false, "> Habitación: ");
-                            if(checkHabitacion(nPlanta, nHabitacion, h)){
-                                System.out.println(ANSI_YELLOW+"Aviso. La habitación introducida está ocupada."+ANSI_RESET);
-                            }
-                        }while (checkHabitacion(nPlanta, nHabitacion, h));
-
-                        if(h.addPaciente(p, nPlanta, nHabitacion)){
-                            System.out.println(ANSI_BGREEN+"Paciente creado correctamente"+ANSI_RESET);
-                        }
-                        break;
+                p = new Paciente(dni, id, n, ap1, ap2, sexo, fNac);
+                if(addPatientTo(p)){
+                    System.out.println(ANSI_BGREEN+"Paciente creado correctamente"+ANSI_RESET);
                 }
-            }else if(tipo==2){
-                if(h.addMedico(false, h, dni)){ //A los médicos y admins les paso por aqui el dni introducido al principio
+
+            } else if (tipo == 2) {
+                m = new Medico(dni, id, n, ap1, ap2, sexo, fNac, especialidad);
+                if(addWorkerTo(m)){
                     System.out.println(ANSI_BGREEN+"Médico creado correctamente"+ANSI_RESET);
                 }
-            }else if(tipo==3){
-                if(h.addAdmin(false, h, dni)){
+
+            } else if (tipo == 3) {
+                a = new Administrativo(dni, id, n, ap1, ap2, sexo, fNac, area);
+                if(addWorkerTo(a)){
                     System.out.println(ANSI_BGREEN+"Administrativo creado correctamente"+ANSI_RESET);
+                }
+            }
+        }
+        return null; //Me pide aqui que devuelva algun objeto, pero como solo necesito devolver los dos aleatorios, aqui devuelvo null
+    }
+
+
+    /**
+     * Lista los centros y con uno ya elegido lo añade.
+     * @param p - persona a añadir
+     * @return boolean - true si la función addMedico/Admin() del centro elegido devuelve verdadero, false si no.
+     * */
+    private static boolean addWorkerTo(Persona p){
+        //Se listan los centros y se elige uno
+        System.out.println(" ");
+        System.out.println(ANSI_BBLUE+"CENTROS"+ANSI_RESET);
+        mostrarCentros();
+        int idCentro=PeticionDatos.pedirEnteroPositivo(false, "> Elige un centro (ID): ");
+        Centro c=whichCenter(idCentro);
+        //Sobre el centro elegido se colocará el objeto persona
+
+        if(c instanceof Hospital) {
+            Hospital h=(Hospital) c;
+            if (p instanceof Medico) {
+                if(h.addMedico((Medico) p)) {
+                    return true;
+                }
+            } else {
+                if(h.addAdmin((Administrativo) p)) {
+                    return true;
                 }
             }
         }else{
-            Clinica cl=(Clinica) centroMedico;
-            if(tipo==1){
-                do{
-                    nConsulta=PeticionDatos.pedirEnteroPositivo(false, "> Número de consulta: ");
-                    System.out.println(" ");
-                    if(!checkConsulta(nConsulta, cl)){
-                        System.out.println(ANSI_YELLOW+"Aviso. La consulta introducida está ocupada."+ANSI_RESET);
-                    }
-                }while (!checkConsulta(nConsulta, cl));
-
-                if(cl.addPaciente(p, nConsulta)){ //Meto la llamada a la funcion en el if y asi aprovecho para informar del resultado
-                    System.out.println(ANSI_BGREEN+"Paciente creado correctamente"+ANSI_RESET);
+            Clinica cl=(Clinica) c;
+            if (p instanceof Medico) {
+                if(cl.addMedico((Medico) p)) {
+                    return true;
                 }
-            }else if(tipo==2){
-                if(cl.addMedico(false, cl, dni)){
-                    System.out.println(ANSI_BGREEN+"Médico creado correctamente"+ANSI_RESET);
-                }
-            }else if(tipo==3){
-                if(cl.addAdmin(false, cl, dni)){
-                    System.out.println(ANSI_BGREEN+"Administrativo creado correctamente"+ANSI_RESET);
+            } else {
+                if(cl.addAdmin((Administrativo) p)) {
+                    return true;
                 }
             }
         }
+        return false;
+    }
+
+
+    /**
+     * Lista los centros y con uno ya elegido pide los datos del paciente y lo añade a ese centro.
+     * @param p - persona a añadir
+     * @return boolean - true si la función addPaciente() del centro elegido devuelve verdadero, false si no.
+     * */
+    private static boolean addPatientTo(Persona p){
+        //Se listan los centros y se elige uno
+        System.out.println(" ");
+        System.out.println(ANSI_BBLUE+"CENTROS"+ANSI_RESET);
+        mostrarCentros();
+        int idCentro=PeticionDatos.pedirEnteroPositivo(false, "> Elige un centro (ID): ");
+        Centro c=whichCenter(idCentro);
+        //Sobre el centro elegido se colocará el objeto persona
+
+        int nConsulta, nPlanta, nHabitacion;
+
+        if(c instanceof Hospital) {
+            Hospital h=(Hospital) c;
+
+            if (p instanceof Paciente) {
+                System.out.println(" "); //Espacio en blanco
+                System.out.println("╔═ " + ANSI_BBLUE + ".../Asignar centro/" + h.getNombre() + "/Seleccionar Ubicación" + ANSI_RESET);
+                int opcion = PeticionDatos.pedirEnteroPositivo(true, """
+                            ║ 1-> Consulta
+                            ║ 2-> Planta
+                            ╚ > """);
+                System.out.println(" "); //Espacio en blanco
+
+                switch (opcion) {
+                    case 1:
+                        mostrarConsultas(h);
+                        if (h.addPaciente((Paciente) p, pedirConsulta(h))) { //Meto la llamada a la funcion en el if y asi aprovecho para informar del resultado
+                            System.out.println(ANSI_BGREEN + "Paciente creado correctamente" + ANSI_RESET);
+                        }
+                        break;
+                    case 2:
+                        do {
+                            nPlanta = PeticionDatos.pedirEnteroPositivo(false, "> Planta: ");
+                            nHabitacion = PeticionDatos.pedirEnteroPositivo(false, "> Habitación: ");
+                            if (checkHabitacion(nPlanta, nHabitacion, h)) {
+                                System.out.println(ANSI_YELLOW + "Aviso. La habitación introducida está ocupada." + ANSI_RESET);
+                            }
+                        } while (checkHabitacion(nPlanta, nHabitacion, h));
+
+                        if (h.addPaciente((Paciente) p, nPlanta, nHabitacion)) {
+                            System.out.println(ANSI_BGREEN + "Paciente creado correctamente" + ANSI_RESET);
+                        }
+                        break;
+                }
+            }
+        }else{
+            Clinica cl=(Clinica) c;
+
+            if (p instanceof Paciente) {
+                mostrarConsultas(cl);
+                if(cl.addPaciente((Paciente) p, pedirConsulta(cl))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
@@ -799,6 +1152,7 @@ public class GestionMedica {
         //Se pide el mes del que se quiere mostrar las stats mientras que no se introduzca un valor válido.
         int mes;
         do {
+            System.out.println(" ");
             System.out.println("╔═ " + ANSI_BBLUE + "Inicio/Mostrar estadísticas" + ANSI_RESET);
             mes = PeticionDatos.pedirEnteroPositivo(false, "║" + "\n" + "╚ > mes: ");
         }while (!Fecha.checkMonth(mes)); //Con la clase Fecha compruebo que el mes sea válido, 1-12
@@ -846,17 +1200,22 @@ public class GestionMedica {
                 opcion=tipoPersona();
                 switch (opcion) { //Llamo a tipo de persona que devuelve un entero para controlar este switch
                     case 1:
-                        mostrarPacientes(whichCenter(idCentro));
-                        int idPaciente=PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
-                        //TODO: esto tiene que llamar a alguna funcion, que no hace nada
+                        int idPaciente=0;
+                        //En caso de que no existan pacientes, como al inicio del programa, no se pedirá el ID ni se mostrará ninguna stat,
+                        //se informa al usuario y aparece de nuevo el menu anterior
+                        if(mostrarPacientes(whichCenter(idCentro))) {
+                            idPaciente = PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
+                            mostrarStatsPaciente(whichPerson(idPaciente), mes);
+                        }
+                        //Para el personal no controlo esto, no lo creo necesario porque siempre se crean personas de este tipo al arrancar
                         break;
                     case 2:
-                        //Paso por parámetro el objeto centro anterior a esta funcion, ya que lo necesita en su bucle.
-                        //TODO: arreglar esto con instaceofs y el whichPerson
-                        mostrarStatsPersonal(mostrarPersonal(true, false, idCentro), centroStats, mes);
+                        int idPersona=mostrarPersonal(2, whichCenter(idCentro));
+                        mostrarStatsPersonal(whichPerson(idPersona), mes);
                         break;
                     case 3:
-                        mostrarStatsPersonal(mostrarPersonal(false, true, idCentro), centroStats, mes);
+                        idPersona=mostrarPersonal(3, whichCenter(idCentro));
+                        mostrarStatsPersonal(whichPerson(idPersona), mes);
                         break;
                     case 4:
                         System.out.println(" ");
@@ -874,97 +1233,72 @@ public class GestionMedica {
 
     /**
      * Funcion que muestra un listado con el personal de un tipo que existe en un centro
-     * @param medicos - lista todos los medicos
-     * @param admins - lista todos los admins
+     * @param tipo de trabajador, 2(Médico) 3(Admin)
      * @return int - idPersona introducido por teclado
      * */
-    private static int mostrarPersonal(boolean medicos, boolean admins, int idCentro){
+    private static int mostrarPersonal(int tipo, Centro c) {
         int idPersona=0;
-        int notNull=0;
         System.out.println(" ");//linea
-        for(Centro c: centrosMedicos){
-            if(c!=null && c.getID()==idCentro){
-                for(Persona p: c.trabajadores){
-                    if(medicos && p!=null && p instanceof Medico) {
-                        notNull++;
-                        Medico m=(Medico) p;
-                        System.out.println(m.toString());
-                    }else if(admins && p!=null && p instanceof Administrativo) {
-                        notNull++;
-                        Administrativo a=(Administrativo) p;
-                        System.out.println(a.toString());
-                    }else if(notNull==0){ //Si no existe ninguna posicion no nula, o sea esta vacio el array muestra un mensaje de aviso
-                        System.out.println(ANSI_YELLOW+"Aviso. No existe ninguna persona en este centro."+ANSI_RESET);
-                        menuInicio(); //vuelve al menu
-                        //Esta condición se me ha ocurrido de casualidad porque no se me han creado las personas por un error,
-                        // normalmente no debería saltar porque desde el inicio hay personas, pero ya la dejo ahi por si acaso.
-                    }
-                }
-                idPersona=PeticionDatos.pedirEnteroPositivo(false, ANSI_YELLOW+"> ID: "+ANSI_RESET);
+
+        for(Persona p: c.trabajadores){
+            if(p!=null && tipo==2 && p instanceof Medico) {
+                Medico m=(Medico) p;
+                System.out.println(m.toString());
+            }else if(p!=null && tipo==3 && p instanceof Administrativo) {
+                Administrativo a=(Administrativo) p;
+                System.out.println(a.toString());
             }
         }
+        idPersona=PeticionDatos.pedirEnteroPositivo(false, ANSI_YELLOW+"> ID: "+ANSI_RESET);
+
         return idPersona;
     }
 
 
     /**
      * Funcion que muestra las stats del personal
-     * @param id - identificador de la persona
-     * @param c - objeto centro al que pertenece esa persona
+     * @param worker - objeto persona, en concreto medico/admin
      * @param mes - mes del que se quieren extraer las stats
      * */
-    private static void mostrarStatsPersonal(int id, Centro c, int mes){
+    private static void mostrarStatsPersonal(Persona worker, int mes){
         System.out.println(" ");
-        System.out.println(ANSI_BBLUE+"Inicio/Estadísticas del mes "+mes+ANSI_RESET);
+        System.out.println(ANSI_BBLUE+".../"+worker.getClass().getSimpleName()+"/Estadísticas del mes "+mes+ANSI_RESET);
 
-        for(Persona i: c.trabajadores) {
-            if (i != null && i.getID() == id) {
-                i.mostrarEstado();
-                System.out.println("Ha trabajado un total de " + i.diasPorMes(mes) + " días.");
-            }
-        }
+        worker.mostrarEstado();
+        System.out.println("Ha trabajado un total de " + worker.diasPorMes(mes) + " días.");
+
     }
 
 
     /**
      * Funcion que muestra las stats del personal
-     * @param id - identificador de la persona
-     * @param c - objeto centro al que pertenece esa persona
+     * @param paciente - identificador de la persona
      * @param mes - mes del que se quieren extraer las stats
      * */
-    private static void mostrarStatsPacientes(int id, Centro c, int mes){
+    private static void mostrarStatsPaciente(Persona paciente, int mes){
         System.out.println(" ");
-        System.out.println(ANSI_BBLUE+"Inicio/Estadísticas del mes "+mes+ANSI_RESET);
+        System.out.println(ANSI_BBLUE+".../"+paciente.getClass().getSimpleName()+"/Estadísticas del mes "+mes+ANSI_RESET);
 
-        for(Persona i: c.consultas) {
-            if (i != null && i.getID() == id) {
-                i.mostrarEstado();
-                System.out.println("Ha realizado " + i.diasPorMes(mes) + " visitas.");
-            }
-        }
-        if(c instanceof Hospital){
-            Hospital h=(Hospital) c;
-            for (int i=0;i<h.habitaciones.length;i++) {
-                for(int x=0;x<h.habitaciones[i].length;x++) {
-                    if (h.habitaciones[i][x] != null && h.habitaciones[i][x].getID()==id) {
-                        h.habitaciones[i][x].mostrarEstado();
-                        System.out.println("Ha realizado " + h.habitaciones[i][x].diasPorMes(mes) + " visitas.");
-                    }
-                }
-            }
-        }
+        paciente.mostrarEstado();
+        System.out.println("Ha realizado " + paciente.diasPorMes(mes) + " visitas.");
+
     }
 
 
     /**
      * Muestra los pacientes que tiene un centro medico, tanto en consultas como en habitaciones si es un Hospital
      * @param c - centro del que se quieren mostrar los pacientes
+     * @return boolean - true si existe al menos un paciente, false si no hay nada
      * */
-    private static void mostrarPacientes(Centro c){
+    private static boolean mostrarPacientes(Centro c){
+        String mensaje="";
         System.out.println(" ");//linea
         for(Paciente p: c.consultas){
             if(p!=null) {
                 System.out.println(p.getID() + ", " + p.getNombre() + " " + p.getApellido1() + " " + p.getApellido2());
+                return true;
+            }else {
+                mensaje=ANSI_YELLOW+"Aún no hay pacientes registrados."+ANSI_RESET;
             }
         }
         if(c instanceof Hospital){
@@ -974,10 +1308,97 @@ public class GestionMedica {
                     if (h.habitaciones[x][z] != null) {
                         System.out.println(h.habitaciones[x][z].getID()+", "+h.habitaciones[x][z].getNombre()+" "+h.habitaciones[x][z].getApellido1()+" "+
                                            h.habitaciones[x][z].getApellido2());
+                        return true;
+                    }else {
+                        mensaje=ANSI_YELLOW+"Aún no hay pacientes registrados."+ANSI_RESET;
                     }
                 }
             }
         }
+        System.out.println(mensaje);
+        return false;
+    }
+
+
+    /**
+     * Muestra todas las personas registradas.
+//     * @return boolean - true si existe al menos un paciente, false si no hay nada
+     * */
+    private static void mostrarPersonas(int tipo){
+        String mensaje="";
+        System.out.println(" ");//linea
+        for(Centro c: centrosMedicos){
+            if(c!=null) {
+                if(c instanceof Hospital){
+                    Hospital h=(Hospital) c;
+                    //Se muestra un listado según el tipo de persona que hay en todos los centros
+                    if(tipo==2 || tipo==3) {
+                        ordenarPorIDpersona(h.trabajadores);
+                        for (Persona worker : h.trabajadores) {
+                            if (worker != null) {
+                                System.out.println(worker.toString());
+//                                return true;
+                            }
+//                            else {
+//                                mensaje = ANSI_YELLOW + "Aún no hay trabajadores registrados." + ANSI_RESET;
+//                            }
+                        }
+                    }else {
+                        ordenarPorIDpersona(h.consultas);
+                        for (Paciente paciente : h.consultas) {
+                            if (paciente != null) {
+                                System.out.println(paciente.toString());
+//                                return true;
+                            } else {
+                                mensaje = ANSI_YELLOW + "Aún no hay pacientes registrados." + ANSI_RESET;
+                            }
+                        }
+
+                        for (int x = 0; x < h.habitaciones.length; x++) {
+                            for (int z = 0; z < h.habitaciones[x].length; z++) {
+                                if (h.habitaciones[x][z] != null) {
+                                    System.out.println(h.habitaciones[x][z].toString());
+//                                    return true;
+                                } else {
+                                    mensaje = ANSI_YELLOW + "Aún no hay pacientes registrados." + ANSI_RESET;
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    Clinica cl=(Clinica) c;
+                    if(tipo==2 || tipo==3) {
+                        ordenarPorIDpersona(cl.trabajadores);
+                        for (Persona worker : cl.trabajadores) {
+                            if (worker != null) {
+                                System.out.println(worker.toString());
+//                                return true;
+                            }
+//                            else {
+//                                mensaje = ANSI_YELLOW + "Aún no hay trabajadores registrados." + ANSI_RESET;
+//                            }
+                        }
+                    }else {
+                        ordenarPorIDpersona(cl.consultas);
+                        for (Paciente paciente : cl.consultas) {
+                            if (paciente != null) {
+                                System.out.println(paciente.toString());
+//                                return true;
+                            } else {
+                                mensaje = ANSI_YELLOW + "Aún no hay pacientes registrados." + ANSI_RESET;
+                            }
+                        }
+                    }
+                }
+//                return true;
+            }
+//            else {
+//                mensaje=ANSI_YELLOW+"Aún no hay pacientes registrados."+ANSI_RESET;
+//            }
+        }
+
+        System.out.println(mensaje);
+//        return false;
     }
 
 
@@ -1109,7 +1530,8 @@ public class GestionMedica {
 
         if(hospital){
             //Si el programa inicia por primera vez se crean 2 Hospitales con 2 Medicos y 2 Admins
-            if(init){ Hospital h=null; //TODO
+            if(init){
+                Hospital h;
                 for(int i=0;i<2;i++) {
                     int id;
                     String n=Faker.devolverHospitales();
@@ -1117,25 +1539,19 @@ public class GestionMedica {
                     do {
                         id = Faker.devolverEnteros(false, centrosMedicos.length);
                     }while(checkCenterID(id));
+                    int consultas=Faker.devolverEnteros(false,15);
                     int plantas=Faker.devolverEnteros(false,10);
                     int hab=Faker.devolverEnteros(false,20);
 
-                     h = new Hospital(n, dir, id, plantas, hab); // 1 hospital por vuelta
+                     h = new Hospital(n, dir, id, plantas, hab, consultas); // 1 hospital por vuelta
                     //Una vez creado el objeto se guarda en una posicion vacía del array centrosMedicos[]
                     centrosMedicos[Centro.contCentros-1]=h;
 
-                    String dniA;
                     for(int x=0;x<2;x++) { // 2 médicos por vuelta
-                        do {
-                            dniA = Faker.generarNIF_NIE();
-                        }while (checkDNI(dniA));
-                        h.addMedico(true, h, dniA);
+                        h.addMedico((Medico) nuevaPersona(true, 2));
                     }
                     for(int y=0;y<2;y++) { // 2 Admins por vuelta
-                        do {
-                            dniA = Faker.generarNIF_NIE();
-                        }while (checkDNI(dniA));
-                        h.addAdmin(true, h, dniA);
+                        h.addAdmin((Administrativo) nuevaPersona(true, 3));
                     }
                 }
 
@@ -1149,10 +1565,11 @@ public class GestionMedica {
                 }while(checkCenterID(id));
                 String n=PeticionDatos.pedirCadena("> nombre: ");
                 String dir=PeticionDatos.pedirCadena("> dirección: ");
+                int consultas=PeticionDatos.pedirEnteroPositivo(false, "> consultas: ");
                 int plantas=PeticionDatos.pedirEnteroPositivo(false, "> plantas: ");
                 int hab=PeticionDatos.pedirEnteroPositivo(false, "> habitaciones: ");
-                Hospital h=new Hospital(n,dir,id,plantas,hab);
 
+                Hospital h=new Hospital(n,dir,id,plantas,hab,consultas);
                 centrosMedicos[Centro.contCentros-1]=h;
             }
 
@@ -1166,22 +1583,16 @@ public class GestionMedica {
                     do{
                         id=Faker.devolverEnteros(false,centrosMedicos.length);
                     }while(checkCenterID(id));
+                    int consultas=Faker.devolverEnteros(false,15);
 
-                    cl=new Clinica(n,dir,id);
+                    cl=new Clinica(n,dir,id,consultas);
                     centrosMedicos[Centro.contCentros-1]=cl;
 
-                    String dniA;
                     for(int x=0;x<2;x++) { // 2 médicos por vuelta
-                        do {
-                            dniA = Faker.generarNIF_NIE();
-                        }while (checkDNI(dniA));
-                        cl.addMedico(true, cl, dniA);
+                        nuevaPersona(true, 2);
                     }
                     for(int y=0;y<2;y++) { // 2 Admins por vuelta
-                        do {
-                            dniA = Faker.generarNIF_NIE();
-                        }while (checkDNI(dniA));
-                        cl.addAdmin(true, cl, dniA);
+                        nuevaPersona(true, 3);
                     }
                 }
             }else{
@@ -1194,8 +1605,9 @@ public class GestionMedica {
                 }while(checkCenterID(id));
                 String n=PeticionDatos.pedirCadena("> nombre: ");
                 String dir=PeticionDatos.pedirCadena("> dirección: ");
+                int consultas=PeticionDatos.pedirEnteroPositivo(false, "> consultas: ");
 
-                Clinica c=new Clinica(n,dir,id);
+                Clinica c=new Clinica(n,dir,id,consultas);
                 centrosMedicos[Centro.contCentros-1]=c;
             }
         }
@@ -1284,6 +1696,88 @@ public class GestionMedica {
         }
         //Po último apuntamos el antiguo array al nuevo espacio en memoria.
         centrosMedicos=centrosMedicosCopia;
+    }
+
+
+    /**
+     * Función de ordenación de centros por su ID. SHELL
+     *
+     * @param v vector de objetos
+     * @return ordena ascendentemente el vector según su id.
+     */
+    public static void ordenarPorIDcentro(Centro v[]) { //esta función ordenará por el dorsal
+        try{
+            int d, i, cont = 0; //inicializo mi variable contador a 0
+            Centro ele;
+            boolean ordenado;
+            while (v[cont] != null) {
+                cont++;
+            }
+            int num_ele = cont; // solo llegará hasta la posición que tenga inicializada sin llegar a los nulos (ya que no los puede ordenar)
+            d = num_ele / 2; // distancia de comparación
+                /* La ordenación se realiza mientras la distancia de comparación d
+                sea menor igual que 1 */
+            while (d >= 1) {
+                ordenado = false;
+                /* ordena el vector para la distancia d */
+                while (!ordenado) { // !ordenado es como poner ordenado == false
+                    ordenado = true;
+                    for (i = 0; i < num_ele - d; i++)
+                        // si el elemento i es mayor que i+d los intercambia
+                        if (v[i].getID() > (v[i + d].getID())) {
+                            ele = v[i];
+                            v[i] = v[i + d];
+                            v[i + d] = ele;
+                            ordenado = false; // el vector no estaba ordenado
+                        } /* fin if */
+                } /* fin while !ordenado */
+                /* calcula la nueva distancia de comparación d */
+                d = d / 2;
+            }
+        }catch (ArrayIndexOutOfBoundsException e){
+            System.out.println(ANSI_RED+"Error al intentar ordenar los centros."+ANSI_RESET);
+        }
+    }
+
+
+    /**
+     * Función de ordenación de personas por su ID. SHELL
+     *
+     * @param v vector de objetos
+     * @return ordena ascendentemente el vector según su id.
+     */
+    public static void ordenarPorIDpersona(Persona v[]) { //esta función ordenará por el dorsal
+        try {
+            int d, i, cont = 0; //inicializo mi variable contador a 0
+            Persona ele;
+            boolean ordenado;
+            while (v[cont] != null) {
+                cont++;
+            }
+            int num_ele = cont; // solo llegará hasta la posición que tenga inicializada sin llegar a los nulos (ya que no los puede ordenar)
+            d = num_ele / 2; // distancia de comparación
+            /* La ordenación se realiza mientras la distancia de comparación d
+            sea menor igual que 1 */
+            while (d >= 1) {
+                ordenado = false;
+                /* ordena el vector para la distancia d */
+                while (!ordenado) { // !ordenado es como poner ordenado == false
+                    ordenado = true;
+                    for (i = 0; i < num_ele - d; i++)
+                        // si el elemento i es mayor que i+d los intercambia
+                        if (v[i].getID() > (v[i + d].getID())) {
+                            ele = v[i];
+                            v[i] = v[i + d];
+                            v[i + d] = ele;
+                            ordenado = false; // el vector no estaba ordenado
+                        } /* fin if */
+                } /* fin while !ordenado */
+                /* calcula la nueva distancia de comparación d */
+                d = d / 2;
+            }
+        }catch (ArrayIndexOutOfBoundsException e){
+            System.out.println(ANSI_RED+"Error al intentar ordenar las personas."+ANSI_RESET);
+        }
     }
 
 

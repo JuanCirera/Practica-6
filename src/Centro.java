@@ -21,15 +21,18 @@ public class Centro implements Estadistica{
     protected Paciente consultas[];
     protected Persona trabajadores[];
     protected int limiteConsultas;
-    protected int contMedicos=0;
-    protected int contAdministrativos=0;
+    protected static int contMedicos=0;
+    protected static int contAdministrativos=0;
+    protected static int totalTrabajadores=contMedicos+contAdministrativos;
     protected static int contCentros=0;
 
+
     //CONSTRUCTOR
-    public Centro(String nombreCentro, String direccionCentro, int identificador){
+    public Centro(String nombreCentro, String direccionCentro, int identificador, int consultas){
         this.nombreCentro=nombreCentro;
         this.direccionCentro=direccionCentro;
         this.identificador=identificador;
+        this.limiteConsultas=consultas;
         contCentros++;
     }
 
@@ -76,11 +79,9 @@ public class Centro implements Estadistica{
 
     @Override
     public String toString() {
-        int trabajadores=contMedicos+contAdministrativos;
         return  ANSI_BGREEN+"ID " + identificador +ANSI_RESET+ '\n' +
                 nombreCentro + '\n' +
-                direccionCentro + '\n' +
-                limiteConsultas + " consultas" + '\n' +
-                trabajadores + " trabajadores";
+                direccionCentro+"\n"+
+                limiteConsultas+" consultas";
     }
 }
