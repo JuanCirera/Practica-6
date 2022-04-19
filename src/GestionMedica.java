@@ -105,35 +105,36 @@ public class GestionMedica {
     }
 
 
-    /**
-     * Muestra las consultas de un centro, si estan vacías como si hay alguien dentro, mostrando sus datos
-     * @param c - objeto centro del que sacar las consultas
-     * */
-    private static void mostrarConsultas(Centro c) {
-        int cont=0;
-
-        if(c instanceof Hospital) {
-            Hospital h=(Hospital) c;
-            for (Paciente p : h.consultas) {
-                cont++;
-                if (p != null) {
-                    System.out.println("Consulta " + cont + ": " + p.toString());
-                } else {
-                    System.out.println("Consulta " + cont + " - " + ANSI_BGREEN + "Libre" + ANSI_RESET);
-                }
-            }
-        }else{
-            Clinica cl=(Clinica) c;
-            for (Paciente p : cl.consultas) {
-                cont++;
-                if (p != null) {
-                    System.out.println("Consulta " + cont + ": " + p.toString());
-                } else {
-                    System.out.println("Consulta " + cont + " - " + ANSI_BGREEN + "Libre" + ANSI_RESET);
-                }
-            }
-        }
-    }
+    //Estaba ya hecho esto -_-
+//    /**
+//     * Muestra las consultas de un centro, si estan vacías como si hay alguien dentro, mostrando sus datos
+//     * @param c - objeto centro del que sacar las consultas
+//     * */
+//    private static void mostrarConsultas(Centro c) {
+//        int cont=0;
+//
+//        if(c instanceof Hospital) {
+//            Hospital h=(Hospital) c;
+//            for (Paciente p : h.consultas) {
+//                cont++;
+//                if (p != null) {
+//                    System.out.println("Consulta " + cont + ": " + p.toString());
+//                } else {
+//                    System.out.println("Consulta " + cont + " - " + ANSI_BGREEN + "Libre" + ANSI_RESET);
+//                }
+//            }
+//        }else{
+//            Clinica cl=(Clinica) c;
+//            for (Paciente p : cl.consultas) {
+//                cont++;
+//                if (p != null) {
+//                    System.out.println("Consulta " + cont + ": " + p.toString());
+//                } else {
+//                    System.out.println("Consulta " + cont + " - " + ANSI_BGREEN + "Libre" + ANSI_RESET);
+//                }
+//            }
+//        }
+//    }
 
 
     //De momento lo dejo asi, ya por lo menos no me desquicio al ver lo de arriba
@@ -238,7 +239,7 @@ public class GestionMedica {
      * Esta funcion obtiene mediante un dni el numero de consulta y lo devuelve si coincide con éste.
      * @param dni del objeto paciente.
      * @param c - centro medico donde esta el paciente.
-     * @return int - numero de consulta donde está el paciente.
+     * @return int - numero de consulta donde está el paciente, 0 si no lo encuentra en niguna consulta.
      * */
     private static int whichConsulta(String dni, Centro c){
         int thisConsulta=0, cont=0; //Declaro aqui el objeto a null porque la función se empeña en devolverlo fuera del for...
@@ -251,6 +252,45 @@ public class GestionMedica {
             }
         }
         return thisConsulta;
+    }
+
+
+    //Como las funciones no pueden devolver más de un valor pues para saber en qué planta y habitacion está el paciente tengo que usar dos funciones identicas.
+    /**
+     * Esta funcion obtiene mediante un dni el numero de planta y lo devuelve.
+     * @param dni del objeto paciente.
+     * @param h - hospital donde esta el paciente.
+     * @return int - numero de planta.
+     * */
+    private static int whichFloor(String dni, Hospital h){
+        int thisFloor=0; //Declaro aqui el objeto a null porque la función se empeña en devolverlo fuera del for...
+        for (int i=0;i<h.habitaciones.length;i++) {
+            for(int x=0;x<h.habitaciones[i].length;x++) {
+                if (h.habitaciones[i][x] != null && h.habitaciones[i][x].getDni().equals(dni)) {
+                    thisFloor = i; //Devuelve la planta y la habitacion donde esta el paciente
+                }
+            }
+        }
+        return thisFloor;
+    }
+
+
+    /**
+     * Esta funcion obtiene mediante un dni el numero de habitacion y lo devuelve.
+     * @param dni del objeto paciente.
+     * @param h - hospital donde esta el paciente.
+     * @return int - numero de habitación.
+     * */
+    private static int whichRoom(String dni, Hospital h){
+        int thisRoom=0; //Declaro aqui el objeto a null porque la función se empeña en devolverlo fuera del for...
+        for (int i=0;i<h.habitaciones.length;i++) {
+            for(int x=0;x<h.habitaciones[i].length;x++) {
+                if (h.habitaciones[i][x] != null && h.habitaciones[i][x].getDni().equals(dni)) {
+                    thisRoom = x; //Devuelve la planta y la habitacion donde esta el paciente
+                }
+            }
+        }
+        return thisRoom;
     }
 
 
@@ -365,7 +405,12 @@ public class GestionMedica {
     }
 
 
-    //TODO: analizar si esta funcion se puede mejorar, tiene muchas cosas duplicadas
+    //Esta función es temporal no me ha dado tiempo de mejorarla
+    /**
+     * Funcion que gestiona un objeto centro segun si es hospital o clinica
+     * @param hospital - true si se quiere gestionar un hospital
+     * @param clinica - true si se quiere gestionar una clinica, false si no
+     * */
     private static void gestionarCentro(boolean hospital, boolean clinica){
         String hcs="",hc="";
         int opcion;
@@ -656,6 +701,7 @@ public class GestionMedica {
     private static int pedirConsulta(Centro c){
         int consulta;
         do {
+            System.out.println(" ");
             consulta = PeticionDatos.pedirEnteroPositivo(false, "> consulta: ");
             if(!checkConsulta(consulta, c)){
                 System.out.println(ANSI_YELLOW+"Aviso. La consulta está ocupada."+ANSI_RESET);
@@ -686,7 +732,6 @@ public class GestionMedica {
 //        System.out.println(" "); //Espacio en blanco
 //        switch (opcion){
 //            case 1:
-//                //TODO: mostrar consultas para saber cual esta libre, buscar donde se pida una ocnsulta y sustiruir por la funcion
 //                for(int y=0;y<h.consultas.length;y++){
 ////            cont++;
 //                    if(h.consultas[y]!=null){
@@ -732,9 +777,10 @@ public class GestionMedica {
                     ╚ > """);
             System.out.println(" "); //Espacio en blanco
 
+            Persona p = whichPerson(dni);
+
             switch (opcion) {
                 case 1:
-                    Persona p = whichPerson(dni);
                     Paciente paciente=null, nuevoPaciente=null;
                     Centro c=null;
                     if(p instanceof Paciente) {
@@ -757,17 +803,58 @@ public class GestionMedica {
                         c.consultas[nuevaConsulta-1] = nuevoPaciente;
                     }
                     c.consultas[antiguaConsulta] = null;
-                    //TODO: No se mueve de posicion el maldito objeto, le ha gustado la 2
                     break;
                 case 2:
-                    System.out.println("Actualmente en " + whereAdmitted(dni));
-                    mostrarCentros();
-                    int nuevoCentro = PeticionDatos.pedirEnteroPositivo(false, "> nuevo centro(ID): ");
+                    Centro thisCenter=whereAdmitted(dni);
+                    //Si el centro donde está ingresada la persona es un hospital se puede mover de habitacion
+                    try {
+                        if (thisCenter instanceof Hospital) {
+                            Hospital h = (Hospital) thisCenter;
+                            int planta = whichFloor(dni, h);
+                            int hab = whichRoom(dni, h);
+                            System.out.println("Actualmente en la planta " + planta + ", habitación " + hab);
+                            int nuevaPlanta = PeticionDatos.pedirEnteroPositivo(false, "> nueva planta: ");
+                            int nuevaHab = PeticionDatos.pedirEnteroPositivo(false, "> nueva habitación: ");
+                            //Se guarda el paciente en la nueva posicion introducida por teclado.
+                            h.habitaciones[nuevaPlanta][nuevaHab] = (Paciente) p; //Se hace un downcast para meterlo en habitaciones
+                            //Se vacía su antigua posición en el array.
+                            h.habitaciones[planta][hab] = null;
+                            System.out.println(ANSI_BGREEN + "Paciente reubicado correctamente." + ANSI_RESET);
 
-                    //TODO: mover del array del hospital en el que este al array del nuevo hospital
+                        } else {
+                            System.out.println(ANSI_YELLOW + p.getNombre() + " no está ingresado/a en ningún hospital." + ANSI_RESET);
+                        }
+                    }catch (ArrayIndexOutOfBoundsException e){
+                        System.out.println(ANSI_RED+"Error. La habitación introducida no existe"+ANSI_RESET);
+                    }
+
                     break;
                 case 3:
-                    //TODO: mover de habitacion
+                    Centro actual=whereAdmitted(dni);
+                    System.out.println("Actualmente en " + actual.getNombre()+", ID "+actual.getID());
+                    System.out.println(" ");
+                    System.out.println(ANSI_BBLUE+"CENTROS"+ANSI_RESET);
+                    mostrarCentros();
+                    int nuevoCentro = PeticionDatos.pedirEnteroPositivo(false, "> nuevo centro(ID): ");
+                    Centro nuevo=whichCenter(nuevoCentro);
+                    //Si el centro elegido es un hospital
+                    if(nuevo instanceof Hospital){
+                        Hospital h = (Hospital) nuevo;
+                        //Se comprueba que no este en consulta
+                        if(whichConsulta(dni,actual)==0) {
+                            int planta = whichFloor(dni, h);
+                            int hab = whichRoom(dni, h);
+                            //Se mete en la misma habitacion pero en el otro centro
+                            h.habitaciones[planta][hab]=(Paciente) p;
+                        //Y si está en una consulta en el viejo centro, se mueve al mismo número en el nuevo
+                        }else{
+                            h.consultas[whichConsulta(dni,actual)]=(Paciente) p;
+                        } //TODO: esto peta, hay que comprobar que en el centro de destino exista el mismo numero y que no este ocupado -_-
+                    }else{
+                        Clinica cl=(Clinica) nuevo;
+                        cl.consultas[whichConsulta(dni,actual)]=(Paciente) p;
+                    }
+
                     break;
                 case 4:
                     System.out.println(" ");
@@ -1106,7 +1193,8 @@ public class GestionMedica {
 
                 switch (opcion) {
                     case 1:
-                        mostrarConsultas(h);
+//                        mostrarConsultas(h);
+                        h.mostrarEstado();
                         if (h.addPaciente((Paciente) p, pedirConsulta(h))) { //Meto la llamada a la funcion en el if y asi aprovecho para informar del resultado
                             System.out.println(ANSI_BGREEN + "Paciente creado correctamente" + ANSI_RESET);
                         }
@@ -1115,10 +1203,10 @@ public class GestionMedica {
                         do {
                             nPlanta = PeticionDatos.pedirEnteroPositivo(false, "> Planta: ");
                             nHabitacion = PeticionDatos.pedirEnteroPositivo(false, "> Habitación: ");
-                            if (checkHabitacion(nPlanta, nHabitacion, h)) {
+                            if (!checkHabitacion(nPlanta, nHabitacion, h)) {
                                 System.out.println(ANSI_YELLOW + "Aviso. La habitación introducida está ocupada." + ANSI_RESET);
                             }
-                        } while (checkHabitacion(nPlanta, nHabitacion, h));
+                        } while (!checkHabitacion(nPlanta, nHabitacion, h));
 
                         if (h.addPaciente((Paciente) p, nPlanta, nHabitacion)) {
                             System.out.println(ANSI_BGREEN + "Paciente creado correctamente" + ANSI_RESET);
@@ -1130,7 +1218,8 @@ public class GestionMedica {
             Clinica cl=(Clinica) c;
 
             if (p instanceof Paciente) {
-                mostrarConsultas(cl);
+//                mostrarConsultas(cl);
+                cl.mostrarEstado();
                 if(cl.addPaciente((Paciente) p, pedirConsulta(cl))) {
                     return true;
                 }
@@ -1297,9 +1386,10 @@ public class GestionMedica {
             if(p!=null) {
                 System.out.println(p.getID() + ", " + p.getNombre() + " " + p.getApellido1() + " " + p.getApellido2());
                 return true;
-            }else {
-                mensaje=ANSI_YELLOW+"Aún no hay pacientes registrados."+ANSI_RESET;
             }
+//            else {
+//                mensaje=ANSI_YELLOW+"Aún no hay pacientes registrados."+ANSI_RESET;
+//            }
         }
         if(c instanceof Hospital){
             Hospital h=(Hospital) c;
@@ -1309,13 +1399,14 @@ public class GestionMedica {
                         System.out.println(h.habitaciones[x][z].getID()+", "+h.habitaciones[x][z].getNombre()+" "+h.habitaciones[x][z].getApellido1()+" "+
                                            h.habitaciones[x][z].getApellido2());
                         return true;
-                    }else {
-                        mensaje=ANSI_YELLOW+"Aún no hay pacientes registrados."+ANSI_RESET;
                     }
+//                    else {
+//                        mensaje=ANSI_YELLOW+"Aún no hay pacientes registrados."+ANSI_RESET;
+//                    }
                 }
             }
         }
-        System.out.println(mensaje);
+//        System.out.println(mensaje);
         return false;
     }
 
@@ -1475,12 +1566,10 @@ public class GestionMedica {
      * @param habitacion
      * @return boolean - true, si la habitacion esta vacía, false si está ocupada
      * */
-    private static boolean checkHabitacion(int planta, int habitacion, Centro c){
-        if(c instanceof Hospital){
-            Hospital h=(Hospital) c;
-            if(h.habitaciones[planta][habitacion]==null) {
-                return true;
-            }
+    private static boolean checkHabitacion(int planta, int habitacion, Hospital h){
+
+        if(h.habitaciones[planta][habitacion]==null) {
+            return true;
         }
         return false;
     }
@@ -1581,7 +1670,7 @@ public class GestionMedica {
                     String dir="C/Por defecto, 0";
                     int id;
                     do{
-                        id=Faker.devolverEnteros(false,centrosMedicos.length);
+                        id=Faker.devolverEnteros(false, centrosMedicos.length);
                     }while(checkCenterID(id));
                     int consultas=Faker.devolverEnteros(false,15);
 
@@ -1648,7 +1737,7 @@ public class GestionMedica {
     }
 
 
-    //TODO: Los trabajadores pueden tener el mismo dni que un paciente, pero entre trabajadores no se puede repetir
+    //Los trabajadores pueden tener el mismo dni que un paciente, pero entre trabajadores no se puede repetir.
 
 
     /**

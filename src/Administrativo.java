@@ -87,4 +87,10 @@ public class Administrativo extends Persona{
             return false;
         }
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + "\n" +
+                "área de '" + area;
+    }
 }

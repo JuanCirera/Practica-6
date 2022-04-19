@@ -60,21 +60,22 @@ public class Hospital extends Centro{
     public void mostrarEstado() {
         System.out.println(ANSI_BBLUE+"CONSULTAS"+ANSI_RESET);
         int cont=0;
-        for(int y=0;y<consultas.length;y++){
-//            cont++;
-            if(consultas[y]!=null){
-                System.out.println("Consulta "+y+": "+consultas[y].getDni()+", "+consultas[y].getNombre()+" "+
-                                    consultas[y].getApellido1()+" "+consultas[y].getApellido2());
+        for(Paciente p: consultas){
+            cont++;
+            if(p!=null){
+                System.out.println("Consulta "+cont+": "+p.getDni()+", "+p.getNombre()+" "+
+                                    p.getApellido1()+" "+p.getApellido2());
             }else{
-                System.out.println(ANSI_BGREEN+y+" Libre"+ANSI_RESET);
+                System.out.println(ANSI_BGREEN+cont+" Libre"+ANSI_RESET);
             }
         }
         System.out.println(" ");
         System.out.println(ANSI_BBLUE+"HABITACIONES"+ANSI_RESET);
         for(int i=0;i<habitaciones.length;i++){
             for(int x=0;x<habitaciones[i].length;x++){
+                //En este caso solo voy a mostrar las habitaciones que estén ocupadas para que no ocupe toda la pantalla
                 if(habitaciones[i][x]!=null){
-                    System.out.println("Planta "+i+", habitación "+x+": "+"hay uno metio");
+                    System.out.println("Planta "+i+", habitación "+x+": "+habitaciones[i][x].getNombre());
                 }
             }
         }
@@ -152,7 +153,7 @@ public class Hospital extends Centro{
                 return true;
             }
         }
-        //TODO: Pero y si la persona tamb es un paciente?
+        //Decido que si la persona también es un paciente puede estar despedido pero estar ingresado en el mismo hospital.
         return false;
     }
 

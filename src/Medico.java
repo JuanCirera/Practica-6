@@ -91,4 +91,9 @@ public class Medico extends Persona{
             return false;
         }
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + "especialidad en'" + especialidad;
+    }
 }

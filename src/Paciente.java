@@ -32,10 +32,52 @@ public class Paciente extends Persona{
         return cont;
     }
 
+
+    /**
+     * Función de ordenación de fechas por su año. SHELL
+     * @param v vector de objetos
+     * @return ordena descendentemente el vector según su año.
+     */
+    public static void orderByYear_desc(Fecha v[]) { //esta función ordenará por el dorsal
+        try{
+            int d, i, cont = 0; //inicializo mi variable contador a 0
+            Fecha ele;
+            boolean ordenado;
+            while (v[cont] != null) {
+                cont++;
+            }
+            int num_ele = cont; // solo llegará hasta la posición que tenga inicializada sin llegar a los nulos (ya que no los puede ordenar)
+            d = num_ele / 2; // distancia de comparación
+                /* La ordenación se realiza mientras la distancia de comparación d
+                sea menor igual que 1 */
+            while (d >= 1) {
+                ordenado = false;
+                /* ordena el vector para la distancia d */
+                while (!ordenado) { // !ordenado es como poner ordenado == false
+                    ordenado = true;
+                    for (i = 0; i < num_ele - d; i++)
+                        // si el elemento i es mayor que i+d los intercambia
+                        if (v[i].getYear() < (v[i + d].getYear())) {
+                            ele = v[i];
+                            v[i] = v[i + d];
+                            v[i + d] = ele;
+                            ordenado = false; // el vector no estaba ordenado
+                        } /* fin if */
+                } /* fin while !ordenado */
+                /* calcula la nueva distancia de comparación d */
+                d = d / 2;
+            }
+        }catch (ArrayIndexOutOfBoundsException e){
+            System.out.println(ANSI_RED+"Error al intentar ordenar los pacientes."+ANSI_RESET);
+        }
+    }
+
+
     @Override
     public void mostrarEstado() {
-        System.out.println(dni+", "+nombre+" "+apellido1+" "+apellido2);
-        //TODO:Copiar la funcion de ordenar objetos, solo para el año y el mes. Dia??
+        //Como no se especifica nada voy a ordenar solo el año, aparecerá primero el año más reciente
+        orderByYear_desc(visitasMedicas);
+        System.out.println(dni+", "+nombre+" "+apellido1+" "+apellido2+"\n"+"última visita: "+fechaNac.toString());
     }
 
 
