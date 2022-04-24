@@ -7,8 +7,9 @@ import java.util.Calendar;
  * */
 public class Medico extends Persona{
     //ATRIBUTOS
-    String especialidad;
-    Fecha  diasTrabajados[];
+    protected String especialidad;
+    protected Fecha  diasTrabajados[];
+    protected boolean ingresado;
 
     //CONSTRUCTOR
     //Inicializa el array con 5 posiciones
@@ -17,6 +18,14 @@ public class Medico extends Persona{
         this.especialidad=especialidad;
         diasTrabajados=new Fecha[5];
     }
+
+
+    //SETTERS-GETTERS
+
+    public void setIngresado(boolean ingresado) {
+        this.ingresado = ingresado;
+    }
+
 
     //FUNCIONES-METODOS
 
@@ -94,6 +103,6 @@ public class Medico extends Persona{
 
     @Override
     public String toString() {
-        return super.toString() + "especialidad en'" + especialidad;
+        return super.toString() +"\n"+"especialidad en " + especialidad;
     }
 }

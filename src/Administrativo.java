@@ -7,8 +7,9 @@ import java.util.Calendar;
  * */
 public class Administrativo extends Persona{
     //ATRIBUTOS
-    String area;
-    Fecha diasTrabajados[];
+    protected String area;
+    protected Fecha diasTrabajados[];
+    protected boolean ingresado;
 
     //CONSTRUCTOR
     //Inicializa el array con 5 posiciones
@@ -16,6 +17,12 @@ public class Administrativo extends Persona{
         super(dni, identificador, nombre, apellido1, apellido2, sexo, fechaNac);
         this.area=area;
         diasTrabajados=new Fecha[5];
+    }
+
+    //SETTERS-GETTERS
+
+    public void setIngresado(boolean ingresado) {
+        this.ingresado = ingresado;
     }
 
     //FUNCIONES-METODOS
@@ -91,6 +98,6 @@ public class Administrativo extends Persona{
     @Override
     public String toString() {
         return super.toString() + "\n" +
-                "área de '" + area;
+                "área de " + area;
     }
 }

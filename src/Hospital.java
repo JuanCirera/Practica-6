@@ -2,6 +2,9 @@ import utilidades.Faker;
 import utilidades.Fecha;
 import utilidades.PeticionDatos;
 
+/**
+ * Clase que crea objetos Hospital y se encarga de añadirlos a los arrays correspondientes
+ * */
 public class Hospital extends Centro{
     //ATRIBUTOS
     private int plantas;
@@ -143,7 +146,7 @@ public class Hospital extends Centro{
 
     /**
      * Funcion para eliminar un trabajador, no importa si es medico o admin.
-     * @param worker - objeto persona a eliminar.
+     * @param worker objeto persona a eliminar.
      * @return boolean - true si la posicion se ha podido "vaciar", false si no.
      * */
     protected boolean removePersonal(Persona worker){
@@ -220,7 +223,7 @@ public class Hospital extends Centro{
 
     /**
      * Funcion que comprueba si el id de un trabajador existe ya
-     * @param id - identificador del objeto Persona, medico o admin
+     * @param id identificador del objeto Persona, medico o admin
      * @return boolean - true si lo encuentra, false si no coincide con ninguno
      * */
     private boolean checkWorkerID(int id){

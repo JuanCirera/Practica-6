@@ -20,7 +20,7 @@ public class Paciente extends Persona{
     /**
      * Devuelve el numero de visitas en un mes introducido
      * @param mes del que sacar el número de visitas
-     * @reurn cont - total de visitas
+     * @return cont - total de visitas
      * */
     public int diasPorMes(int mes) {
         int cont=0;
@@ -36,7 +36,6 @@ public class Paciente extends Persona{
     /**
      * Función de ordenación de fechas por su año. SHELL
      * @param v vector de objetos
-     * @return ordena descendentemente el vector según su año.
      */
     public static void orderByYear_desc(Fecha v[]) { //esta función ordenará por el dorsal
         try{

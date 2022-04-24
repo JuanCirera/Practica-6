@@ -2,6 +2,9 @@ import utilidades.Faker;
 import utilidades.Fecha;
 import utilidades.PeticionDatos;
 
+/**
+ * Clase que crea objetos Clinica y se encarga de añadirlos a los arrays correspondientes
+ * */
 public class Clinica extends Centro{
     //ATRIBUTOS
     private int contConsultas=0;
