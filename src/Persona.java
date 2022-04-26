@@ -1,11 +1,12 @@
 import utilidades.Fecha;
 
+import java.io.Serializable;
 import java.util.Calendar;
 
 /**
  * Clase con la información común que define a una persona
  * */
-public class Persona implements Estadistica{
+public class Persona implements Estadistica, Serializable {
     //ATRIBUTOS CONSTANTES
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_GREEN = "\u001B[32m";

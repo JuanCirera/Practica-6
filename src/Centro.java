@@ -1,9 +1,10 @@
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * Clase para definir la información genérica de un centro médico
  * */
-public class Centro implements Estadistica{
+public class Centro implements Estadistica, Serializable {
     //CONSTANTES
     protected static final String ANSI_RESET = "\u001B[0m";
     protected static final String ANSI_GREEN = "\u001B[32m";

@@ -2,13 +2,14 @@ import utilidades.Faker;
 import utilidades.Fecha;
 import utilidades.PeticionDatos;
 
-import java.io.File;
+import java.io.*;
+import java.util.Scanner;
 
 /**
  * Clase que se encarga de gestionar centros, personas, hacer comprobaciones, etc.
  * @author Juan Fco Cirera
  * */
-public class GestionMedica {
+public class GestionMedica implements Serializable {
 
     //ATRIBUTOS CONSTANTES
     public static final String ANSI_RESET = "\u001B[0m";
@@ -21,13 +22,12 @@ public class GestionMedica {
     public static final String ANSI_CYAN = "\u001B[36m";
 
     //ATRIBUTOS
-//    private static int opcionMenu, idCentro, idPersona; //Estos dos atributos son para controlar opciones del menu principal y submenus.
-    //Fallo mio gordo al usar atributos de clase para las opciones del menu, esto lo escribi con el esquema del menu hecho pero no me he dado
-    //cuenta hasta que han fallado los menus... Lo dejo comentado para no volver a hacer lo mismo.
 
-    private static Centro centrosMedicos[]=new Centro[5];
+    private Centro centrosMedicos[]=new Centro[5];
     //Aqui se guarda la planta y hab introducidas por teclado, como no puedo devolverlos a la vez en una funcion, esto es lo que se me ha ocurrido.
     private static int planta=0, hab=0;
+    //La idea de usar este objeto no tiene sentido, he decidido serializar el array centrosMedicos. Más explicacion en recuperarEstado()
+    //    private static GestionMedica app;
 
 
     /**
@@ -42,7 +42,7 @@ public class GestionMedica {
     /**
      * Muestra el menu de inicio con las opciones del programa
      */
-    protected static void menuInicio() {
+    protected void menuInicio() {
         int opcionInicio;
         do {
             System.out.println(" "); //Espacio en blanco
@@ -81,8 +81,11 @@ public class GestionMedica {
                 case 0:
                     char guardar=Character.toUpperCase(PeticionDatos.pedirCaracter("¿Desea guardar el estado actual? S/N: "));
                     if(guardar=='S'){
-                        System.out.println(ANSI_YELLOW + "Guardando..."+ ANSI_RESET);
-                        guardarEstado();
+                        System.out.print(ANSI_YELLOW + "Guardando..."+ ANSI_RESET);
+                        if(guardarEstado("datos/app.ser", "datos/static.ser")){
+                            System.out.print(ANSI_GREEN + " OK"+ ANSI_RESET);
+                            System.exit(0);
+                        }
                     }else{
                         System.out.println(" ");
                         System.out.println(ANSI_YELLOW + "Saliendo..." + ANSI_RESET);
@@ -103,7 +106,7 @@ public class GestionMedica {
      * Muestra un listado de los centros segun el tipo
      * @param tipo 1-Hospital, 2-Clinica, 0-Ambos.
      * */
-    protected static void mostrarCentros(int tipo) {
+    protected void mostrarCentros(int tipo) {
         ordenarPorIDcentro(centrosMedicos);
         if(tipo==1) {
             for (Centro c : centrosMedicos) {
@@ -134,7 +137,7 @@ public class GestionMedica {
      * @param id del centro a borrar
      * @return boolean - true, si se ha borrado con éxito, false si encuentra mínimo una persona
      * */
-    protected static boolean removeCentro(int id){
+    protected boolean removeCentro(int id){
         //He probado a usar un for each pero solo se hace un set null al objeto en sí, la posicion del array se queda igual, es raro, por eso he usado un for normal.
         //No se trata de eliminar un objeto, sino de VACIAR la posición de un ARRAY.
 
@@ -191,7 +194,7 @@ public class GestionMedica {
      * @param id del objeto centro que se quiere obtener.
      * @return Centro - objeto centro que se necesita para realizar alguna operación con él.
      * */
-    protected static Centro whichCenter(int id){
+    protected Centro whichCenter(int id){
         Centro thisCenter=null; //Declaro aqui el objeto a null porque la función se empeña en devolverlo fuera del for...
         for(Centro c: centrosMedicos){
             if(c!=null && c.getID()==id){
@@ -266,7 +269,7 @@ public class GestionMedica {
      * @param dni del objeto centro que se quiere obtener.
      * @return Persona - objeto persona que se necesita para realizar alguna operación con él.
      * */
-    protected static Persona whichPerson(String dni){
+    protected Persona whichPerson(String dni){
         Persona thisPerson=null;
         for(Centro c: centrosMedicos){
             if (c != null) {
@@ -301,7 +304,7 @@ public class GestionMedica {
      * @param idPersona del objeto persona que se quiere obtener.
      * @return Persona - objeto persona que se necesita para realizar alguna operación con él.
      * */
-    protected static Persona whichPerson(int idPersona){
+    protected Persona whichPerson(int idPersona){
         Persona thisPerson=null;
         for(Centro c: centrosMedicos){
             if (c != null) {
@@ -377,7 +380,7 @@ public class GestionMedica {
      * Funcion que gestiona un objeto centro segun si es hospital o clinica
      * @param tipo 1-Hospital, 2-Clinica.
      * */
-    protected static void gestionarCentro(int tipo){
+    protected void gestionarCentro(int tipo){
         String hcs="",hc="";
         int opcion;
         //Si hospital/clinica es true todos los string donde aparezcan se cambian, ademas de la informacion que muestra. Chapuzilla temporal
@@ -501,7 +504,7 @@ public class GestionMedica {
      * Funcion que actualiza los datos de una persona en concreto usando su DNI
      * @param dniA de la persona que se quiere modificar.
      * */
-    protected static void modificarPersona(String dniA){
+    protected void modificarPersona(String dniA){
         Persona p=whichPerson(dniA); //Saco el objeto persona mediante su dni, asi puedo acceder a sus getters/setters
 
         String dni=PeticionDatos.pedirNIF_NIE("> DNI "+"("+p.getDni()+")"+": ");
@@ -550,7 +553,7 @@ public class GestionMedica {
      * @param p objeto persona a gestionar.
 //     * @return int - opcion elegida.
      * */
-    protected static void personaSubMenu2(Persona p){
+    protected void personaSubMenu2(Persona p){
         int opcion=0;
         Centro c;
         String dni=p.getDni();
@@ -614,18 +617,19 @@ public class GestionMedica {
                     }
                     break;
                 case 4:
-                    //TODO: guardar/serializar? el objeto antes de eliminarlo, en un archivo del que no se lea al iniciar
                     Persona person=whichPerson(dni);
+                    //Antes de vaciar su posicion en el array, se guarda(no se pa que) llamando a esta funcion.
+                    boolean saved=saveFired(person);
                     //PERSONAL
                     c=whereWorking(dni);
                     if(c instanceof Hospital && person instanceof Medico || person instanceof Administrativo){
                         Hospital h=(Hospital) c;
-                        if(h.removePersonal(person)){
+                        if(h.removePersonal(person) && saved){
                             System.out.println(ANSI_BGREEN+"Trabajador eliminado con éxito."+ANSI_RESET);
                         }
                     }else if(c instanceof Clinica && person instanceof Medico || person instanceof Administrativo){
                         Clinica cl=(Clinica) c;
-                        if(cl.removePersonal(person)){
+                        if(cl.removePersonal(person) && saved){
                             System.out.println(ANSI_BGREEN+"Trabajador eliminado con éxito."+ANSI_RESET);
                         }
                     }
@@ -716,7 +720,7 @@ public class GestionMedica {
      * @param nuevaPersona true si se está creando una nueva persona, false si solo se necesita un id existente.
      * @return int - id introducido.
      * */
-    protected static int pedirIDpersona(boolean nuevaPersona){
+    protected int pedirIDpersona(boolean nuevaPersona){
         int idPersona=0;
         if(nuevaPersona) {
             do {
@@ -742,7 +746,7 @@ public class GestionMedica {
      * @param nuevaPersona true si se está creando una nueva persona, false si solo se necesita un id existente.
      * @return int - id introducido.
      * */
-    protected static String pedirDNI(boolean nuevaPersona){
+    protected String pedirDNI(boolean nuevaPersona){
         String dni="";
         if(nuevaPersona) {
             do {
@@ -771,7 +775,7 @@ public class GestionMedica {
      * @param tipo de centro a mostrar en caso de que !nuevoCentro. 1-H, 2-CL, O-defecto
      * @return int - id introducido.
      * */
-    protected static int pedirIDcentro(boolean nuevoCentro, int tipo){
+    protected int pedirIDcentro(boolean nuevoCentro, int tipo){
         int idCentro=0;
         String titulo="";
         if(nuevoCentro) {
@@ -824,7 +828,7 @@ public class GestionMedica {
     /**
      * Mueve a la persona de ubicación.
      * */
-    protected static void moverPersona(String dni){
+    protected void moverPersona(String dni){
         int opcion=0;
         do {
             System.out.println(" "); //Espacio en blanco
@@ -949,7 +953,7 @@ public class GestionMedica {
      * @param dni del objeto persona.
      * @return Centro - objeto centro donde trabaja esa persona.
      * */
-    protected static Centro whereWorking(String dni){
+    protected Centro whereWorking(String dni){
         Centro workingHere=null;
         for(Centro c:centrosMedicos){
             if(c!=null){
@@ -969,7 +973,7 @@ public class GestionMedica {
      * @param dni del objeto persona.
      * @return Centro - objeto centro donde esta ese paciente.
      * */
-    protected static Centro whereAdmitted(String dni){
+    protected Centro whereAdmitted(String dni){
         Centro admittedHere=null;
         for(Centro c:centrosMedicos){
             if(c!=null){
@@ -1000,7 +1004,7 @@ public class GestionMedica {
 //     * @param personal - si el objeto persona a gestionar es un medico/administrativo
 //     * @param paciente - si el objeto paciente es un paciente
      * */
-    protected static void gestionarPersona(int tipo){
+    protected void gestionarPersona(int tipo){
 
         int opcion=0;
         do {
@@ -1063,7 +1067,7 @@ public class GestionMedica {
      * Funcion que crea un nuevo objeto Persona y llamar a su funcion add correspondiente
      * @param tipo de objeto persona, 1(Paciente) 2(Médico) 3(Admin)
      * */
-    protected static Persona nuevaPersona(boolean aleatorio, int tipo) {
+    protected Persona nuevaPersona(boolean aleatorio, int tipo) {
         //** PETICIÓN DE DATOS **
         int id=0;
         String especialidad="", area="", dni="", n="", ap1="", ap2="", sexo="";
@@ -1207,7 +1211,7 @@ public class GestionMedica {
      * @param p - objeto persona a ingresar
      * @return boolean - true si se ha añadido con éxito al centro correspondiente, false si no.
      * */
-    protected static boolean ingresarPersona(Persona p){
+    protected boolean ingresarPersona(Persona p){
         Paciente trabIngresado=new Paciente(p.getDni(), p.getID(), p.getNombre(), p.getApellido1(), p.getApellido2(),
                 p.getSexo(), p.getFechaNac());
         mostrarCentros(0);
@@ -1223,7 +1227,7 @@ public class GestionMedica {
      * @param p - persona a añadir
      * @return boolean - true si la función addMedico/Admin() del centro elegido devuelve verdadero, false si no.
      * */
-    protected static boolean addWorkerTo(Persona p){
+    protected boolean addWorkerTo(Persona p){
         //Se listan los centros y se elige uno
         int idCentro=pedirIDcentro(false, 0);
         Centro c=whichCenter(idCentro);
@@ -1261,7 +1265,7 @@ public class GestionMedica {
      * @param p - persona a añadir
      * @return boolean - true si la función addPaciente() del centro elegido devuelve verdadero, false si no.
      * */
-    protected static boolean addPatientTo(Persona p){
+    protected boolean addPatientTo(Persona p){
         //Se listan los centros y se elige uno
         int idCentro=pedirIDcentro(false, 0);
         Centro c=whichCenter(idCentro);
@@ -1319,7 +1323,7 @@ public class GestionMedica {
      * @param centro Si se quieren las stats de un objeto Centro
      * @param personal Si se quieren las stats de un objeto Persona
      * */
-    protected static void estadisticas(boolean centro, boolean personal){
+    protected void estadisticas(boolean centro, boolean personal){
 
         //PEDIR MES
         int mes=pedirMes();
@@ -1380,7 +1384,7 @@ public class GestionMedica {
      * @param tipo de trabajador, 2(Médico) 3(Admin)
      * @return int - idPersona introducido por teclado
      * */
-    protected static int mostrarPersonal(int tipo, Centro c) {
+    protected int mostrarPersonal(int tipo, Centro c) {
         int idPersona=0;
         System.out.println(" ");//linea
 
@@ -1469,7 +1473,7 @@ public class GestionMedica {
     /**
      * Muestra todas las personas registradas.
      * */
-    protected static void mostrarPersonas(int tipo){
+    protected void mostrarPersonas(int tipo){
         String mensaje="";
         System.out.println(" ");//linea
         for(Centro c: centrosMedicos){
@@ -1553,22 +1557,28 @@ public class GestionMedica {
      * */
     protected static boolean checkConfig(){
         File dir=new File("datos");
-        File subDir1=new File("datos/centros");
+//        File subDir1=new File("datos/centros");
         File subDir2=new File("datos/personas");
 
-        if(dir.exists() && subDir1.exists() && subDir2.exists()){
-            File h=new File("datos/centros/hospitales.txt");
-            File c=new File("datos/centros/clinicas.txt");
-            File p=new File("datos/personas/pacientes.txt");
-            File m=new File("datos/personas/medicos.txt");
-            File a=new File("datos/personas/administrativos.txt");
+        if(dir.exists() && /*subDir1.exists() &&*/ subDir2.exists()){
+//            File h=new File("datos/centros/hospitales.txt");
+//            File c=new File("datos/centros/clinicas.txt");
+//            File p=new File("datos/personas/pacientes.txt");
+//            File m=new File("datos/personas/medicos.txt");
+//            File a=new File("datos/personas/administrativos.txt");
+            File app=new File("datos/app.ser");
+//            File f=new File("datos/personas/fired.txt"); No se va a leer de él por lo que no importa si existe o no.
 
-            if (h.exists() || c.exists() || p.exists() || m.exists() || a.exists()){
+            if (/*h.exists() || c.exists() || p.exists() || m.exists() || a.exists()*/app.exists()){
                 return true;
             }else{
                 return false;
             }
         }else{
+            //En caso de que los directorios no existan lo que voy a hacer es crear el arbol de directorios y dejarlos vacios.
+            dir.mkdir();
+//            subDir1.mkdir();
+            subDir2.mkdir();
             return false;
         }
     }
@@ -1579,7 +1589,7 @@ public class GestionMedica {
      * @param id - identificador de Centro a comprobar
      * @return boolean - true, si coincide con alguno, false si no existe
      * */
-    protected static boolean checkCenterID(int id){
+    protected boolean checkCenterID(int id){
         for(Centro c: centrosMedicos){
             if(c!=null && c.getID()==id){
                 return true;
@@ -1634,7 +1644,7 @@ public class GestionMedica {
      * @param id - identificador de Persona a comprobar
      * @return boolean - true, si coincide con alguno, false si no existe
      * */
-    protected static boolean checkPersonID(int id){
+    protected boolean checkPersonID(int id){
         //Lo comprueba en todos los arrays porque al no existir aun el objeto no se sabe de qué tipo es
         for(Centro c: centrosMedicos){
             if(c!=null){
@@ -1670,7 +1680,7 @@ public class GestionMedica {
      * @param clinica true, si es de tipo clinica
      * @param init Si la aplicacion se inicia por primera vez
      * */
-    protected static void nuevoCentro(boolean hospital, boolean clinica, boolean init){
+    protected void nuevoCentro(boolean hospital, boolean clinica, boolean init){
 
         if(hospital){
             //Si el programa inicia por primera vez se crean 2 Hospitales con 2 Medicos y 2 Admins
@@ -1751,7 +1761,7 @@ public class GestionMedica {
      * @param dni a comprobar
      * @return boolean - true, si encuentra un dni que coincida, false si no encuentra nada.
      * */
-    protected static boolean checkDNI(String dni){
+    protected boolean checkDNI(String dni){
         for(Centro c: centrosMedicos){ //Busca en todos los centros
             if(c!=null) {
                 for (Persona p : c.trabajadores) { //En todos los trabajadores de cada centro
@@ -1786,7 +1796,7 @@ public class GestionMedica {
     /**
      * Esta función va a crear objetos aleatorios por defecto para que la aplicación funcione
      * */
-    protected static void estadoPorDefecto(){
+    protected void estadoPorDefecto(){
         //Hospitales
         nuevoCentro(true,false, true);
 
@@ -1805,20 +1815,104 @@ public class GestionMedica {
 
     /**
      * Función que crea los archivos necesarios para guardar el estado de la aplicación en el momento de salir.
+     * @param objPath ruta del archivo para los objetos.
+     * @param staticPath ruta del archivo para los atributos de clase.
+     * @return boolean - true si se ha guardado bie, false si no.
      * */
-    protected static boolean guardarEstado(){
-        //TODO: Guardar los objetos en sus archivos correspondientes
-//            dir.mkdir(); TODO: Hacer esto cuando se vaya a cerrar el programa
-//            subDir1.mkdir();
-//            subDir2.mkdir();
-        return false;
+    protected boolean guardarEstado(String objPath, String staticPath){
+        try{
+            //GUARDAR OBJETO
+            ObjectOutputStream oos=new ObjectOutputStream(new FileOutputStream(objPath));
+            //Si el array centrosMedicos contiene realmente todos los datos del programa pues únicamente se serializa el array.
+            oos.writeObject(centrosMedicos);
+            oos.close();
+            //GUARDAR ATRIBUTOS STATIC
+            //La chapuza que se me ha ocurrido es meter estos atributos en un array de enteros(menos mal que son todos el mismo tipo de dato)
+            int estaticos[]={Centro.contCentros, Centro.contMedicos, Centro.contAdministrativos, Centro.totalTrabajadores};
+            //Ahora este array lo guardo en un archivo tal cual está.
+            //Tengo que usar BufferedWriter para tener acceso al metodo newLine y que se guarde cada valor en una linea.
+            BufferedWriter file=new BufferedWriter(new FileWriter(staticPath));
+            for(int i: estaticos) {
+                file.write(Integer.toString(i));
+                file.newLine();
+            }
+            file.close();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println(ANSI_RED + "Ha ocurrido un error mientras se guardaba." + ANSI_RESET);
+            return false;
+        }
+    }
+
+
+    /**
+     * Recupera el estado del programa que había sido guardado en la anterior ejecución.
+     * @param objPath ruta del archivo para los objetos.
+     * @param staticPath ruta del archivo para los atributos de clase.
+     * @return boolean - true, si se ha leido correctamente, false si no.
+     * */
+    protected boolean recuperarEstado(String objPath, String staticPath){
+        Centro anteriorEstado[];
+        int estaticos[]={Centro.contCentros, Centro.contMedicos, Centro.contAdministrativos, Centro.totalTrabajadores};
+
+        try{
+            //SE CARGA EL OBJETO
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(objPath));
+            anteriorEstado=(Centro []) ois.readObject();
+            ois.close(); //Se cierra la lectura del archivo app.ser
+            //Una vez leido el objeto guardado se apunta el espacio de memoria de centrosMedicos al array anteriorEstado que tiene los datos anteriores.
+            centrosMedicos=anteriorEstado;
+
+            //SE CARGAN LOS ATRIBUTOS ESTATICOS
+            FileReader file=new FileReader(staticPath);
+            Scanner lector=new Scanner(file); //Se le pasa a Scanner el archivo en vez de System.in
+            int cont=0;
+            while (lector.hasNextInt()) { //Mientras se lea un entero
+                cont++; //va a incrementar el contador
+                estaticos[cont-1]=lector.nextInt(); //para almacenar en esa posicion lo que hay leído Scanner del archivo
+            }
+            lector.close(); //Se cierra la lectura del archivo static.ser
+
+            //Les asigno a cada atributo el valor que tenían.
+            Centro.contCentros=estaticos[0];
+            Centro.contMedicos=estaticos[1];
+            Centro.contAdministrativos=estaticos[2];
+            Centro.totalTrabajadores=estaticos[3];
+
+            return true; //Se ha leido/recuperado el objeto correctamente
+
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return false; //Ha ocurrido algo
+        }
+    }
+
+
+    /**
+     * Guarda en un archivo la persona antes de ser despedida, de este archivo no se va a leer más.
+     * @param worker persona de tipo medico/admin a guardar.
+     * @return boolean - true, si se ha guardado correctamente, false si algo ha fallado.
+     * */
+    protected static boolean saveFired(Persona worker){
+        String path="datos/personas/fired.ser"; //La ruta no la paso por parámetro porque no va a cambiar y solo se usa en esta funcion
+        try{
+            ObjectOutputStream oos=new ObjectOutputStream(new FileOutputStream(path));
+            oos.writeObject(worker); //Con el objeto oos llamo a la funcion de escribir y le paso por parámetro el parámetro de esta funcion.
+            oos.close();
+            return true;
+        } catch (IOException e) {
+//            e.printStackTrace(); //Aqui me saltaba una excepcion porque el atributo fechaNac es un objeto Fecha y esa clase NO es serializable...
+            System.out.println(ANSI_RED + "Ha ocurrido un error mientras se guardaba." + ANSI_RESET);
+            return false;
+        }
     }
 
 
     /**
      * Funcion para aumentar el tamaño de un array fijo que se ha llenado
      * */
-    protected static void aumentarCentrosMedicos(){
+    protected void aumentarCentrosMedicos(){
         //Se crea un nuevo array de tipo Cetro con el doble de la longitud del array centrosMedicos actual.
         Centro centrosMedicosCopia[]=new Centro[centrosMedicos.length*2];
         //Despues hay que guardar los datos del array viejo en la copia para no perderlos
@@ -1911,11 +2005,12 @@ public class GestionMedica {
     /**
      * Funcion de inicio del programa que hace las comprobaciones iniciales y llama al menu principal
      * */
-    protected static void init(){
+    protected void init(){
+//        app=new GestionMedica();
         if(!checkConfig()){ //se llama a la funcion checkConfig para comprobar si existe o no algún archivo previo.
             estadoPorDefecto();
         }else{
-            cargarConfig();
+            recuperarEstado("datos/app.ser", "datos/static.ser");
         }
         menuInicio();
     }

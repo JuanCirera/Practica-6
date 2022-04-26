@@ -4,6 +4,8 @@
  * */
 public class Main {
     public static void main(String[] args) {
-        GestionMedica.init();
+        GestionMedica app=new GestionMedica();
+        app.init();
+//        GestionMedica.init();
     }
 }
