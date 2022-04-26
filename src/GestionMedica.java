@@ -1557,19 +1557,14 @@ public class GestionMedica implements Serializable {
      * */
     protected static boolean checkConfig(){
         File dir=new File("datos");
-//        File subDir1=new File("datos/centros");
         File subDir2=new File("datos/personas");
 
-        if(dir.exists() && /*subDir1.exists() &&*/ subDir2.exists()){
-//            File h=new File("datos/centros/hospitales.txt");
-//            File c=new File("datos/centros/clinicas.txt");
-//            File p=new File("datos/personas/pacientes.txt");
-//            File m=new File("datos/personas/medicos.txt");
-//            File a=new File("datos/personas/administrativos.txt");
+        if(dir.exists() && subDir2.exists()){
             File app=new File("datos/app.ser");
+            File s=new File("datos/static.ser");
 //            File f=new File("datos/personas/fired.txt"); No se va a leer de él por lo que no importa si existe o no.
 
-            if (/*h.exists() || c.exists() || p.exists() || m.exists() || a.exists()*/app.exists()){
+            if (app.exists() && s.exists()){
                 return true;
             }else{
                 return false;
@@ -1577,7 +1572,6 @@ public class GestionMedica implements Serializable {
         }else{
             //En caso de que los directorios no existan lo que voy a hacer es crear el arbol de directorios y dejarlos vacios.
             dir.mkdir();
-//            subDir1.mkdir();
             subDir2.mkdir();
             return false;
         }
