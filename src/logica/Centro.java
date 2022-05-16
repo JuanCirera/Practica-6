@@ -1,5 +1,6 @@
+package logica;
+
 import java.io.Serializable;
-import java.util.Arrays;
 
 /**
  * Clase para definir la información genérica de un centro médico

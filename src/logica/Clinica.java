@@ -1,9 +1,9 @@
-import utilidades.Faker;
+package logica;
+
 import utilidades.Fecha;
-import utilidades.PeticionDatos;
 
 /**
- * Clase que crea objetos Clinica y se encarga de añadirlos a los arrays correspondientes
+ * Clase que crea objetos logica.Clinica y se encarga de añadirlos a los arrays correspondientes
  * */
 public class Clinica extends Centro{
     //ATRIBUTOS
@@ -13,7 +13,7 @@ public class Clinica extends Centro{
     //CONSTRUCTOR
     public Clinica(String nombreCentro, String direccionCentro, int identificador, int consultas){
         super(nombreCentro, direccionCentro, identificador, consultas);
-        trabajadores=new Persona[5]; //Fun fact: Se me olvidó iniciar estos dos arrays y me volví loco porque esta clase no creaba personas y la de Hospital si...
+        trabajadores=new Persona[5]; //Fun fact: Se me olvidó iniciar estos dos arrays y me volví loco porque esta clase no creaba personas y la de logica.Hospital si...
         this.consultas=new Paciente[consultas];
     }
 
@@ -157,7 +157,7 @@ public class Clinica extends Centro{
 
     /**
      * Funcion que comprueba si el id de un trabajador existe ya
-     * @param id - identificador del objeto Persona, medico o admin
+     * @param id - identificador del objeto logica.Persona, medico o admin
      * @return boolean - true si lo encuentra, false si no coincide con ninguno
      * */
     protected boolean checkWorkerID(int id){

@@ -1,9 +1,9 @@
-import utilidades.Faker;
+package logica;
+
 import utilidades.Fecha;
-import utilidades.PeticionDatos;
 
 /**
- * Clase que crea objetos Hospital y se encarga de añadirlos a los arrays correspondientes
+ * Clase que crea objetos logica.Hospital y se encarga de añadirlos a los arrays correspondientes
  * */
 public class Hospital extends Centro{
     //ATRIBUTOS
@@ -223,7 +223,7 @@ public class Hospital extends Centro{
 
     /**
      * Funcion que comprueba si el id de un trabajador existe ya
-     * @param id identificador del objeto Persona, medico o admin
+     * @param id identificador del objeto logica.Persona, medico o admin
      * @return boolean - true si lo encuentra, false si no coincide con ninguno
      * */
     private boolean checkWorkerID(int id){

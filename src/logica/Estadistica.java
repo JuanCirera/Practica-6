@@ -1,3 +1,5 @@
+package logica;
+
 /**
  * Define aquellas funciones útiles para sacar estadística de la aplicación
  * */

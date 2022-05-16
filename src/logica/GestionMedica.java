@@ -1,3 +1,5 @@
+package logica;
+
 import utilidades.Faker;
 import utilidades.Fecha;
 import utilidades.PeticionDatos;
@@ -27,7 +29,7 @@ public class GestionMedica implements Serializable {
     //Aqui se guarda la planta y hab introducidas por teclado, como no puedo devolverlos a la vez en una funcion, esto es lo que se me ha ocurrido.
     private static int planta=0, hab=0;
     //La idea de usar este objeto no tiene sentido, he decidido serializar el array centrosMedicos. Más explicacion en recuperarEstado()
-    //    private static GestionMedica app;
+    //    private static logica.GestionMedica app;
 
 
     /**
@@ -104,7 +106,7 @@ public class GestionMedica implements Serializable {
 
     /**
      * Muestra un listado de los centros segun el tipo
-     * @param tipo 1-Hospital, 2-Clinica, 0-Ambos.
+     * @param tipo 1-logica.Hospital, 2-logica.Clinica, 0-Ambos.
      * */
     protected void mostrarCentros(int tipo) {
         ordenarPorIDcentro(centrosMedicos);
@@ -144,7 +146,7 @@ public class GestionMedica implements Serializable {
         //Booleanos para hacer la comprobacion final antes de vaciar la posicion
         boolean consultasVacias=true, habitacionesVacias=true, sinTrabajadores=true;
 
-        //Se comprueba cada uno de los arrays pertenecientes a Centro que guarden objetos persona
+        //Se comprueba cada uno de los arrays pertenecientes a logica.Centro que guarden objetos persona
         for(int a=0;a<centrosMedicos.length;a++) {
             if (centrosMedicos[a] != null && centrosMedicos[a].getID() == id) {
                 //CONSULTAS (PACIENTES)
@@ -192,7 +194,7 @@ public class GestionMedica implements Serializable {
     /**
      * Esta funcion obtiene mediante un id el objeto centro y lo devuelve si coincide con éste.
      * @param id del objeto centro que se quiere obtener.
-     * @return Centro - objeto centro que se necesita para realizar alguna operación con él.
+     * @return logica.Centro - objeto centro que se necesita para realizar alguna operación con él.
      * */
     protected Centro whichCenter(int id){
         Centro thisCenter=null; //Declaro aqui el objeto a null porque la función se empeña en devolverlo fuera del for...
@@ -267,7 +269,7 @@ public class GestionMedica implements Serializable {
     /**
      * Esta funcion obtiene mediante un DNI el objeto persona y lo devuelve si coincide con éste.
      * @param dni del objeto centro que se quiere obtener.
-     * @return Persona - objeto persona que se necesita para realizar alguna operación con él.
+     * @return logica.Persona - objeto persona que se necesita para realizar alguna operación con él.
      * */
     protected Persona whichPerson(String dni){
         Persona thisPerson=null;
@@ -302,7 +304,7 @@ public class GestionMedica implements Serializable {
     /**
      * Esta funcion obtiene mediante un ID el objeto persona y lo devuelve si coincide con éste.
      * @param idPersona del objeto persona que se quiere obtener.
-     * @return Persona - objeto persona que se necesita para realizar alguna operación con él.
+     * @return logica.Persona - objeto persona que se necesita para realizar alguna operación con él.
      * */
     protected Persona whichPerson(int idPersona){
         Persona thisPerson=null;
@@ -378,7 +380,7 @@ public class GestionMedica implements Serializable {
     //Esta función es temporal no me ha dado tiempo de mejorarla
     /**
      * Funcion que gestiona un objeto centro segun si es hospital o clinica
-     * @param tipo 1-Hospital, 2-Clinica.
+     * @param tipo 1-logica.Hospital, 2-logica.Clinica.
      * */
     protected void gestionarCentro(int tipo){
         String hcs="",hc="";
@@ -402,7 +404,7 @@ public class GestionMedica implements Serializable {
                         if (h.getID() == idCentro) {
                             do {
                                 //Se muestra el segundo submenu
-                                opcion=centroSubMenu2("Hospital", h);
+                                opcion=centroSubMenu2("logica.Hospital", h);
                                 switch (opcion){
                                     case 1:
                                         System.out.println(ANSI_BBLUE + "Datos del centro:" + ANSI_RESET);
@@ -490,9 +492,9 @@ public class GestionMedica implements Serializable {
      * */
     protected static int tipoPersona(){
         int opcion = PeticionDatos.pedirEnteroPositivo(true, """ 
-                        ║ 1-> Paciente                                     
+                        ║ 1-> logica.Paciente                                     
                         ║ 2-> Médico   
-                        ║ 3-> Administrativo  
+                        ║ 3-> logica.Administrativo  
                         ║ 4-> Volver                                                                                
                         ╚ > """);
 //        System.out.println(" "); //Espacio en blanco
@@ -559,7 +561,7 @@ public class GestionMedica implements Serializable {
         String dni=p.getDni();
         do {
             System.out.println(" ");//linea
-            System.out.println("╔═ " + ANSI_BBLUE + "Inicio/Gestionar Persona/"+p.getNombre()+ ANSI_RESET);
+            System.out.println("╔═ " + ANSI_BBLUE + "Inicio/Gestionar logica.Persona/"+p.getNombre()+ ANSI_RESET);
             opcion = PeticionDatos.pedirEnteroPositivo(true, """ 
                         ║ 1-> Modificar datos                                      
                         ║ 2-> Modificar ubicación
@@ -636,7 +638,7 @@ public class GestionMedica implements Serializable {
                     //PACIENTES
                     if(person instanceof Paciente) {
                         c = whereAdmitted(dni); //Se busca en que centro está la persona a la que pertenece ese dni
-                        //Aqui tengo que liar esto porque whichPerson devuelve un objeto Persona y me hace falta un Paciente
+                        //Aqui tengo que liar esto porque whichPerson devuelve un objeto logica.Persona y me hace falta un logica.Paciente
                         Persona cualquiera = whichPerson(dni);
                         Paciente paciente = null;
                         if (cualquiera instanceof Paciente) {
@@ -832,7 +834,7 @@ public class GestionMedica implements Serializable {
         int opcion=0;
         do {
             System.out.println(" "); //Espacio en blanco
-            System.out.println("╔═ " + ANSI_BBLUE + "Inicio/Gestionar Persona/Cambiar ubicación" + ANSI_RESET);
+            System.out.println("╔═ " + ANSI_BBLUE + "Inicio/Gestionar logica.Persona/Cambiar ubicación" + ANSI_RESET);
             opcion = PeticionDatos.pedirEnteroPositivo(true, """ 
                     ║ 1-> Cambiar de consulta
                     ║ 2-> Cambiar de habitación                                  
@@ -882,7 +884,7 @@ public class GestionMedica implements Serializable {
                             h.habitaciones[planta][hab] = (Paciente) p; //Se hace un downcast para meterlo en habitaciones
                             //Se vacía su antigua posición en el array.
                             h.habitaciones[oldFloor][oldRoom] = null;
-                            System.out.println(ANSI_BGREEN + "Paciente reubicado correctamente." + ANSI_RESET);
+                            System.out.println(ANSI_BGREEN + "logica.Paciente reubicado correctamente." + ANSI_RESET);
                             resetHabitacion(); //reseteo los valores porque ya he hecho la operacion arriba.
 
                         } else {
@@ -951,7 +953,7 @@ public class GestionMedica implements Serializable {
     /**
      * Funcion que comprueba el centro donde trabaja una persona de tipo medico o admin
      * @param dni del objeto persona.
-     * @return Centro - objeto centro donde trabaja esa persona.
+     * @return logica.Centro - objeto centro donde trabaja esa persona.
      * */
     protected Centro whereWorking(String dni){
         Centro workingHere=null;
@@ -971,7 +973,7 @@ public class GestionMedica implements Serializable {
     /**
      * Funcion que comprueba el centro donde está ingresado o en consulta un paciente
      * @param dni del objeto persona.
-     * @return Centro - objeto centro donde esta ese paciente.
+     * @return logica.Centro - objeto centro donde esta ese paciente.
      * */
     protected Centro whereAdmitted(String dni){
         Centro admittedHere=null;
@@ -1039,7 +1041,7 @@ public class GestionMedica implements Serializable {
                         if(respuesta=='S'){
                             if(tipo==2 || tipo==3) {
                                 System.out.println(" ");
-                                System.out.println("2. Médico" + "\n" + "3. Administrativo");
+                                System.out.println("2. Médico" + "\n" + "3. logica.Administrativo");
                                 int workerType = PeticionDatos.pedirEnteroPositivo(false, "> Elige una opción: ");
                                 nuevaPersona(false, workerType);
                             }else {
@@ -1064,8 +1066,8 @@ public class GestionMedica implements Serializable {
 
 
     /**
-     * Funcion que crea un nuevo objeto Persona y llamar a su funcion add correspondiente
-     * @param tipo de objeto persona, 1(Paciente) 2(Médico) 3(Admin)
+     * Funcion que crea un nuevo objeto logica.Persona y llamar a su funcion add correspondiente
+     * @param tipo de objeto persona, 1(logica.Paciente) 2(Médico) 3(Admin)
      * */
     protected Persona nuevaPersona(boolean aleatorio, int tipo) {
         //** PETICIÓN DE DATOS **
@@ -1127,7 +1129,7 @@ public class GestionMedica implements Serializable {
                                 //Se crea un paciente con los datos de la persona que ya existía (trabajador), siempre y cuando no sea otro paciente
                                 Paciente paciente=new Paciente(w.getDni(), w.getID(), w.getNombre(), w.getApellido1(), w.getApellido2(), w.getSexo(), w.getFechaNac());
                                 //Se asigna a un centro
-                                addPatientTo(paciente); //LLamo a la funcion que asigna a un paciente a consulta o planta en un Hospital
+                                addPatientTo(paciente); //LLamo a la funcion que asigna a un paciente a consulta o planta en un logica.Hospital
                                 System.out.println(" ");
                                 menuInicio();
 
@@ -1185,7 +1187,7 @@ public class GestionMedica implements Serializable {
             if(tipo==1){
                 p = new Paciente(dni, id, n, ap1, ap2, sexo, fNac);
                 if(addPatientTo(p)){
-                    System.out.println(ANSI_BGREEN+"Paciente creado correctamente"+ANSI_RESET);
+                    System.out.println(ANSI_BGREEN+"logica.Paciente creado correctamente"+ANSI_RESET);
                 }
 
             } else if (tipo == 2) {
@@ -1197,7 +1199,7 @@ public class GestionMedica implements Serializable {
             } else if (tipo == 3) {
                 a = new Administrativo(dni, id, n, ap1, ap2, sexo, fNac, area);
                 if(addWorkerTo(a)){
-                    System.out.println(ANSI_BGREEN+"Administrativo creado correctamente"+ANSI_RESET);
+                    System.out.println(ANSI_BGREEN+"logica.Administrativo creado correctamente"+ANSI_RESET);
                 }
             }
         }
@@ -1284,7 +1286,7 @@ public class GestionMedica implements Serializable {
                     case 1:
                         h.mostrarEstado();
                         if (h.addPaciente((Paciente) p, pedirConsulta(h))) { //Meto la llamada a la funcion en el if y asi aprovecho para informar del resultado
-                            System.out.println(ANSI_BGREEN + "Paciente creado correctamente" + ANSI_RESET);
+                            System.out.println(ANSI_BGREEN + "logica.Paciente creado correctamente" + ANSI_RESET);
                         }
                         break;
                     case 2:
@@ -1296,7 +1298,7 @@ public class GestionMedica implements Serializable {
                         } while (!checkHabitacion(planta, hab, h));
 
                         if (h.addPaciente((Paciente) p, planta, hab)) {
-                            System.out.println(ANSI_BGREEN + "Paciente creado correctamente" + ANSI_RESET);
+                            System.out.println(ANSI_BGREEN + "logica.Paciente creado correctamente" + ANSI_RESET);
                         }
 
                         resetHabitacion();
@@ -1320,8 +1322,8 @@ public class GestionMedica implements Serializable {
 
     /**
      * Funcion que muestra las estadísticas según el tipo de objeto elegido.
-     * @param centro Si se quieren las stats de un objeto Centro
-     * @param personal Si se quieren las stats de un objeto Persona
+     * @param centro Si se quieren las stats de un objeto logica.Centro
+     * @param personal Si se quieren las stats de un objeto logica.Persona
      * */
     protected void estadisticas(boolean centro, boolean personal){
 
@@ -1434,7 +1436,7 @@ public class GestionMedica implements Serializable {
 
 
     /**
-     * Muestra los pacientes que tiene un centro medico, tanto en consultas como en habitaciones si es un Hospital
+     * Muestra los pacientes que tiene un centro medico, tanto en consultas como en habitaciones si es un logica.Hospital
      * @param c - centro del que se quieren mostrar los pacientes
      * @return boolean - true si existe al menos un paciente, false si no hay nada
      * */
@@ -1579,8 +1581,8 @@ public class GestionMedica implements Serializable {
 
 
     /**
-     * Comprueba si un identificador de Centro ya existe
-     * @param id - identificador de Centro a comprobar
+     * Comprueba si un identificador de logica.Centro ya existe
+     * @param id - identificador de logica.Centro a comprobar
      * @return boolean - true, si coincide con alguno, false si no existe
      * */
     protected boolean checkCenterID(int id){
@@ -1634,8 +1636,8 @@ public class GestionMedica implements Serializable {
 
 
     /**
-     * Comprueba si un identificador de Persona ya existe
-     * @param id - identificador de Persona a comprobar
+     * Comprueba si un identificador de logica.Persona ya existe
+     * @param id - identificador de logica.Persona a comprobar
      * @return boolean - true, si coincide con alguno, false si no existe
      * */
     protected boolean checkPersonID(int id){
@@ -1669,7 +1671,7 @@ public class GestionMedica implements Serializable {
 
 
     /**
-     * Funcion que crea un nuevo objeto Centro segun sea hospital o clinica
+     * Funcion que crea un nuevo objeto logica.Centro segun sea hospital o clinica
      * @param hospital true, Si el objeto se quiere crear de tipo hospital
      * @param clinica true, si es de tipo clinica
      * @param init Si la aplicacion se inicia por primera vez
@@ -2000,7 +2002,7 @@ public class GestionMedica implements Serializable {
      * Funcion de inicio del programa que hace las comprobaciones iniciales y llama al menu principal
      * */
     protected void init(){
-//        app=new GestionMedica();
+//        app=new logica.GestionMedica();
         if(!checkConfig()){ //se llama a la funcion checkConfig para comprobar si existe o no algún archivo previo.
             estadoPorDefecto();
         }else{

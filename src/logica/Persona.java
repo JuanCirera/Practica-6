@@ -1,3 +1,5 @@
+package logica;
+
 import utilidades.Fecha;
 
 import java.io.Serializable;

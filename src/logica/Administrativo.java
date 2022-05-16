@@ -1,24 +1,25 @@
+package logica;
+
 import utilidades.Fecha;
 
 import java.util.Calendar;
 
 /**
- * Clase que gestiona la información de una persona tipo médico, con información específica.
+ * Clase que gestiona la información de una persona tipo administrativo, con información específica.
  * */
-public class Medico extends Persona{
+public class Administrativo extends Persona{
     //ATRIBUTOS
-    protected String especialidad;
-    protected Fecha  diasTrabajados[];
+    protected String area;
+    protected Fecha diasTrabajados[];
     protected boolean ingresado;
 
     //CONSTRUCTOR
     //Inicializa el array con 5 posiciones
-    public Medico(String dni, int identificador, String nombre, String apellido1, String apellido2, String sexo, Fecha fechaNac,String especialidad){
+    public Administrativo(String dni, int identificador, String nombre, String apellido1, String apellido2, String sexo, Fecha fechaNac, String area){
         super(dni, identificador, nombre, apellido1, apellido2, sexo, fechaNac);
-        this.especialidad=especialidad;
+        this.area=area;
         diasTrabajados=new Fecha[5];
     }
-
 
     //SETTERS-GETTERS
 
@@ -26,14 +27,13 @@ public class Medico extends Persona{
         this.ingresado = ingresado;
     }
 
-
     //FUNCIONES-METODOS
 
     @Override
     /**
      * Devuelve el número de dias trabajados en un mes introducido
      * @param mes del que sacar el número de dias
-     * @return cont - total de trabajados
+     * @reurn cont - total de trabajados
      * */
     public int diasPorMes(int mes) {
         int cont=0;
@@ -52,7 +52,7 @@ public class Medico extends Persona{
 
 
     /**
-     * Funcion que añade un dia de trabajo a un medico
+     * Funcion que añade un dia de trabajo a un administrativo
      * @param dt - objeto de tipo Fecha con el dia trabajado
      * @return boolean - true si la fecha no existe y es válida (lunes-viernes), false si la fecha existe ya o es inválida (sábado-domingo)
      * */
@@ -75,26 +75,22 @@ public class Medico extends Persona{
     }
 
 
-    /**
-     * Comprueba si la especialidad introducida por parametro es alguna de las permitidas
-     * @param especialidad
-     * @return boolean - true si coincide con alguna, false si no
-     * */
-    public static boolean validarEspecialidad(String especialidad){
-        especialidad.toLowerCase();
-        if(especialidad.equals("traumatologia") || especialidad.equals("dermatologia") || especialidad.equals("oftalmologia") || especialidad.equals("neurologia")) {
+    public static boolean validarArea(String area){
+        area.toLowerCase();
+        if(area.equals("traumatología") || area.equals("dermatologia") || area.equals("oftalmologia") || area.equals("neurologia") || area.equals("urgencias") || area.equals("quirofano") || area.equals("administracion")) {
             return true;
         }else {
             return false;
         }
     }
 
+
     @Override
     public boolean validarFechaNac(Fecha fechaNac) {
         Calendar calendar = Calendar.getInstance();
         int actual=calendar.get(Calendar.YEAR);
         //Se llama al atributo año del objeto fecha que se haya creado y se hace la comprobacion
-        if(actual - fechaNac.getYear()>22 && actual - fechaNac.getYear()<70){
+        if(actual - fechaNac.getYear()>18 && actual - fechaNac.getYear()<65){
             return true;
         }else {
             return false;
@@ -103,6 +99,7 @@ public class Medico extends Persona{
 
     @Override
     public String toString() {
-        return super.toString() +"\n"+"especialidad en " + especialidad;
+        return super.toString() + "\n" +
+                "área de " + area;
     }
 }
