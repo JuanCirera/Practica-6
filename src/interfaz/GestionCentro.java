@@ -1,17 +1,22 @@
 package interfaz;
 
+import logica.Centro;
+import logica.Clinica;
+import logica.Hospital;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class GestionCentro extends JPanel{
 
     protected GridBagConstraints c;
     protected JButton opciones[]; //Array donde se almacenan objetos JButton con sus propiedades
-    protected JRadioButton radioButtons[];
+    protected JRadioButton radioButtons[]; //Decido guardar los componentes en arrays normales para que no se sobrepase nunca el límite.
     protected JScrollPane scroll;
     protected JPanel panelRadio;
 
-    public GestionCentro(int nOpciones, String centros[], Color bg){
+    public GestionCentro(int tipo, int nOpciones, Centro centros[], Color bg){
         //Layout
         panelRadio=new JPanel();
         GridBagLayout layout=new GridBagLayout();
@@ -43,10 +48,20 @@ public class GestionCentro extends JPanel{
 //        c.insets= new Insets(0,0,10,0);
 
         for(int i=0;i<centros.length;i++){
-            JRadioButton r=new JRadioButton(centros[i]);
-            radioButtons[i]=r;
-            group.add(radioButtons[i]);
-            panelRadio.add(radioButtons[i], c);
+            if(tipo==1 && centros[i]!=null && centros[i] instanceof Hospital) {
+                Hospital h=(Hospital) centros[i];
+                JRadioButton rh = new JRadioButton("ID " + h.getID() + " " + h.getNombre());
+                radioButtons[i]=rh;
+                group.add(radioButtons[i]);
+                panelRadio.add(radioButtons[i], c);
+            }else if(tipo==2 && centros[i]!=null && centros[i] instanceof Clinica){
+                Clinica cl=(Clinica) centros[i];
+                JRadioButton rcl = new JRadioButton("ID " + cl.getID() + " " + cl.getNombre());
+                radioButtons[i]=rcl;
+                group.add(radioButtons[i]);
+                panelRadio.add(radioButtons[i], c);
+            }
+
             c.gridy++;
         }
 

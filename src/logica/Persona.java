@@ -8,7 +8,8 @@ import java.util.Calendar;
 /**
  * Clase con la información común que define a una persona
  * */
-public class Persona implements Estadistica, Serializable {
+//Tenías razón es mejor abstracta
+public abstract class Persona implements Estadistica, Serializable {
     //ATRIBUTOS CONSTANTES
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_GREEN = "\u001B[32m";
@@ -99,14 +100,10 @@ public class Persona implements Estadistica, Serializable {
     //FUNCIONES-METODOS
 
     @Override
-    public int diasPorMes(int month) {
-        return 0;
-    }
+    public abstract int diasPorMes(int month);
 
     @Override
-    public void mostrarEstado() {
-
-    }
+    public abstract String mostrarEstado();
 
     /**
      * Comprueba que la fecha sea correcta, validando el año de nacimiento
@@ -142,7 +139,7 @@ public class Persona implements Estadistica, Serializable {
 
     @Override
     public String toString() {
-        return ANSI_BGREEN+identificador +ANSI_RESET+" " +
+        return identificador +" " +
                 dni + " "+
                 nombre + " " +
                 apellido1 + ", " + apellido2;

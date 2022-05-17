@@ -48,8 +48,8 @@ public class Medico extends Persona{
     }
 
     @Override
-    public void mostrarEstado() {
-        System.out.println(dni+", "+nombre+" "+apellido1+" "+apellido2);
+    public String mostrarEstado() {
+        return dni+", "+nombre+" "+apellido1+" "+apellido2;
     }
 
 

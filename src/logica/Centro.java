@@ -1,6 +1,7 @@
 package logica;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Clase para definir la información genérica de un centro médico
@@ -20,14 +21,15 @@ public class Centro implements Estadistica, Serializable {
     protected String nombreCentro;
     protected String direccionCentro;
     protected int identificador;
-    protected Paciente consultas[];
-    protected Persona trabajadores[];
+    public Paciente consultas[];
+    public Persona trabajadores[];
     protected int limiteConsultas;
     protected static int contMedicos=0;
     protected static int contAdministrativos=0;
     protected static int totalTrabajadores=contMedicos+contAdministrativos;
     protected static int contCentros=0;
-
+    protected ArrayList<Medico> medicos=new ArrayList<>();
+    protected ArrayList<Administrativo> admins=new ArrayList<>();
 
     //CONSTRUCTOR
     public Centro(String nombreCentro, String direccionCentro, int identificador, int consultas){
@@ -65,6 +67,13 @@ public class Centro implements Estadistica, Serializable {
         return direccionCentro;
     }
 
+    public int getLimiteConsultas() {
+        return limiteConsultas;
+    }
+
+    public static int getContCentros() {
+        return contCentros;
+    }
 
     //FUNCIONES-METODOS
 
@@ -74,14 +83,14 @@ public class Centro implements Estadistica, Serializable {
     }
 
     @Override
-    public void mostrarEstado() {
-
+    public String mostrarEstado() {
+        return "";
     }
 
 
     @Override
     public String toString() {
-        return  ANSI_BGREEN+"ID " + identificador +ANSI_RESET+ '\n' +
+        return  "ID " + identificador + '\n' +
                 nombreCentro + '\n' +
                 direccionCentro+"\n"+
                 limiteConsultas+" consultas";

@@ -25,7 +25,7 @@ public class GestionMedica implements Serializable {
 
     //ATRIBUTOS
 
-    private Centro centrosMedicos[]=new Centro[5];
+    public Centro centrosMedicos[]=new Centro[5];
     //Aqui se guarda la planta y hab introducidas por teclado, como no puedo devolverlos a la vez en una funcion, esto es lo que se me ha ocurrido.
     private static int planta=0, hab=0;
     //La idea de usar este objeto no tiene sentido, he decidido serializar el array centrosMedicos. Más explicacion en recuperarEstado()
@@ -108,7 +108,7 @@ public class GestionMedica implements Serializable {
      * Muestra un listado de los centros segun el tipo
      * @param tipo 1-logica.Hospital, 2-logica.Clinica, 0-Ambos.
      * */
-    protected void mostrarCentros(int tipo) {
+    public void mostrarCentros(int tipo) {
         ordenarPorIDcentro(centrosMedicos);
         if(tipo==1) {
             for (Centro c : centrosMedicos) {
@@ -139,7 +139,7 @@ public class GestionMedica implements Serializable {
      * @param id del centro a borrar
      * @return boolean - true, si se ha borrado con éxito, false si encuentra mínimo una persona
      * */
-    protected boolean removeCentro(int id){
+    public boolean removeCentro(int id){
         //He probado a usar un for each pero solo se hace un set null al objeto en sí, la posicion del array se queda igual, es raro, por eso he usado un for normal.
         //No se trata de eliminar un objeto, sino de VACIAR la posición de un ARRAY.
 
@@ -196,7 +196,7 @@ public class GestionMedica implements Serializable {
      * @param id del objeto centro que se quiere obtener.
      * @return logica.Centro - objeto centro que se necesita para realizar alguna operación con él.
      * */
-    protected Centro whichCenter(int id){
+    public Centro whichCenter(int id){
         Centro thisCenter=null; //Declaro aqui el objeto a null porque la función se empeña en devolverlo fuera del for...
         for(Centro c: centrosMedicos){
             if(c!=null && c.getID()==id){
@@ -271,7 +271,7 @@ public class GestionMedica implements Serializable {
      * @param dni del objeto centro que se quiere obtener.
      * @return logica.Persona - objeto persona que se necesita para realizar alguna operación con él.
      * */
-    protected Persona whichPerson(String dni){
+    public Persona whichPerson(String dni){
         Persona thisPerson=null;
         for(Centro c: centrosMedicos){
             if (c != null) {
@@ -306,7 +306,7 @@ public class GestionMedica implements Serializable {
      * @param idPersona del objeto persona que se quiere obtener.
      * @return logica.Persona - objeto persona que se necesita para realizar alguna operación con él.
      * */
-    protected Persona whichPerson(int idPersona){
+    public Persona whichPerson(int idPersona){
         Persona thisPerson=null;
         for(Centro c: centrosMedicos){
             if (c != null) {
@@ -1355,17 +1355,17 @@ public class GestionMedica implements Serializable {
                         //se informa al usuario y aparece de nuevo el menu anterior
                         if(mostrarPacientes(whichCenter(idCentro))) {
                             idPaciente = pedirIDpersona(false);
-                            mostrarStatsPaciente(whichPerson(idPaciente), mes);
+                            getStatsPaciente(whichPerson(idPaciente), mes);
                         }
                         //Para el personal no controlo esto, no lo creo necesario porque siempre se crean personas de este tipo al arrancar
                         break;
                     case 2:
-                        int idPersona=mostrarPersonal(2, whichCenter(idCentro));
-                        mostrarStatsPersonal(whichPerson(idPersona), mes);
+//                        int idPersona=mostrarPersonal(2, whichCenter(idCentro));
+//                        mostrarStatsPersonal(whichPerson(idPersona), mes);
                         break;
                     case 3:
-                        idPersona=mostrarPersonal(3, whichCenter(idCentro));
-                        mostrarStatsPersonal(whichPerson(idPersona), mes);
+//                        idPersona=mostrarPersonal(3, whichCenter(idCentro));
+//                        mostrarStatsPersonal(whichPerson(idPersona), mes);
                         break;
                     case 4:
                         System.out.println(" ");
@@ -1386,52 +1386,48 @@ public class GestionMedica implements Serializable {
      * @param tipo de trabajador, 2(Médico) 3(Admin)
      * @return int - idPersona introducido por teclado
      * */
-    protected int mostrarPersonal(int tipo, Centro c) {
-        int idPersona=0;
-        System.out.println(" ");//linea
+    public void setPersonal(int tipo, Centro c) {
+//        int idPersona=0;
+//        System.out.println(" ");//linea
+//        String cadena="";
 
         for(Persona p: c.trabajadores){
             if(p!=null && tipo==2 && p instanceof Medico) {
                 Medico m=(Medico) p;
-                System.out.println(m.toString());
+//                cadena=m.toString();
+                c.medicos.add(m);
             }else if(p!=null && tipo==3 && p instanceof Administrativo) {
                 Administrativo a=(Administrativo) p;
-                System.out.println(a.toString());
+//                cadena=a.toString();
+                c.admins.add(a);
             }
         }
-        idPersona=pedirIDpersona(false);
+//        idPersona=pedirIDpersona(false);
 
-        return idPersona;
+//        return cadena;
     }
 
 
     /**
-     * Funcion que muestra las stats del personal
+     * Funcion que devuelve una cadena con las stats del personal
      * @param worker - objeto persona, en concreto medico/admin
      * @param mes - mes del que se quieren extraer las stats
+     * @return String
      * */
-    protected static void mostrarStatsPersonal(Persona worker, int mes){
-        System.out.println(" ");
-        System.out.println(ANSI_BBLUE+".../"+worker.getClass().getSimpleName()+"/Estadísticas del mes "+mes+ANSI_RESET);
+    public String getStatsPersonal(Persona worker, int mes){
 
-        worker.mostrarEstado();
-        System.out.println("Ha trabajado un total de " + worker.diasPorMes(mes) + " días.");
-
+        return worker.mostrarEstado()+"\n"+"Ha trabajado un total de " + worker.diasPorMes(mes) + " días este mes.";
     }
 
 
     /**
-     * Funcion que muestra las stats del personal
+     * Funcion que devuelve las stats del paciente
      * @param paciente - identificador de la persona
      * @param mes - mes del que se quieren extraer las stats
      * */
-    protected static void mostrarStatsPaciente(Persona paciente, int mes){
-        System.out.println(" ");
-        System.out.println(ANSI_BBLUE+".../"+paciente.getClass().getSimpleName()+"/Estadísticas del mes "+mes+ANSI_RESET);
+    public String getStatsPaciente(Persona paciente, int mes){
 
-        paciente.mostrarEstado();
-        System.out.println("Ha realizado " + paciente.diasPorMes(mes) + " visitas.");
-
+        return paciente.mostrarEstado()+"\n"+"Ha realizado " + paciente.diasPorMes(mes) + " visitas este mes.";
     }
 
 
@@ -1585,7 +1581,7 @@ public class GestionMedica implements Serializable {
      * @param id - identificador de logica.Centro a comprobar
      * @return boolean - true, si coincide con alguno, false si no existe
      * */
-    protected boolean checkCenterID(int id){
+    public boolean checkCenterID(int id){
         for(Centro c: centrosMedicos){
             if(c!=null && c.getID()==id){
                 return true;
@@ -1906,9 +1902,11 @@ public class GestionMedica implements Serializable {
 
 
     /**
-     * Funcion para aumentar el tamaño de un array fijo que se ha llenado
+     * Funcion para aumentar el tamaño de un array fijo que se ha llenado.
+     * @return boolean - true si la longitud se ha aumentado, false si no.
      * */
-    protected void aumentarCentrosMedicos(){
+    public boolean aumentarCentrosMedicos(){
+        int anteriorLongitud=centrosMedicos.length;
         //Se crea un nuevo array de tipo Cetro con el doble de la longitud del array centrosMedicos actual.
         Centro centrosMedicosCopia[]=new Centro[centrosMedicos.length*2];
         //Despues hay que guardar los datos del array viejo en la copia para no perderlos
@@ -1917,6 +1915,12 @@ public class GestionMedica implements Serializable {
         }
         //Po último apuntamos el antiguo array al nuevo espacio en memoria.
         centrosMedicos=centrosMedicosCopia;
+
+        if(centrosMedicos.length>anteriorLongitud){
+            return true;
+        }else{
+            return false;
+        }
     }
 
 
@@ -2001,18 +2005,14 @@ public class GestionMedica implements Serializable {
     /**
      * Funcion de inicio del programa que hace las comprobaciones iniciales y llama al menu principal
      * */
-    protected void init(){
+    public void init(){
 //        app=new logica.GestionMedica();
         if(!checkConfig()){ //se llama a la funcion checkConfig para comprobar si existe o no algún archivo previo.
             estadoPorDefecto();
         }else{
             recuperarEstado("datos/app.ser", "datos/static.ser");
         }
-        menuInicio();
+//        menuInicio();
     }
 
-//Este ya no sirve, esta clase es como las demás tiene sus objetos.
-//    public static void main(String[] args) {
-//        init();
-//    }
 }

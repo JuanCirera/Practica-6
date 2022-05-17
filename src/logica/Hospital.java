@@ -9,7 +9,7 @@ public class Hospital extends Centro{
     //ATRIBUTOS
     private int plantas;
     private int habitacionesPorPlanta;
-    protected Paciente habitaciones[][]; //[planta][habitación]
+    public Paciente habitaciones[][]; //[planta][habitación] //TODO: puedo hacer getters para los arrays asi los puedo dejar protected
     private int contHabitaciones=0;
     private int contConsultas=0;
     protected int totalTrabajadores=0;
@@ -22,6 +22,12 @@ public class Hospital extends Centro{
         trabajadores=new Persona[5]; //Inicializo este array para poder meter el personal al inicio
         this.consultas=new Paciente[consultas]; //Lo mismo para este aunque no se van a crear pacientes al inicio
         habitaciones=new Paciente[plantas][habitacionesPorPlanta]; //El limite de ambas dimensiones será lo que haya almacenado en cada uno de los dos atributos
+    }
+
+    //GETTERS-SETTERS
+
+    public int getTotalTrabajadores() {
+        return totalTrabajadores;
     }
 
 
@@ -60,28 +66,35 @@ public class Hospital extends Centro{
 
 
     @Override
-    public void mostrarEstado() {
-        System.out.println(ANSI_BBLUE+"CONSULTAS"+ANSI_RESET);
+    public String mostrarEstado() {
+//        System.out.println(ANSI_BBLUE+"CONSULTAS"+ANSI_RESET);
         int cont=0;
+        String cadena="";
+
         for(Paciente p: consultas){
             cont++;
             if(p!=null){
-                System.out.println("Consulta "+cont+": "+p.getDni()+", "+p.getNombre()+" "+
-                                    p.getApellido1()+" "+p.getApellido2());
+//                System.out.println("Consulta "+cont+": "+p.getDni()+", "+p.getNombre()+" "+
+//                                    p.getApellido1()+" "+p.getApellido2());
+                cadena= "Consulta "+cont+": "+p.getDni()+", "+p.getNombre()+" "+
+                        p.getApellido1()+" "+p.getApellido2();
             }else{
-                System.out.println(ANSI_BGREEN+cont+" Libre"+ANSI_RESET);
+//                System.out.println(ANSI_BGREEN+cont+" Libre"+ANSI_RESET);
+                cadena= cont+" Libre";
             }
         }
-        System.out.println(" ");
-        System.out.println(ANSI_BBLUE+"HABITACIONES"+ANSI_RESET);
+//        System.out.println(" ");
+//        System.out.println(ANSI_BBLUE+"HABITACIONES"+ANSI_RESET);
         for(int i=0;i<habitaciones.length;i++){
             for(int x=0;x<habitaciones[i].length;x++){
                 //En este caso solo voy a mostrar las habitaciones que estén ocupadas para que no ocupe toda la pantalla
                 if(habitaciones[i][x]!=null){
-                    System.out.println("Planta "+i+", habitación "+x+": "+habitaciones[i][x].getNombre());
+//                    System.out.println("Planta "+i+", habitación "+x+": "+habitaciones[i][x].getNombre());
+                    cadena= "Planta "+i+", habitación "+x+": "+habitaciones[i][x].getNombre();
                 }
             }
         }
+        return cadena;
     }
 
 

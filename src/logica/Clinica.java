@@ -17,6 +17,12 @@ public class Clinica extends Centro{
         this.consultas=new Paciente[consultas];
     }
 
+    //GETTERS-SETTERS
+
+    public int getTotalTrabajadores() {
+        return totalTrabajadores;
+    }
+
     //FUNCIONES_METODOS
     @Override
     public int diasPorMes(int month) {
@@ -37,17 +43,20 @@ public class Clinica extends Centro{
 
 
     @Override
-    public void mostrarEstado() {
+    public String mostrarEstado() {
         int cont=0;
+        String cadena="";
+
         for(Paciente p: consultas){
             cont++;
             if(p!=null){
-                System.out.println("Consulta "+cont+": "+p.getDni()+", "+p.getNombre()+" "+
-                        p.getApellido1()+" "+p.getApellido2());
+                cadena= "Consulta "+cont+": "+p.getDni()+", "+p.getNombre()+" "+
+                        p.getApellido1()+" "+p.getApellido2();
             }else{
-                System.out.println(ANSI_BGREEN+cont+" Libre"+ANSI_RESET);
+                cadena= cont+" Libre";
             }
         }
+        return cadena;
     }
 
 

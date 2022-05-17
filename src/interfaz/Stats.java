@@ -11,13 +11,13 @@ public class Stats extends JPanel {
     protected JRadioButton personas[];
     protected String tipo[]={"Paciente", "Médico", "Administrativo"};
     protected JLabel t1, t2, t3;
-    protected JComboBox desplegable;
+    protected JComboBox desplegableMeses, desplegableCentros;
 
 
     /**
-     * Constructor para las ststs de centros
+     * Constructor para las stats de centros
      * */
-    public Stats(int nCentros, Color bg){ //TODO: esto es temporal por aqui entraria un arraylist
+    public Stats(int nCentros, Color bg){
 
         //LAYOUT
         GridBagLayout layout=new GridBagLayout();
@@ -41,40 +41,38 @@ public class Stats extends JPanel {
         t1=new JLabel();
         add(t1,c);
 
+        c.gridx = 1;
+        c.gridy = 0;
+        c.anchor=GridBagConstraints.WEST;
+//        c.gridwidth=2;
+        c.insets= new Insets(0,5,30,0);
+
+        desplegableMeses=new JComboBox();
+        add(desplegableMeses,c);
+
         c.gridx = 0;
         c.gridy = 1;
         c.anchor=GridBagConstraints.EAST;
-        c.gridwidth=2;
-        c.insets= new Insets(0,0,30,0);
-
-        desplegable=new JComboBox();
-        add(desplegable,c);
-
-        c.gridx = 0;
-        c.gridy = 2;
-        c.anchor=GridBagConstraints.WEST;
-        c.gridwidth=1;
+//        c.gridwidth=1;
         c.insets= new Insets(0,0,0,0);
 
         t2=new JLabel();
         add(t2,c);
 
-        c.gridx = 0;
-        c.gridy = 3;
-        c.anchor=GridBagConstraints.EAST;
-        c.gridwidth=2;
-        c.insets= new Insets(0,0,10,0);
+        c.gridx = 1;
+        c.gridy = 1;
+        c.anchor=GridBagConstraints.WEST;
+//        c.gridwidth=2;
+        c.insets= new Insets(0,5,0,0);
 
-        for(int i=0;i<centros.length;i++){
-            JRadioButton r=new JRadioButton("ID "+i+" Pruebas");
-            centros[i]=r;
-            group.add(centros[i]);
-            add(centros[i], c);
-            c.gridy++;
-        }
+        desplegableCentros=new JComboBox();
+        add(desplegableCentros,c);
     }
 
 
+    /**
+     * Constructor para las stats de personas
+     * */
     public Stats(int tiposPersona, String centro[], Color bg){
         //LAYOUT
         GridBagLayout layout=new GridBagLayout();
@@ -101,8 +99,8 @@ public class Stats extends JPanel {
         c.gridwidth=2;
         c.insets= new Insets(0,5,30,0);
 
-        desplegable=new JComboBox();
-        add(desplegable,c);
+        desplegableMeses=new JComboBox();
+        add(desplegableMeses,c);
 
         c.gridx = 0;
         c.gridy = 1;
@@ -139,14 +137,9 @@ public class Stats extends JPanel {
         c.gridy = 2;
         c.anchor=GridBagConstraints.WEST;
         c.gridwidth=3;
-        c.insets= new Insets(0,5,10,0);
+//        c.insets= new Insets(0,5,10,0);
 
-        for(int i=0;i<centros.length;i++){
-            JRadioButton r=new JRadioButton("ID "+i+" "+centro[i]);
-            centros[i]=r;
-            group.add(centros[i]);
-            add(centros[i], c);
-            c.gridy++;
-        }
+        desplegableCentros=new JComboBox();
+        add(desplegableCentros,c);
     }
 }

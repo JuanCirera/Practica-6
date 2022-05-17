@@ -75,10 +75,10 @@ public class Paciente extends Persona{
 
 
     @Override
-    public void mostrarEstado() {
+    public String mostrarEstado() {
         //Como no se especifica nada voy a ordenar solo el año, aparecerá primero el año más reciente
         orderByYear_desc(visitasMedicas);
-        System.out.println(dni+", "+nombre+" "+apellido1+" "+apellido2+"\n"+"última visita: "+fechaNac.toString());
+        return dni+", "+nombre+" "+apellido1+" "+apellido2+"\n"+"última visita: "+fechaNac.toString();
     }
 
 

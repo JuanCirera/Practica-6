@@ -6,5 +6,6 @@ package logica;
 public interface Estadistica {
     //FUNCIONES
     public int diasPorMes(int month);
-    public void mostrarEstado();
+    //He decidido modificar esta funcion para que en vez de hacer un print devuelva toda la cadena.
+    public String mostrarEstado();
 }

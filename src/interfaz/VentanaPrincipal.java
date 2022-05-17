@@ -1,34 +1,36 @@
 package interfaz;
 
-import utilidades.Faker;
-import utilidades.PeticionDatos;
+import logica.*;
 import utilidades.PeticionDatosSwing;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
 public class VentanaPrincipal extends javax.swing.JFrame {
 
     //ATRIBUTOS
-    GridBagConstraints c = new GridBagConstraints();
+    private GestionMedica app;
+    private GridBagConstraints c = new GridBagConstraints();
     private Central central;
     private Menu m;
     private JFrame frame;
     private JLabel titulo, version;
-    private String hospitales[]=new String[15];
-    private String clinicas[]=new String[15];
+    private ArrayList<String> hospitales=new ArrayList<>();
+    private ArrayList<String> clinicas=new ArrayList<>();
+    private ArrayList<Paciente> pacientesHospital=new ArrayList<>();
+    //Declaro este array como final para que no se pueda modificar.
+    private final String MESES[]={"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto","Septiembre","Octubre", "Noviembre", "Diciembre"};
 
     //COLORES DE LOS PANELES
     //Con estos dos atributos puedo cambiar rápidamente los colores de todos los paneles y componentes.
@@ -43,7 +45,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     ImageIcon img = new ImageIcon("src/img/p6-icon.png");
 
 
-    public VentanaPrincipal() {
+    public VentanaPrincipal(GestionMedica app) {
+
+        this.app=app; //Inicializo el objeto GestionMédica con el que crea el MAIN del proyecto
+
         //FRAME
         frame = new JFrame("Gestión Médica");
         frame.setSize(700,650);
@@ -117,7 +122,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
 
     protected void setStyleBottomType1(){
-        version.setText("Alfa 0.3 © Juan Fco Cirera "); //TODO: cambiar version en cada commit
+        version.setText("Alfa 0.4 © Juan Fco Cirera "); //TODO: cambiar version en cada commit
         version.setFont(new Font("Calibri", Font.PLAIN, 12));
         version.setForeground(Color.decode("#555555"));
         version.setBorder(new EmptyBorder(0, 0, 0, 465)); //Chapucilla para que se separe este texto de los botones.
@@ -217,6 +222,26 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    protected void setStyleJList(JList<String> list){
+
+        list.setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 0));
+        list.setBackground(Color.decode("#3C3C3C"));
+        list.setForeground(Color.decode("#CDCDCD"));
+        list.setFont(new Font("Verdana", 1, 16));
+    }
+
+
+    protected void setStyleJRadioButton(JRadioButton radio[]){
+        for(JRadioButton r: radio){
+            if(r!=null) {
+                r.setBackground(bgColorCentral);
+                r.setForeground(Color.decode("#CDCDCD"));
+                r.setFont(new Font("Verdana", 1, 16));
+            }
+        }
+    }
+
+
     protected void setMenuStyle(Menu m) {
 
         for(JButton b: m.opciones){
@@ -250,32 +275,21 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
         GestionCentro gc;
 
+        app.mostrarCentros(tipo); //TODO
+        gc=new GestionCentro(tipo, opciones, app.centrosMedicos, bgColorCentral); //Esto crea un nuevo panel al que se le pasa las opciones a mostrar
         if(tipo==1) {
-            for(int i=0;i<hospitales.length;i++){
-                hospitales[i]=Faker.devolverHospitales();
-            }
-            gc=new GestionCentro(opciones, hospitales, bgColorCentral); //Esto crea un nuevo panel al que se le pasa las opciones a mostrar
             continuar(anterior, gc, "Inicio>Gestionar Hospital");
-            bottomType2.opciones[1].addActionListener(evt->volver(gc, bottomType2));
         }else{
-            for(int i=0;i<clinicas.length;i++){
-                clinicas[i]=Faker.devolverClinicas();
-            }
-            gc=new GestionCentro(opciones, clinicas, bgColorCentral); //Esto crea un nuevo panel al que se le pasa las opciones a mostrar
             continuar(anterior, gc, "Inicio>Gestionar Clínica");
-            bottomType2.opciones[1].addActionListener(evt->volver(gc, bottomType2));
         }
-
         bottomType1.setVisible(false);
-        rmActionListener(bottomType2);
-        frame.add(bottomType2, BorderLayout.SOUTH);
-        bottomType2.setVisible(true);
-        bottomType2.opciones[0].addActionListener(evt-> System.out.println(topType1.titulo.getText()));
+        rmActionListener(bottomType3);
+        frame.add(bottomType3, BorderLayout.SOUTH);
+        bottomType3.setVisible(true);
 
         //COMPONENTES
-
         setStyleScrollPane(gc.scroll);
-        gc.scroll.setPreferredSize(new Dimension(390, 350));
+        gc.scroll.setPreferredSize(new Dimension(420, 350));
         gc.scroll.setBorder(new EmptyBorder(new Insets(0,0,0,0)));
 
         for(JButton b: gc.opciones){
@@ -302,7 +316,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             b.setBackground(Color.decode("#5C5C5C"));
         }
 
-//        gc.opciones[0].addActionListener(evt->mostrarDatos(tipo, gc, centros));
+        gc.opciones[0].addActionListener(evt->mostrarDatos(tipo, gc));
 //        opcion6.addMouseListener(this);
         gc.opciones[0].setText("Mostrar información");
 
@@ -310,20 +324,18 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 //        opcion6.addMouseListener(this);
         gc.opciones[1].setText("Modificar");
 
-        gc.opciones[2].addActionListener(evt->nuevoCentro(tipo, gc));
+        gc.opciones[2].addActionListener(evt-> nuevoCentroPanel(tipo, gc));
 //        opcion6.addMouseListener(this);
         gc.opciones[2].setText("+ Nuevo");
 
-        gc.opciones[3].addActionListener(evt->confirmar());
+        gc.opciones[3].addActionListener(evt-> confirmRmCentro(getSelectedCenter(gc), gc, anterior, gc));
 //        opcion6.addMouseListener(this);
         gc.opciones[3].setText("- Eliminar");
 
-        for(JRadioButton r: gc.radioButtons){
-            r.setBackground(bgColorCentral);
-            r.setForeground(Color.decode("#CDCDCD"));
-            r.setFont(new Font("Verdana", 1, 16));
-        }
-        gc.radioButtons[0].setSelected(true);
+        setStyleJRadioButton(gc.radioButtons);
+//        gc.radioButtons[0].setSelected(true);
+
+        bottomType3.opciones[0].addActionListener(evt->volver(gc, bottomType3));
     }
 
 
@@ -428,7 +440,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
-    protected void mostrarDatos(int tipo, JPanel anterior, String arr[]){
+    protected void mostrarDatos(int tipo, JPanel anterior){
+
+        Centro c=getSelectedCenter(anterior);
+
         String type;
         if(tipo==1){
             type="Hospital";
@@ -443,11 +458,18 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 //        bottomType3.setVisible(true);
         bottomType3.opciones[0].addActionListener(evt-> volver(dp, bottomType3));
         continuar(anterior, dp, "Inicio>Gestionar "+type+">Mostrar Datos");
+        setStyleJTextArea(dp.texto);
 
         //COMPONENTES
-        //TODO: No es la mejor manera de mostrar esto con una tabla
         setStyleJTextArea(dp.texto);
-//        dp.texto.setText(); //TODO: meter aqui el toString del centro seleccionado
+        if(c instanceof Hospital) {
+            Hospital h=(Hospital)c;
+            dp.texto.setText(h.toString());
+        }else{
+            Clinica cl=(Clinica) c;
+            dp.texto.setText(cl.toString());
+        }
+        dp.texto.setMargin(new Insets(0,80,0,0));
     }
 
 
@@ -461,7 +483,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     protected void setStyleJTextArea(JTextArea label){
         label.setBackground(bgColorCentral);
         label.setForeground(Color.decode("#CDCDCD"));
-        label.setFont(new Font("Tahoma", 0, 16));
+        label.setFont(new Font("Tahoma", 0, 18));
     }
 
 
@@ -505,8 +527,13 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
 
     protected void setStyleJComboBox(JComboBox combo){
-        //CUSTOM SCROLLBAR
 
+        combo.setBackground(Color.decode("#3C3C3C"));
+        combo.setForeground(Color.decode("#CDCDCD"));
+        combo.setFont(new Font("Tahoma", 0, 16));
+        combo.setBorder(BorderFactory.createMatteBorder(1,1,1,1,Color.decode("#505050")));
+
+        //CUSTOM SCROLLBAR
         combo.setUI(new BasicComboBoxUI() {
 
             @Override
@@ -627,33 +654,43 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
-    protected void nuevoCentro(int tipo, JPanel anterior){
+    protected void nuevoCentroPanel(int tipoCentro, JPanel anterior){
         String type;
-        if(tipo==1){
+        if(tipoCentro ==1){
             type="Hospital";
         }else {
             type="Clínica";
         }
 
-        InputForm nuevoCentro=new InputForm(5, bgColorCentral);
-        continuar(anterior, nuevoCentro, "Inicio>Gestionar "+type+">Crear "+type);
+        InputForm nuevo;
+
+        if(tipoCentro==1) {
+            nuevo = new InputForm(7, bgColorCentral);
+            nuevo.titulos[5].setText("Plantas:");
+            nuevo.titulos[6].setText("Habitaciones por planta:");
+        }else{
+            nuevo = new InputForm(5, bgColorCentral);
+        }
+
+        continuar(anterior, nuevo, "Inicio>Gestionar "+type+">Crear "+type);
+        bottomType3.setVisible(false);
         rmActionListener(bottomType2);
         frame.add(bottomType2, BorderLayout.SOUTH);
         bottomType2.setVisible(true);
 
 
         //Texto para los campos
-        nuevoCentro.titulos[0].setText("Identificador:");
-        nuevoCentro.titulos[1].setText("Nombre:");
-        nuevoCentro.titulos[2].setText("Dirección:");
-        nuevoCentro.titulos[3].setText("Consultas:");
-        nuevoCentro.titulos[4].setText("Trabajadores:");
+        nuevo.titulos[0].setText("Identificador:");
+        nuevo.titulos[1].setText("Nombre:");
+        nuevo.titulos[2].setText("Dirección:");
+        nuevo.titulos[3].setText("Consultas:");
+        nuevo.titulos[4].setText("Trabajadores:");
 
         //Mensaje informativo
         JLabel info=new JLabel();
-        nuevoCentro.c.gridx=1;
-        nuevoCentro.c.gridy+=1;
-        nuevoCentro.add(info, nuevoCentro.c);
+        nuevo.c.gridx=1;
+        nuevo.c.gridy+=1;
+        nuevo.add(info, nuevo.c);
         setStyleJLabel(info);
         info.setForeground(Color.decode("#92D050"));
         info.setText("Nuevo centro añadido");
@@ -667,7 +704,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         Border defaultBorder= new MatteBorder(1,1,1,1,Color.decode("#414141"));
 
 
-        nuevoCentro.campos[0].getDocument().addDocumentListener(new DocumentListener() {
+        nuevo.campos[0].getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
                 warn();
             }
@@ -680,20 +717,28 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
             public void warn() {
                 info.setVisible(false);
+                String campo=nuevo.campos[0].getText();
+//                int idCentro=Integer.parseInt(campo);
+
                 //En el caso de que este vacío vuelve a su color -> INICIAL
-                if(nuevoCentro.campos[0].getText().equals("")){
-                    nuevoCentro.campos[0].setBorder(defaultBorder);
+                if(nuevo.campos[0].getText().equals("")){
+                    nuevo.campos[0].setBorder(defaultBorder);
                 //Si el texto del JTextField cumple las restricciones -> VERDE
-                }else if(PeticionDatosSwing.checkEnteroPositivo(nuevoCentro.campos[0].getText())==0) {
-                    nuevoCentro.campos[0].setBorder(greenBorder);
-                //Si el texto del JTextField imcumple alguna de las restricciones -> ROJO
-                }else if(PeticionDatosSwing.checkEnteroPositivo(nuevoCentro.campos[0].getText())!=0){
-                    nuevoCentro.campos[0].setBorder(redBorder);
+                }else if(PeticionDatosSwing.checkEnteroPositivo(campo)==0) {
+                    if(app.checkCenterID(Integer.parseInt(campo))){
+                        nuevo.campos[0].setBorder(redBorder);
+                    }else {
+                        nuevo.campos[0].setBorder(greenBorder);
+                    }
+                //Si el texto del JTextField incumple alguna de las restricciones -> ROJO
+                }else if(PeticionDatosSwing.checkEnteroPositivo(campo)!=0){
+                    nuevo.campos[0].setBorder(redBorder);
+                //Comprueba que el ID del nuevo centro no exista ya.
                 }
             }
         });
 
-        nuevoCentro.campos[1].getDocument().addDocumentListener(new DocumentListener() {
+        nuevo.campos[1].getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
                 warn();
             }
@@ -707,19 +752,19 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             public void warn() {
                 info.setVisible(false);
                 //En el caso de que este vacío vuelve a su color -> INICIAL
-                if(nuevoCentro.campos[1].getText().equals("")){
-                    nuevoCentro.campos[1].setBorder(defaultBorder);
+                if(nuevo.campos[1].getText().equals("")){
+                    nuevo.campos[1].setBorder(defaultBorder);
                 //Si el texto del JTextField cumple las restricciones -> VERDE
-                }else if(PeticionDatosSwing.checkCadenaLimite(false, true, 70, nuevoCentro.campos[1].getText())==0) {
-                    nuevoCentro.campos[1].setBorder(greenBorder);
+                }else if(PeticionDatosSwing.checkCadenaLimite(false, true, 70, nuevo.campos[1].getText())==0) {
+                    nuevo.campos[1].setBorder(greenBorder);
                 //Si el texto del JTextField imcumple alguna de las restricciones -> ROJO
-                }else if(PeticionDatosSwing.checkCadenaLimite(false, true, 70, nuevoCentro.campos[1].getText())!=0){
-                    nuevoCentro.campos[1].setBorder(redBorder);
+                }else if(PeticionDatosSwing.checkCadenaLimite(false, true, 70, nuevo.campos[1].getText())!=0){
+                    nuevo.campos[1].setBorder(redBorder);
                 }
             }
         });
 
-        nuevoCentro.campos[2].getDocument().addDocumentListener(new DocumentListener() {
+        nuevo.campos[2].getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
                 warn();
             }
@@ -733,19 +778,19 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             public void warn() {
                 info.setVisible(false);
                 //En el caso de que este vacío vuelve a su color -> INICIAL
-                if(nuevoCentro.campos[2].getText().equals("")){
-                    nuevoCentro.campos[2].setBorder(defaultBorder);
+                if(nuevo.campos[2].getText().equals("")){
+                    nuevo.campos[2].setBorder(defaultBorder);
                     //Si el texto del JTextField cumple las restricciones -> VERDE
-                }else if(PeticionDatosSwing.checkCadenaLimite(true, true, 70, nuevoCentro.campos[2].getText())==0) {
-                    nuevoCentro.campos[2].setBorder(greenBorder);
+                }else if(PeticionDatosSwing.checkCadenaLimite(true, true, 70, nuevo.campos[2].getText())==0) {
+                    nuevo.campos[2].setBorder(greenBorder);
                     //Si el texto del JTextField imcumple alguna de las restricciones -> ROJO
-                }else if(PeticionDatosSwing.checkCadenaLimite(true, true, 70, nuevoCentro.campos[2].getText())!=0){
-                    nuevoCentro.campos[2].setBorder(redBorder);
+                }else if(PeticionDatosSwing.checkCadenaLimite(true, true, 70, nuevo.campos[2].getText())!=0){
+                    nuevo.campos[2].setBorder(redBorder);
                 }
             }
         });
 
-        nuevoCentro.campos[3].getDocument().addDocumentListener(new DocumentListener() {
+        nuevo.campos[3].getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
                 warn();
             }
@@ -759,19 +804,19 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             public void warn() {
                 info.setVisible(false);
                 //En el caso de que este vacío vuelve a su color -> INICIAL
-                if(nuevoCentro.campos[3].getText().equals("")){
-                    nuevoCentro.campos[3].setBorder(defaultBorder);
+                if(nuevo.campos[3].getText().equals("")){
+                    nuevo.campos[3].setBorder(defaultBorder);
                     //Si el texto del JTextField cumple las restricciones -> VERDE
-                }else if(PeticionDatosSwing.checkEnteroPositivo(nuevoCentro.campos[3].getText())==0) {
-                    nuevoCentro.campos[3].setBorder(greenBorder);
+                }else if(PeticionDatosSwing.checkEnteroPositivo(nuevo.campos[3].getText())==0) {
+                    nuevo.campos[3].setBorder(greenBorder);
                     //Si el texto del JTextField imcumple alguna de las restricciones -> ROJO
-                }else if(PeticionDatosSwing.checkEnteroPositivo(nuevoCentro.campos[3].getText())!=0){
-                    nuevoCentro.campos[3].setBorder(redBorder);
+                }else if(PeticionDatosSwing.checkEnteroPositivo(nuevo.campos[3].getText())!=0){
+                    nuevo.campos[3].setBorder(redBorder);
                 }
             }
         });
 
-        nuevoCentro.campos[4].getDocument().addDocumentListener(new DocumentListener() {
+        nuevo.campos[4].getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
                 warn();
             }
@@ -785,20 +830,73 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             public void warn() {
                 info.setVisible(false);
                 //En el caso de que este vacío vuelve a su color -> INICIAL
-                if(nuevoCentro.campos[4].getText().equals("")){
-                    nuevoCentro.campos[4].setBorder(defaultBorder);
+                if(nuevo.campos[4].getText().equals("")){
+                    nuevo.campos[4].setBorder(defaultBorder);
                     //Si el texto del JTextField cumple las restricciones -> VERDE
-                }else if(PeticionDatosSwing.checkEnteroPositivo(nuevoCentro.campos[4].getText())==0) {
-                    nuevoCentro.campos[4].setBorder(greenBorder);
+                }else if(PeticionDatosSwing.checkEnteroPositivo(nuevo.campos[4].getText())==0) {
+                    nuevo.campos[4].setBorder(greenBorder);
                     //Si el texto del JTextField imcumple alguna de las restricciones -> ROJO
-                }else if(PeticionDatosSwing.checkEnteroPositivo(nuevoCentro.campos[4].getText())!=0){
-                    nuevoCentro.campos[4].setBorder(redBorder);
+                }else if(PeticionDatosSwing.checkEnteroPositivo(nuevo.campos[4].getText())!=0){
+                    nuevo.campos[4].setBorder(redBorder);
                 }
             }
         });
 
-        bottomType2.opciones[0].addActionListener(evt-> getCampo(nuevoCentro.campos, info));
-        bottomType2.opciones[1].addActionListener(evt->volver(nuevoCentro, bottomType2));
+        if(tipoCentro==1){
+            nuevo.campos[5].getDocument().addDocumentListener(new DocumentListener() {
+                public void changedUpdate(DocumentEvent e) {
+                    warn();
+                }
+                public void removeUpdate(DocumentEvent e) {
+                    warn();
+                }
+                public void insertUpdate(DocumentEvent e) {
+                    warn();
+                }
+
+                public void warn() {
+                    info.setVisible(false);
+                    //En el caso de que este vacío vuelve a su color -> INICIAL
+                    if(nuevo.campos[5].getText().equals("")){
+                        nuevo.campos[5].setBorder(defaultBorder);
+                        //Si el texto del JTextField cumple las restricciones -> VERDE
+                    }else if(PeticionDatosSwing.checkEnteroPositivo(nuevo.campos[5].getText())==0) {
+                        nuevo.campos[5].setBorder(greenBorder);
+                        //Si el texto del JTextField imcumple alguna de las restricciones -> ROJO
+                    }else if(PeticionDatosSwing.checkEnteroPositivo(nuevo.campos[5].getText())!=0){
+                        nuevo.campos[5].setBorder(redBorder);
+                    }
+                }
+            });
+            nuevo.campos[6].getDocument().addDocumentListener(new DocumentListener() {
+                public void changedUpdate(DocumentEvent e) {
+                    warn();
+                }
+                public void removeUpdate(DocumentEvent e) {
+                    warn();
+                }
+                public void insertUpdate(DocumentEvent e) {
+                    warn();
+                }
+
+                public void warn() {
+                    info.setVisible(false);
+                    //En el caso de que este vacío vuelve a su color -> INICIAL
+                    if(nuevo.campos[6].getText().equals("")){
+                        nuevo.campos[6].setBorder(defaultBorder);
+                        //Si el texto del JTextField cumple las restricciones -> VERDE
+                    }else if(PeticionDatosSwing.checkEnteroPositivo(nuevo.campos[6].getText())==0) {
+                        nuevo.campos[6].setBorder(greenBorder);
+                        //Si el texto del JTextField imcumple alguna de las restricciones -> ROJO
+                    }else if(PeticionDatosSwing.checkEnteroPositivo(nuevo.campos[6].getText())!=0){
+                        nuevo.campos[6].setBorder(redBorder);
+                    }
+                }
+            });
+        }
+
+        bottomType2.opciones[0].addActionListener(evt-> nuevoCentro(nuevo.campos, info, tipoCentro));
+        bottomType2.opciones[1].addActionListener(evt->volver(nuevo, bottomType2));
     }
 
 
@@ -806,31 +904,93 @@ public class VentanaPrincipal extends javax.swing.JFrame {
      * Obtiene los datos introducidos en el formulario a través de JTextField
      * @param campos - Array de JTextField
      * */
-    protected void getCampo(JTextField campos[]){
+    protected void nuevoCentro(JTextField campos[], JLabel info, int tipoCentro){
+
+        String n="", dir="";
+        int idCentro=0,consultas=0, plantas=0, hab=0;
+
         for(JTextField campo: campos){
-            System.out.println(campo.getText());
-            //TODO:Estos datos deberian meterse en el constructor del nuevo centro
+            idCentro=Integer.parseInt(campos[0].getText());
+            //TODO: Esto es un misterio le meto una "t" solamente en el nombre y me borra el centro anterior, solo pasa con esa letra o_o
+            n= campos[1].getText();
+            dir=campos[2].getText();
+            consultas=Integer.parseInt(campos[3].getText());
+            if(tipoCentro==1) {
+                plantas = Integer.parseInt(campos[4].getText());
+                hab = Integer.parseInt(campos[5].getText());
+            }
+        }
+
+        int contCentros=Centro.getContCentros();
+        if(contCentros>=app.centrosMedicos.length) {
+            if(app.aumentarCentrosMedicos()) {
+                if (tipoCentro == 1) {
+                    Hospital h = new Hospital(n, dir, idCentro, plantas, hab, consultas);
+                    app.centrosMedicos[contCentros - 1] = h;
+                } else {
+                    Clinica cl = new Clinica(n, dir, idCentro, consultas);
+                    app.centrosMedicos[contCentros - 1] = cl;
+                }
+            }
+        }else{
+            if (tipoCentro == 1) {
+                Hospital h = new Hospital(n, dir, idCentro, plantas, hab, consultas);
+                app.centrosMedicos[contCentros - 1] = h;
+            } else {
+                Clinica cl = new Clinica(n, dir, idCentro, consultas);
+                app.centrosMedicos[contCentros - 1] = cl;
+            }
+        }
+
+        for(JTextField campo: campos){
             campo.setText(""); //Para limpiar los campos una vez creado el centro
         }
+
+        info.setVisible(true);
     }
 
 
-    /**
-     * Obtiene los datos introducidos en el formulario a través de JTextField
-     * @param campos - Array de JTextField
-     * */
-    protected void getCampo(JTextField campos[], JLabel info){
-        for(JTextField campo: campos){
-            System.out.println(campo.getText());
-            //TODO:Estos datos deberian meterse en el constructor del nuevo centro
-            campo.setText(""); //Para limpiar los campos una vez creado el centro
-            //TODO:Si al crear el objeto no hay ningun error se muestra esto
-            info.setVisible(true);
+//    /**
+//     * Obtiene los datos introducidos en el formulario a través de JTextField
+//     * @param campos - Array de JTextField
+//     * */
+//    protected void checkCampo(JTextField campos[], JLabel info){
+//        for(JTextField campo: campos){
+//            System.out.println(campo.getText());
+//            //TODO:Estos datos deberian meterse en el constructor del nuevo centro
+//            campo.setText(""); //Para limpiar los campos una vez creado el centro
+//            //TODO:Si al crear el objeto no hay ningun error se muestra esto
+//            info.setVisible(true);
+//        }
+//    }
+
+
+    protected Centro getSelectedCenter(JPanel actual){
+        int idCentro=0;
+
+        if(actual instanceof GestionCentro) {
+            GestionCentro gc = (GestionCentro) actual;
+            for (JRadioButton r : gc.radioButtons) {
+                if (r != null && r.isSelected()) {
+                    String cadena = r.getText();
+                    idCentro = Integer.parseInt(cadena.substring(3, 4));
+                }
+            }
+        }else if(actual instanceof Stats){
+            Stats s = (Stats) actual;
+            String cadena= s.desplegableCentros.getSelectedItem().toString();
+            idCentro = Integer.parseInt(cadena.substring(3, 4));
         }
+
+        Centro c=app.whichCenter(idCentro);
+        return c;
     }
 
 
     protected void modificarCentro(int tipo, JPanel anterior){
+
+        Centro c=getSelectedCenter(anterior);
+
         String type;
         if(tipo==1){
             type="Hospital";
@@ -840,16 +1000,27 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
         InputForm modCentro=new InputForm(5, bgColorCentral);
         continuar(anterior, modCentro,"Inicio>Gestionar "+type+">Modificar Datos");
+        bottomType3.setVisible(false);
         rmActionListener(bottomType2);
         frame.add(bottomType2, BorderLayout.SOUTH);
         bottomType2.setVisible(true);
 
         //Texto para los campos
-        modCentro.titulos[0].setText("Identificador (1):"); //TODO: Hacer los get a los atributos actuales y concatenar al lado con un color mas oscuro
-        modCentro.titulos[1].setText("Nombre (Torrecárdenas):");
-        modCentro.titulos[2].setText("Dirección (Calle prueba):");
-        modCentro.titulos[3].setText("Consultas (20):");
-        modCentro.titulos[4].setText("Trabajadores (100):");
+        if(tipo==1) {
+            Hospital h=(Hospital) c;
+            modCentro.titulos[0].setText("Identificador ("+h.getID()+"):");
+            modCentro.titulos[1].setText("Nombre ("+h.getNombre()+"):");
+            modCentro.titulos[2].setText("Dirección ("+h.getDireccionCentro()+"):");
+            modCentro.titulos[3].setText("Consultas ("+h.getLimiteConsultas()+"):");
+            modCentro.titulos[4].setText("Trabajadores ("+h.getTotalTrabajadores()+"):");
+        }else{
+            Clinica cl=(Clinica)c;
+            modCentro.titulos[0].setText("Identificador ("+cl.getID()+"):");
+            modCentro.titulos[1].setText("Nombre ("+cl.getNombre()+"):");
+            modCentro.titulos[2].setText("Dirección ("+cl.getDireccionCentro()+"):");
+            modCentro.titulos[3].setText("Consultas ("+cl.getLimiteConsultas()+"):");
+            modCentro.titulos[4].setText("Trabajadores ("+cl.getTotalTrabajadores()+"):");
+        }
 
         //Mensaje informativo
         JLabel info=new JLabel();
@@ -997,7 +1168,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
         });
 
-        bottomType2.opciones[0].addActionListener(evt-> getCampo(modCentro.campos, info));
+//        bottomType2.opciones[0].addActionListener(evt-> getCampo(modCentro.campos, info));
         bottomType2.opciones[1].addActionListener(evt->volver(modCentro, bottomType2));
     }
 
@@ -1020,29 +1191,28 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         sc.t2.setFont(new Font("Tahoma", 0, 16));
         sc.t2.setHorizontalAlignment(SwingConstants.LEFT);
 
-
-        String meses[]={"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto","Septiembre","Octubre", "Noviembre", "Diciembre"};
-
-        for(String mes: meses){
-            sc.desplegable.addItem(mes);
+        for(String mes: MESES){
+            sc.desplegableMeses.addItem(mes);
         }
-        sc.desplegable.setBackground(Color.decode("#3C3C3C"));
-        sc.desplegable.setForeground(Color.decode("#CDCDCD"));
-        sc.desplegable.setFont(new Font("Tahoma", 0, 16));
-        sc.desplegable.setPreferredSize(new Dimension(110, 25));
-        setStyleJComboBox(sc.desplegable);
 
-        for(JRadioButton r: sc.centros){
-            r.setBackground(bgColorCentral);
-            r.setForeground(Color.decode("#CDCDCD"));
-            r.setFont(new Font("Tahoma", 1, 16));
+        for (Centro c: app.centrosMedicos) {
+            if(c!=null) {
+                sc.desplegableCentros.addItem("ID " + c.getID() + " " + c.getNombre());
+            }
         }
+
+        sc.desplegableMeses.setPreferredSize(new Dimension(110, 25));
+        setStyleJComboBox(sc.desplegableMeses);
+
+        setStyleJComboBox(sc.desplegableCentros);
+
+        setStyleJRadioButton(sc.centros);
 
         if(sc.centros[0]!=null) {
             sc.centros[0].setSelected(true);
         }
 
-//        bottomType2.opciones[0].addActionListener(evt-> mostrarStats(sc, 1 )); //TODO: se deberia comprobar de que clase es instancia la seleccion del ComboBox
+        bottomType2.opciones[0].addActionListener(evt-> mostrarStatsCentros(sc, sc.desplegableMeses.getSelectedItem().toString()));
         bottomType2.opciones[1].addActionListener(evt->volver(sc, bottomType2));
     }
 
@@ -1052,7 +1222,6 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         int tipoPersona;
 
         String centro[]={"Torrecárdenas", "Mediterráneo", "Virgen del Mar"};
-//        String c[]={"Clinica Almeria", "Clinica programadores", "Clinica pruebas"};
 
         Stats sc=new Stats(3, centro, bgColorCentral);
         bottomType1.setVisible(false);
@@ -1075,116 +1244,346 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         sc.t2.setFont(new Font("Tahoma", 0, 16));
         sc.t2.setHorizontalAlignment(SwingConstants.LEFT);
 
-
-        String meses[]={"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto","Septiembre","Octubre", "Noviembre", "Diciembre"};
-
-        for(String mes: meses){
-            sc.desplegable.addItem(mes);
+        for(String mes: MESES){
+            sc.desplegableMeses.addItem(mes);
         }
 
-        sc.desplegable.setBackground(Color.decode("#3C3C3C"));
-        sc.desplegable.setForeground(Color.decode("#CDCDCD"));
-        sc.desplegable.setFont(new Font("Tahoma", 0, 16));
-        sc.desplegable.setPreferredSize(new Dimension(110, 25));
-        sc.desplegable.addActionListener(e -> checkMes((String) sc.desplegable.getSelectedItem()));
-        sc.desplegable.setBorder(BorderFactory.createMatteBorder(1,1,1,1,Color.decode("#505050")));
-        setStyleJComboBox(sc.desplegable);
+        sc.desplegableMeses.setPreferredSize(new Dimension(110, 25));
+//        sc.desplegableMeses.addActionListener(e -> checkMes((String) sc.desplegableMeses.getSelectedItem()));
+        setStyleJComboBox(sc.desplegableMeses);
 
-        for(JRadioButton r: sc.personas){
-            r.setBackground(bgColorCentral);
-            r.setForeground(Color.decode("#CDCDCD"));
-            r.setFont(new Font("Tahoma", 0, 16));
-            r.addActionListener(e -> checkPerson(r.getText()));
+        setStyleJRadioButton(sc.personas);
+
+        for (Centro c: app.centrosMedicos) {
+            if(c!=null) {
+                sc.desplegableCentros.addItem("ID " + c.getID() + " " + c.getNombre());
+            }
         }
 
-        for(JRadioButton r: sc.centros){
-            r.setBackground(bgColorCentral);
-            r.setForeground(Color.decode("#CDCDCD"));
-            r.setFont(new Font("Tahoma", 0, 16));
-            r.addActionListener(e -> checkCenter(r.getText()));
-        }
+        sc.desplegableCentros.addActionListener(e -> getSelectedCenter(sc));
+        setStyleJComboBox(sc.desplegableCentros);
 
         if(sc.centros[0]!=null) {
             sc.centros[0].setSelected(true);
         }
 
-//        bottomType2.opciones[0].addActionListener(evt-> mostrarStats(sc, 1, )); //TODO: se deberia comprobar de que clase es instancia la seleccion del ComboBox
+        bottomType2.opciones[0].addActionListener(evt-> mostrarStatsPersonal(sc, sc.desplegableMeses.getSelectedItem().toString()));
         bottomType2.opciones[1].addActionListener(evt->volver(sc, bottomType2));
     }
 
-    //TODO
-    protected void checkPerson(String tipo){
-        if(tipo=="Paciente"){
-//            return 1;
-            System.out.println(tipo);
+
+    /**
+     * Obtiene el JradioButton seleccionado y segun sea devuelve el tipo de persona.
+     * @param actual - Jpanel
+     * @return int - 1->Paciente, 2->Trabajador
+     * */
+    protected int getPerson(JPanel actual){
+        Stats sp=(Stats) actual;
+        String persona="";
+
+        for(JRadioButton r: sp.personas){
+            if(r!=null && r.isSelected()){
+                persona=r.getText();
+            }
+        }
+
+        if(persona=="Paciente"){
+            return 1;
+        }else if(persona=="Médico"){
+            return 2;
         }else{
-//            return 2;
-            System.out.println(tipo);
+            return 3;
         }
     }
 
-    //TODO
-    protected void checkMes(String tipo){
-//        if(tipo=="Paciente"){
-//            return 1;
-            System.out.println(tipo);
-//        }else{
-//            return 2;
-//            System.out.println(tipo);
-//        }
-    }
 
-    //TODO
-    protected void checkCenter(String tipo){
-//        if(tipo=="Paciente"){
-//            return 1;
-        System.out.println(tipo);
-//        }else{
-//            return 2;
-//            System.out.println(tipo);
-//        }
+    /**
+     * Obtiene la posicion del mes seleccionado en el JComboBox
+     * @param actual - Jpanel
+     * @return int - mes en formato numérico
+     * */
+    protected int getMes(JPanel actual){
+        Stats sp=(Stats) actual;
+
+        return sp.desplegableMeses.getSelectedIndex()+1;
+
     }
 
 
-    protected void mostrarStats(JPanel anterior, int mes, int idCentro, int tipo){
+    /**
+     * Muestra los pacientes que tiene un centro medico, tanto en consultas como en habitaciones si es un Hospital
+     * @param c - centro del que se quieren mostrar los pacientes
+     * @return boolean - true si existe al menos un paciente, false si no hay nada
+     * */
+    protected int mostrarPacientes(Centro c/*, JTextArea t*/){
+        String mensaje="";
+        System.out.println(" ");//linea
+        int nulo=0, cont=0;
+
+        for(Paciente p: c.consultas){
+            if(p!=null) {
+                pacientesHospital.add(p);
+            } else {
+                nulo++;
+            }
+        }
+
+        if(c instanceof Hospital){
+            Hospital h=(Hospital) c;
+            for (int x = 0; x < h.habitaciones.length; x++) {
+                for (int z = 0; z < h.habitaciones[x].length; z++) {
+                    if (h.habitaciones[x][z] != null) {
+                        pacientesHospital.add(h.habitaciones[x][z]);
+                    } else {
+                        nulo++;
+                    }
+                }
+            }
+        }
+        return nulo;
+    }
+
+
+
+    /**
+     * Muestra un panel con las estadísticas del tipo de persona elegida
+     * @param anterior - JPanel desde donde se llama a esta funcion
+     * @param mesP - Mes del que obtener los datos
+     * */
+    protected void mostrarStatsPersonal(JPanel anterior, String mesP){
+
+        int tipoPersona=getPerson(anterior);
+        int mes=getMes(anterior);
+        Centro c=getSelectedCenter(anterior);
+
         bottomType2.setVisible(false);
         rmActionListener(bottomType2);
         frame.add(bottomType3, BorderLayout.SOUTH);
         bottomType3.setVisible(true);
 
-        //COMPONENTES
-        if(tipo==1) {
-            String[] columnNames = { "ID", "DNI/NIE", "Nombre", "Especialidad/Área"};
-            DataPanel ms=new DataPanel(bgColorCentral, columnNames);
-            continuar(anterior, ms, "Inicio>Estadísticas de los centros>Estadísticas de "+mes);
-            bottomType3.opciones[0].addActionListener(evt-> volver(ms, bottomType3));
-            ms.texto.setBackground(bgColorCentral);
-            ms.texto.setForeground(Color.decode("#CDCDCD"));
-            ms.texto.setFont(new Font("Arial", 0, 16));
-            ms.texto.setMargin(new Insets(0, 0, 0, 0));
+        Hospital h=null;
+        Clinica cl=null;
+
+        if(c instanceof Hospital){
+            h=(Hospital) c;
         }else{
-            String personas[]={"Juan", "Maria", "Rafa", "David"};
-            DataPanel sp=new DataPanel(personas, bgColorCentral);
-            continuar(anterior, sp, "Inicio>Estadísticas de los centros>Estadísticas de "+mes);
-            bottomType3.opciones[0].addActionListener(evt-> volver(sp, bottomType3));
+            cl=(Clinica) c;
+        }
 
-            sp.t1.setText("Pacientes del Hospital Torrecárdenas: ");
-            sp.t1.setForeground(Color.decode("#CDCDCD"));
-            sp.t1.setFont(new Font("Tahoma", 0, 16));
+        //COMPONENTES
+        //Se que esto es una chapuza, pero si me da tiempo lo mejoro.
+        if(tipoPersona==1 && c instanceof Hospital) {
+            int nulo=mostrarPacientes(h);
+            DataPanel pacientes=new DataPanel(pacientesHospital,bgColorCentral);
+            continuar(anterior, pacientes, "Inicio>Estadísticas de los centros>Estadísticas de "+mesP);
+            bottomType3.opciones[0].addActionListener(evt-> volver(pacientes, bottomType3));
 
-            for(JRadioButton r: sp.encontradas){
-                r.setBackground(bgColorCentral);
-                r.setForeground(Color.decode("#CDCDCD"));
-                r.setFont(new Font("Tahoma", 0, 16));
+            pacientes.t1.setText("Pacientes de "+h.getNombre()+": ");
+            setStyleJLabel(pacientes.t1);
+
+            setStyleScrollPane(pacientes.scroll);
+            pacientes.scroll.setBorder(new EmptyBorder(new Insets(0,0,0,0)));
+            setStyleJRadioButton(pacientes.encontradas);
+
+            setStyleJTextArea(pacientes.texto);
+            pacientes.texto.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(1,0,1,0 ,Color.decode("#414141") ),
+                    BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+            int total=h.consultas.length+h.habitaciones.length;
+
+            if(nulo>=total){
+                pacientes.texto.setText("Aún no hay pacientes registrados");
+                pacientes.texto.setForeground(Color.decode("#BFB500"));
             }
 
-            sp.texto.setBackground(bgColorCentral);
-            sp.texto.setForeground(Color.decode("#CDCDCD"));
-            sp.texto.setFont(new Font("Arial", 0, 16));
-            sp.texto.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(1,0,0,0,Color.decode("#414141")),
-                    BorderFactory.createEmptyBorder(15, 0, 5, 5)));
+            for(JRadioButton r: pacientes.encontradas){
+                if(r!=null) {
+                    r.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            int idPersona=Integer.parseInt(r.getText().substring(3,4));
+                            Persona p=app.whichPerson(idPersona);
+                            pacientes.texto.setText(app.getStatsPersonal(p, mes));
+                        }
+                    });
+                }
+            }
+
+        }else if(tipoPersona==1 && c instanceof Clinica){
+            DataPanel pacientes=new DataPanel(cl.consultas, 1, bgColorCentral);
+            continuar(anterior, pacientes, "Inicio>Estadísticas de los centros>Estadísticas de "+mesP);
+            bottomType3.opciones[0].addActionListener(evt-> volver(pacientes, bottomType3));
+
+            pacientes.t1.setText("Pacientes de "+cl.getNombre()+": ");
+            setStyleJLabel(pacientes.t1);
+
+            setStyleScrollPane(pacientes.scroll);
+            pacientes.scroll.setBorder(new EmptyBorder(new Insets(0,0,0,0)));
+            setStyleJRadioButton(pacientes.encontradas);
+
+            setStyleJTextArea(pacientes.texto);
+            pacientes.texto.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(1,0,1,0 ,Color.decode("#414141") ),
+                    BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+
+            for(JRadioButton r: pacientes.encontradas){
+                if(r!=null) {
+                    r.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            int idPersona=Integer.parseInt(r.getText().substring(3,4));
+                            Persona p=app.whichPerson(idPersona);
+                            pacientes.texto.setText(app.getStatsPersonal(p, mes));
+                        }
+                    });
+                }
+            }
+
+        }else if(tipoPersona==2){
+            DataPanel medicos=new DataPanel(c.trabajadores, 2, bgColorCentral);
+            continuar(anterior, medicos, "Inicio>Estadísticas de los centros>Estadísticas de "+mesP);
+            bottomType3.opciones[0].addActionListener(evt-> volver(medicos, bottomType3));
+
+            medicos.t1.setText("Médicos de "+c.getNombre()+": ");
+            setStyleJLabel(medicos.t1);
+
+            setStyleScrollPane(medicos.scroll);
+            medicos.scroll.setBorder(new EmptyBorder(new Insets(0,0,0,0)));
+            setStyleJRadioButton(medicos.encontradas);
+
+            setStyleJTextArea(medicos.texto);
+            medicos.texto.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(1,0,1,0 ,Color.decode("#414141") ),
+                    BorderFactory.createEmptyBorder(25, 5, 5, 5)));
+
+            for(JRadioButton r: medicos.encontradas){
+                if(r!=null) {
+                    r.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            int idPersona=Integer.parseInt(r.getText().substring(3,4));
+                            Persona p=app.whichPerson(idPersona);
+                            medicos.texto.setText(app.getStatsPersonal(p, mes));
+                        }
+                    });
+                }
+            }
+        }else if(tipoPersona==3){
+            DataPanel admins=new DataPanel(c.trabajadores, 3, bgColorCentral);
+            continuar(anterior, admins, "Inicio>Estadísticas de los centros>Estadísticas de "+mesP);
+            bottomType3.opciones[0].addActionListener(evt-> volver(admins, bottomType3));
+
+            admins.t1.setText("Administrativos de "+c.getNombre()+": ");
+            setStyleJLabel(admins.t1);
+
+            setStyleScrollPane(admins.scroll);
+            admins.scroll.setBorder(new EmptyBorder(new Insets(0,0,0,0)));
+            setStyleJRadioButton(admins.encontradas);
+
+            setStyleJTextArea(admins.texto);
+            admins.texto.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(1,0,1,0 ,Color.decode("#414141") ),
+                    BorderFactory.createEmptyBorder(25, 5, 5, 5)));
+
+            for(JRadioButton r: admins.encontradas){
+                if(r!=null) {
+                    r.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            int idPersona=Integer.parseInt(r.getText().substring(3,4));
+                            Persona p=app.whichPerson(idPersona);
+                            admins.texto.setText(app.getStatsPersonal(p, mes));
+                        }
+                    });
+                }
+            }
         }
+    }
+
+
+    protected void mostrarStatsCentros(JPanel anterior, String  mesP){
+        int mes=getMes(anterior);
+        Centro centro=getSelectedCenter(anterior);
+        int cont=0, libres=0;
+
+        String consultas[]=new String[centro.consultas.length];
+        String habitaciones[];
+
+        for(Paciente p: centro.consultas){
+            cont++;
+            if(p!=null){
+                consultas[cont-1]=cont+" > "+p.getNombre()+", "+p.getApellido1()+" "+p.getApellido2();
+            }else{
+//                consultas[cont-1]=cont+" > "+" Libre";
+                libres++;
+            }
+        }
+
+        if(libres>=centro.consultas.length) {
+            consultas[0] = "Todas las consultas libres";
+        }
+
+
+        DataPanel msc=new DataPanel(bgColorCentral, true, consultas);
+        continuar(anterior, msc, "...>Estadísticas de centros>"+centro.getNombre()+", "+mesP);
+
+        bottomType2.setVisible(false);
+        rmActionListener(bottomType2);
+        frame.add(bottomType3, BorderLayout.SOUTH);
+        bottomType3.setVisible(true);
+
+        setStyleJLabel(msc.t1);
+        msc.t1.setText("CONSULTAS");
+        msc.t1.setFont(new Font("Tahoma", 1, 16));
+//        msc.t2.setText("HABITACIONES");
+//        setStyleJTextArea(msc.texto);
+        setStyleScrollPane(msc.scroll);
+        setStyleJList(msc.estadoConsultas);
+        msc.estadoConsultas.setPreferredSize(new Dimension(350, 0));
+
+        msc.scroll.setBorder(BorderFactory.createLineBorder(Color.decode("#414141"), 1));
+
+        if(centro instanceof Hospital) {
+            Hospital h=(Hospital) centro;
+            int longitud=h.habitaciones.length*h.habitaciones[0].length; //Hay que multiplicarlo, no sumarlo...
+            habitaciones = new String[longitud];
+            int contador=0;
+
+            for (int x = 0; x < h.habitaciones.length; x++) {
+                for (int z = 0; z < h.habitaciones[x].length; z++) {
+                    if (h.habitaciones[x][z] != null) {
+                        habitaciones[z]=x+"-"+z+h.habitaciones[x][z].getNombre()+", "+h.habitaciones[x][z].getApellido1()+
+                                " "+h.habitaciones[x][z].getApellido2();
+                    }else{
+                        contador++;
+                    }
+                }
+            }
+
+            if(contador>=longitud) {
+                habitaciones[0] = "Todas las habitaciones libres";
+            }
+
+            msc.c.gridx = 0;
+            msc.c.gridy = 2;
+            msc.c.insets= new Insets(10,0,0,0);
+            JLabel t2=new JLabel("HABITACIONES");
+            msc.add(t2, msc.c);
+
+            msc.c.gridx = 0;
+            msc.c.gridy = 3;
+            JList<String> estadoHabitaciones=new JList<>(habitaciones);
+            msc.add(estadoHabitaciones, msc.c);
+            estadoHabitaciones.setPreferredSize(new Dimension(350, 0));
+            JScrollPane scroll=new JScrollPane(estadoHabitaciones);
+            msc.add(scroll, msc.c);
+            setStyleJLabel(t2);
+            t2.setFont(new Font("Tahoma", 1, 16));
+            setStyleScrollPane(scroll);
+            setStyleJList(estadoHabitaciones);
+        }
+
+        bottomType3.opciones[0].addActionListener(evt->volver(msc, bottomType3));
     }
 
 
@@ -1237,28 +1636,35 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
-    protected static void confirmar(){
+    protected void confirmRmCentro(Centro c, JPanel actual, JPanel anterior, JPanel nuevo){
 
         int opcion=JOptionPane.showConfirmDialog(null, "Está apunto de eliminar el objeto ¿Está seguro?", "Confirmación de la operación", JOptionPane.OK_CANCEL_OPTION);
-        if(opcion==1){
-            //TODO:lo elimina
-//            System.exit(0);
-            System.out.println("Objeto eliminado");
+
+        if(opcion==0){
+            if(app.removeCentro(c.getID())){
+                System.out.println("Objeto eliminado");
+                JOptionPane.showMessageDialog(null, "El centro "+c.getNombre()+" ha sido eliminado correctamente.", "Mensaje de información", JOptionPane.INFORMATION_MESSAGE);
+                //Por mas que intento que se actualice al eliminarlo no quiere...(Arreglado)
+                central.remove(actual); //No quitar esta línea que hace falta, si no se solapa to.
+                //Ni revalidate, ni repaint ni nada, llamo otra vez a la funcion y que se cree to de nuevo :)
+                gestionCentro(anterior, 1, 4);
+            }else{
+//                System.out.println("Error. El centro tiene personas.");
+                JOptionPane.showMessageDialog(null, "El centro contiene personas, primero debes dar de baja todo su personal.", "Error al eliminar", JOptionPane.ERROR_MESSAGE);
+            }
         }else{
-//            System.exit(0);
             System.out.println("Operación cancelada");
         }
-
     }
 
 
-    public static void main(String args[]) {
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new VentanaPrincipal();
-            }
-        });
-    }
+//    public static void main(String args[]) {
+//        /* Create and display the form */
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                new VentanaPrincipal();
+//            }
+//        });
+//    }
 
 }
