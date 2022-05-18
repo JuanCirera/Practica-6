@@ -4,6 +4,9 @@ import javax.swing.*;
 import javax.tools.JavaCompiler;
 import java.awt.*;
 
+/**
+ * Clase que crea un panel-formulario que pide datos para mostrar las Stats ya sea de centros o personas, segun el constructor
+ * */
 public class Stats extends JPanel {
 
     protected GridBagConstraints c;

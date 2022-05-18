@@ -10,6 +10,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ * Clase que crea un panel-norte con el logo y la posicion actual
+ * */
 public class Top extends javax.swing.JPanel{
 
     protected JLabel titulo;

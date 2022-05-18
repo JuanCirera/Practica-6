@@ -1277,7 +1277,7 @@ public class GestionMedica implements Serializable {
     }
 
 
-    //Podría haber usado la funcion nuevaPersona, pero como necesito datos de un objeto que ya existe no puedo volver a pedirlos.
+    //Podría haber usado la funcion pedirDni, pero como necesito datos de un objeto que ya existe no puedo volver a pedirlos.
     /**
      * Ingresa un objeto persona de tipo medico/admin que ya existe.
      * @param p - objeto persona a ingresar
@@ -1288,7 +1288,7 @@ public class GestionMedica implements Serializable {
                 p.getSexo(), p.getFechaNac());
         mostrarCentros(0);
         int idCentro=PeticionDatos.pedirEnteroPositivo(false, "> ID: ");
-        //TODO:copiar la opcion de crear paciente de nuevaPersona
+        //TODO:copiar la opcion de crear paciente de pedirDni
 
         return false;
     }
@@ -1451,31 +1451,31 @@ public class GestionMedica implements Serializable {
     }
 
 
-    /**
-     * Funcion que muestra un listado con el personal de un tipo que existe en un centro
-     * @param tipo de trabajador, 2(Médico) 3(Admin)
-     * @return int - idPersona introducido por teclado
-     * */
-    public void setPersonal(int tipo, Centro c) {
-//        int idPersona=0;
-//        System.out.println(" ");//linea
-//        String cadena="";
-
-        for(Persona p: c.trabajadores){
-            if(p!=null && tipo==2 && p instanceof Medico) {
-                Medico m=(Medico) p;
-//                cadena=m.toString();
-                c.medicos.add(m);
-            }else if(p!=null && tipo==3 && p instanceof Administrativo) {
-                Administrativo a=(Administrativo) p;
-//                cadena=a.toString();
-                c.admins.add(a);
-            }
-        }
-//        idPersona=pedirIDpersona(false);
-
-//        return cadena;
-    }
+//    /**
+//     * Funcion que muestra un listado con el personal de un tipo que existe en un centro
+//     * @param tipo de trabajador, 2(Médico) 3(Admin)
+//     * @return int - idPersona introducido por teclado
+//     * */
+//    public void setPersonal(int tipo, Centro c) {
+////        int idPersona=0;
+////        System.out.println(" ");//linea
+////        String cadena="";
+//
+//        for(Persona p: c.trabajadores){
+//            if(p!=null && tipo==2 && p instanceof Medico) {
+//                Medico m=(Medico) p;
+////                cadena=m.toString();
+//                c.medicos.add(m);
+//            }else if(p!=null && tipo==3 && p instanceof Administrativo) {
+//                Administrativo a=(Administrativo) p;
+////                cadena=a.toString();
+//                c.admins.add(a);
+//            }
+//        }
+////        idPersona=pedirIDpersona(false);
+//
+////        return cadena;
+//    }
 
 
     /**
@@ -1834,7 +1834,7 @@ public class GestionMedica implements Serializable {
      * @param dni a comprobar
      * @return boolean - true, si encuentra un dni que coincida, false si no encuentra nada.
      * */
-    protected boolean checkDNI(String dni){
+    public boolean checkDNI(String dni){
         for(Centro c: centrosMedicos){ //Busca en todos los centros
             if(c!=null) {
                 for (Persona p : c.trabajadores) { //En todos los trabajadores de cada centro
@@ -1969,7 +1969,7 @@ public class GestionMedica implements Serializable {
      * @param worker persona de tipo medico/admin a guardar.
      * @return boolean - true, si se ha guardado correctamente, false si algo ha fallado.
      * */
-    protected static boolean saveFired(Persona worker){
+    protected boolean saveFired(Persona worker){
         String path="datos/personas/fired.ser"; //La ruta no la paso por parámetro porque no va a cambiar y solo se usa en esta funcion
         try{
             ObjectOutputStream oos=new ObjectOutputStream(new FileOutputStream(path));
@@ -1981,6 +1981,32 @@ public class GestionMedica implements Serializable {
             System.out.println(ANSI_RED + "Ha ocurrido un error mientras se guardaba." + ANSI_RESET);
             return false;
         }
+    }
+
+
+    /**
+     * Funcion nueva que despide al trabajador pasado, se llama desde la interfaz
+     * */
+    public boolean fireWorker(String dni){
+        Persona person=whichPerson(dni);
+        //Antes de vaciar su posicion en el array, se guarda(no se pa que) llamando a esta funcion.
+        boolean saved=saveFired(person);
+        //PERSONAL
+        Centro c=whereWorking(dni);
+        if(c instanceof Hospital && person instanceof Medico || person instanceof Administrativo){
+            Hospital h=(Hospital) c;
+            if(h.removePersonal(person) && saved){
+//                System.out.println(ANSI_BGREEN+"Trabajador eliminado con éxito."+ANSI_RESET);
+                return true;
+            }
+        }else if(c instanceof Clinica && person instanceof Medico || person instanceof Administrativo){
+            Clinica cl=(Clinica) c;
+            if(cl.removePersonal(person) && saved){
+//                System.out.println(ANSI_BGREEN+"Trabajador eliminado con éxito."+ANSI_RESET);
+                return true;
+            }
+        }
+        return false;
     }
 
 

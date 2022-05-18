@@ -3,6 +3,9 @@ package interfaz;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Clase que crea un panel-menu con JButtons
+ * */
 public class Menu extends javax.swing.JPanel{
 
 //    private JButton opcion;

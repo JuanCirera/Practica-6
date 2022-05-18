@@ -4,6 +4,7 @@ import utilidades.Fecha;
 
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * Clase con la información común que define a una persona
@@ -110,7 +111,7 @@ public abstract class Persona implements Estadistica, Serializable {
      * @param fechaNac - objeto fecha que se necesita comprobar
      * @return boolean - true si el año es correcto, false si no cumple la condicion (120 años)
      * */
-    protected boolean validarFechaNac(Fecha fechaNac){
+    public boolean validarFechaNac(Fecha fechaNac){
         //Estas dos líneas son para obtener el año actual
         Calendar calendar = Calendar.getInstance();
         int actual=calendar.get(Calendar.YEAR);
@@ -128,7 +129,8 @@ public abstract class Persona implements Estadistica, Serializable {
      * @param sexo introducido
      * @return boolean - Devuelve true si coincide con hombre/mujer y false si no coincide con ninguno.
      * */
-    protected static boolean validarGenero(String sexo){
+    public static boolean validarGenero(String sexo){
+        sexo.toLowerCase();
         if (sexo.equals("hombre") || sexo.equals("mujer")){
             return true;
         }else {

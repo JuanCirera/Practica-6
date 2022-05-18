@@ -16,8 +16,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 
+/**
+ * Clase gráfica que crea la ventana basa donde se añaden todos los paneles y se encarga de la gestión de la interfaz.
+ * @author Juan Fco Cirera
+ * */
 public class VentanaPrincipal extends javax.swing.JFrame {
 
     //ATRIBUTOS
@@ -26,7 +29,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     private Central central;
     private Menu m;
     private JFrame frame;
-    private JLabel titulo, version;
+    private JLabel titulo, version, mensaje;
     private ArrayList<String> hospitales=new ArrayList<>();
     private ArrayList<String> clinicas=new ArrayList<>();
     private ArrayList<Paciente> pacientesHospital=new ArrayList<>();
@@ -39,13 +42,24 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     private Color bgColorTop=Color.decode("#2B2B2B");
     private Color bgColorTextField=Color.decode("#3C3C3C");
 
+    //IMAGENES
+    ImageIcon img = new ImageIcon("src/img/p6-icon.png");
+    ImageIcon info = new ImageIcon("src/img/info-24.png");
+    ImageIcon error = new ImageIcon("src/img/error-24.png");
+
     //PANELES
     private Top topType1;
     private Bottom bottomType1,bottomType2,bottomType3;
 
-    ImageIcon img = new ImageIcon("src/img/p6-icon.png");
+    //Bordes para los JTextField
+    Border greenBorder=new MatteBorder(1,1,1,1,Color.decode("#00B050"));
+    Border redBorder=new MatteBorder(1,1,1,1,Color.decode("#C00000"));
+    Border defaultBorder= new MatteBorder(1,1,1,1,Color.decode("#414141"));
 
 
+    /**
+     * Constructor
+     * */
     public VentanaPrincipal(GestionMedica app) {
 
         this.app=app; //Inicializo el objeto GestionMédica con el que crea el MAIN del proyecto
@@ -67,6 +81,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Funcion que inicializa los componentes principales o iniciales.
+     * */
     private void inicia() {
 
         //TOP PANELS
@@ -82,9 +99,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         c.gridy = 0;
         m = new Menu(6, bgColorCentral);
         central.add(m, c);
-        setMenuStyle(m);
+        setStyleMenu(m);
         //COMPONENTES
-        m.opciones[0].addActionListener(evt->gestionCentro(m,1, 4)); //TODO: llamar a la funcion que creara otro objeto menu con distintos atributos
+        m.opciones[0].addActionListener(evt->gestionCentro(m,1, 4));
         m.opciones[0].setText("Gestionar Hospital");
 
         m.opciones[1].addActionListener(evt->gestionCentro(m,2,4));
@@ -105,29 +122,27 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         frame.add(central, BorderLayout.CENTER);
 
         //BOTTOM PANELS
-        version=new JLabel();
-
-        bottomType1=new Bottom(version, 1, bgColorCentral);
+        bottomType1=new Bottom(1, bgColorCentral);
         frame.add(bottomType1, BorderLayout.SOUTH); //Este lo añado desde el principio porque aparece al arrancar
         setStyleBottomType1();
-//        bottomType1.setVisible(true);
 
         bottomType2=new Bottom(2, bgColorCentral);
-//        frame.add(bottomType2, BorderLayout.SOUTH);
         setStyleBottomType2();
 
         bottomType3=new Bottom(1, bgColorCentral);
-//        frame.add(bottomType3, BorderLayout.SOUTH);
         setStyleBottomType3();
     }
 
 
+    /**
+     * Da formato al tipo de panel-sur 1 (Texto, Salir).
+     * */
     protected void setStyleBottomType1(){
-        version.setText("Alfa 0.5 © Juan Fco Cirera "); //TODO: cambiar version en cada commit
-        version.setFont(new Font("Calibri", Font.PLAIN, 12));
-        version.setForeground(Color.decode("#555555"));
-        version.setBorder(new EmptyBorder(0, 0, 0, 510)); //Chapucilla para que se separe este texto de los botones.
-
+        bottomType1.text.setText("Alfa 0.6 © Juan Fco Cirera "); //TODO: cambiar version en cada commit
+        bottomType1.text.setFont(new Font("Calibri", 0, 12));
+        bottomType1.text.setForeground(Color.decode("#555555"));
+        bottomType1.text.setBorder(new EmptyBorder(0, 0, 0, 510)); //Chapucilla para que se separe este texto de los botones.
+        bottomType1.text.setVisible(true);
 
         for(JButton b: bottomType1.opciones){
             b.setBorder(BorderFactory.createCompoundBorder(
@@ -155,10 +170,18 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         bottomType1.opciones[0].setText("Salir");
         //Este listener lo dejo porque el Type1 siempre va a hacer lo MISMO
         bottomType1.opciones[0].addActionListener(evt->salir());
+//        bottomType1.opciones[0].setBorder(new EmptyBorder(0,0,50,10));
+//        bottomType1.opciones[0].setMargin(new Insets(0,0,10,10));
     }
 
 
+    /**
+     * Da formato al tipo de panel-sur 2 (Texto, Aceptar, Volver).
+     * */
     protected void setStyleBottomType2(){
+        bottomType2.text.setFont(new Font("Tahoma", 0, 16));
+        bottomType2.text.setForeground(Color.decode("#555555"));
+        bottomType2.text.setBorder(new EmptyBorder(0, 0, 0, 20)); //Chapucilla para que se separe este texto de los botones.
 
         for(JButton b: bottomType2.opciones){
             b.setBorder(BorderFactory.createCompoundBorder(
@@ -192,7 +215,13 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Da formato al tipo de panel-sur 3 (Texto, Volver).
+     * */
     protected void setStyleBottomType3(){
+        bottomType3.text.setFont(new Font("Tahoma", 0, 16));
+        bottomType3.text.setForeground(Color.decode("#555555"));
+        bottomType3.text.setBorder(new EmptyBorder(0, 0, 0, 20)); //Chapucilla para que se separe este texto de los botones.
 
         for(JButton b: bottomType3.opciones){
             b.setBorder(BorderFactory.createCompoundBorder(
@@ -219,11 +248,17 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         bottomType3.opciones[0].setBackground(Color.decode("#5C5C5C"));
         bottomType3.opciones[0].setText("Volver");
 //        bottomType1.opciones[0].addActionListener(evt->);
-
     }
 
 
+    /**
+     * Da formato a un JList ya asus elementos
+     * @param list - JList a formatear
+     * */
     protected void setStyleJList(JList<String> list){
+        bottomType1.text.setFont(new Font("Calibri", 0, 16));
+        bottomType1.text.setForeground(Color.decode("#555555"));
+        bottomType1.text.setBorder(new EmptyBorder(0, 0, 0, 510)); //Chapucilla para que se separe este texto de los botones.
 
         list.setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 0));
         list.setBackground(Color.decode("#3C3C3C"));
@@ -232,6 +267,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Da formato a un conjunto de JRadioButtons
+     * @param radio - array que contiene los radio button
+     * */
     protected void setStyleJRadioButton(JRadioButton radio[]){
         for(JRadioButton r: radio){
             if(r!=null) {
@@ -243,7 +282,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
-    protected void setMenuStyle(Menu m) {
+    /**
+     * Da estilo o formato a los elementos del panel-menu
+     * @param m - panel-menu a dar formato
+     * */
+    protected void setStyleMenu(Menu m) {
 
         for(JButton b: m.opciones){
             b.setBorder(BorderFactory.createCompoundBorder(
@@ -272,21 +315,21 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Crea un panel-gestionCentro que lista los centros y permite realizar operaciones sobre ellos.
+     * @param anterior
+     * @param tipo de centro a gestionar
+     * @param opciones - cantidad de botones para las operaciones.
+     * */
     protected void gestionCentro(JPanel anterior, int tipo, int opciones){
 
         GestionCentro gc;
-
-//        app.mostrarCentros(tipo); //TODO
         gc=new GestionCentro(tipo, opciones, app.centrosMedicos, bgColorCentral); //Esto crea un nuevo panel al que se le pasa las opciones a mostrar
         if(tipo==1) {
-            continuar(anterior, gc, "Inicio>Gestionar Hospital");
+            continuar(bottomType1, bottomType3, anterior, gc, "Inicio>Gestionar Hospital");
         }else{
-            continuar(anterior, gc, "Inicio>Gestionar Clínica");
+            continuar(bottomType1, bottomType3,anterior, gc, "Inicio>Gestionar Clínica");
         }
-        bottomType1.setVisible(false);
-        rmActionListener(bottomType3);
-        frame.add(bottomType3, BorderLayout.SOUTH);
-        bottomType3.setVisible(true);
 
         //COMPONENTES
         setStyleScrollPane(gc.scroll);
@@ -359,37 +402,42 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Crea un panel-menu para gestionar personas
+     * @param tipo de persona a gestionar
+     * */
     protected void gestionPersona(int tipo){
         //TODO
         String trab[]={"1 12345678Z, Juan Francisco", "2 983465981F, Maria Jover", "3 096581291G, Rafael Cirera", "4 001746125A, Mariano Rajoy"};
         String pac[]={"David", "Pepe", "Antonio", "Francisco"};
 
-        bottomType1.setVisible(false);
-        frame.add(bottomType3, BorderLayout.SOUTH);
-        bottomType3.setVisible(true);
         Menu gp=new Menu(2, bgColorCentral);;
-//        continuar(m, gp, "Inicio>Gestionar Personal");
-        setMenuStyle(gp);
+        setStyleMenu(gp);
         bottomType3.opciones[0].addActionListener(evt->volver(gp, bottomType3));
 
         if(tipo==2 || tipo==3){
-            continuar(m, gp, "Inicio>Gestionar Personal");
+            continuar(bottomType1,bottomType3, m, gp, "Inicio>Gestionar Personal");
             gp.opciones[0].setText("Mostrar Trabajadores");
-            gp.opciones[0].addActionListener(evt->mostrarPersonas(tipo, gp, trab));
+            gp.opciones[0].addActionListener(evt->mostrarPersonas(tipo, gp));
             gp.opciones[1].setText("Nuevo Trabajador");
-            gp.opciones[1].addActionListener(evt->nuevaPersona(gp, tipo));
+            gp.opciones[1].addActionListener(evt-> pedirDni(gp, tipo));
 
         }else{
-            continuar(m, gp, "Inicio>Gestionar Paciente");
+            continuar(bottomType1,bottomType3,m, gp, "Inicio>Gestionar Paciente");
             gp.opciones[0].setText("Mostrar Pacientes");
-            gp.opciones[0].addActionListener(evt->mostrarPersonas(tipo, gp, pac));
+            gp.opciones[0].addActionListener(evt->mostrarPersonas(tipo, gp));
             gp.opciones[1].setText("Nuevo Paciente");
 //            gp.opciones[1].addActionListener(evt->mostrarDatos(1, m));
         }
     }
 
 
-    protected void nuevaPersona(JPanel anterior, int tipo){
+    /**
+     * Crea un panel-formulario que pide un DNI, lo valida y dice si existe o no.
+     * @param anterior
+     * @param tipo de persona
+     * */
+    protected void pedirDni(JPanel anterior, int tipo){
         String type;
         if(tipo==1){
             type="paciente";
@@ -397,22 +445,17 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             type="trabajador";
         }
 
-        pedirDNI pDNI=new pedirDNI(1,  bgColorCentral);
-        continuar(anterior, pDNI, "Inicio>Gestionar Personal>Crear "+type);
-        bottomType3.setVisible(false);
-        rmActionListener(bottomType2);
-        frame.add(bottomType2, BorderLayout.SOUTH);
-        bottomType2.setVisible(true);
+        pedirDNI pDNI=new pedirDNI(1,20,   bgColorCentral);
+        continuar(bottomType3,bottomType2,anterior, pDNI, "Inicio>Gestionar Personal>Crear "+type);
 
         pDNI.t1.setText("Introduce el DNI del "+type+" que quieres crear/gestionar");
         pDNI.t1.setFont(new Font("Tahoma", 0, 16));
         pDNI.t1.setForeground(Color.decode("#CDCDCD"));
         pDNI.t1.setBackground(Color.decode("#5C5C5C"));
 
-        pDNI.t2.setFont(new Font("Tahoma", 0, 16));
-        pDNI.t2.setForeground(Color.ORANGE);
-        pDNI.t2.setText("El DNI introducido no existe. ¿Desea crear un nuevo "+type+"?");
-        pDNI.t2.setVisible(false);
+        bottomType2.text.setForeground(Color.decode("#CDCDCD"));
+        bottomType2.text.setText("Este DNI no está registrado. ¿Desea crear un nuevo "+type+"?");
+        bottomType2.text.setIcon(info);
 
         //Texto para los campos
         pDNI.titulos[0].setText("DNI:");
@@ -445,21 +488,296 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 //Si el texto del JTextField es igual a este DNI temporal -> VERDE
                 if(PeticionDatosSwing.checkNIF_NIE(dni)==0) {
                     pDNI.campos[0].setBorder(BorderFactory.createMatteBorder(1,1,1,1,Color.decode("#00B050")));
+                    //Una vez que el campo se pone verder, significa que el dni está completo y es válido, por lo que se comprueba si está registrado:
+                    if(!app.checkDNI(dni)){
+                        bottomType2.text.setVisible(true);
+                    }
                 //Si el texto del JTextField es DISTINTO y el JTextField NO está vacío -> ROJO
                 }else if(PeticionDatosSwing.checkNIF_NIE(dni)!=0 &&  !dni.equals("")){
                     pDNI.campos[0].setBorder(BorderFactory.createMatteBorder(1,1,1,1,Color.decode("#C00000")));
+                    bottomType2.text.setVisible(false);
                 //En en caso de que este vacío vuelve a su color -> INICIAL
                 }else{
                     pDNI.campos[0].setBorder(BorderFactory.createMatteBorder(1,1,1,1,Color.decode("#414141")));
+                    bottomType2.text.setVisible(false);
                 }
             }
         });
 
-        bottomType2.opciones[0].addActionListener(evt-> System.out.println(pDNI.campos[0].getText()));
+        bottomType2.opciones[0].addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //Si el dni NO existe
+                if(!app.checkDNI(pDNI.campos[0].getText())){
+                    //muestra el panel formulario para crear la nueva persona
+                    nuevaPersonaPanel(pDNI);
+                //Si el dni SI existe
+                }else{
+                    //muestra un menu de gestion de la persona
+                    gestionPersonaRegistrada(pDNI, app.whichPerson(pDNI.campos[0].getText()));
+                }
+            }
+        });
         bottomType2.opciones[1].addActionListener(evt->volver(pDNI, bottomType2));
     }
 
 
+    /**
+     * Crea un panel-formulario que pide los datos para crear una nueva persona.
+     * @param anterior
+     * */
+    protected void nuevaPersonaPanel(JPanel anterior){
+        InputForm np=new InputForm(7, 20, bgColorCentral);
+        continuar(bottomType2, bottomType2, anterior, np, "Inicio>Gestionar Personal>Crear Trabajador");
+
+        np.titulos[0].setText("Identificador: ");
+        np.titulos[1].setText("DNI:");
+        np.titulos[2].setText("Nombre:");
+        np.titulos[3].setText("Primer Apellido:");
+        np.titulos[4].setText("Segundo Apellido:");
+        np.titulos[5].setText("Sexo:");
+        np.titulos[6].setText("Fecha de Nacimiento:");
+
+        //ID
+        np.campos[0].getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {warn();}
+            public void removeUpdate(DocumentEvent e) {warn();}
+            public void insertUpdate(DocumentEvent e) {warn();}
+
+            public void warn() {
+                //En el caso de que este vacío vuelve a su color -> INICIAL
+                if(np.campos[0].getText().equals("")){
+                    np.campos[0].setBorder(defaultBorder);
+                    //Si el texto del JTextField cumple las restricciones -> VERDE
+                }else if(PeticionDatosSwing.checkEnteroPositivo(np.campos[0].getText())==0) {
+                    if(app.checkCenterID(Integer.parseInt(np.campos[0].getText()))){
+                        np.campos[0].setBorder(redBorder);
+                    }else {
+                        np.campos[0].setBorder(greenBorder);
+                    }
+                    //Si el texto del JTextField imcumple alguna de las restricciones -> ROJO
+                }else if(PeticionDatosSwing.checkEnteroPositivo(np.campos[0].getText())!=0){
+                    np.campos[0].setBorder(redBorder);
+                }
+            }
+        });
+        //DNI
+        np.campos[1].getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void removeUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void insertUpdate(DocumentEvent e) {
+                warn();
+            }
+
+            public void warn() {
+                String dni= np.campos[1].getText();
+                //Si el texto del JTextField es igual a este DNI temporal -> VERDE
+                if(PeticionDatosSwing.checkNIF_NIE(dni)==0) {
+                    np.campos[1].setBorder(BorderFactory.createMatteBorder(1,1,1,1,Color.decode("#00B050")));
+//                    if(!app.checkDNI(dni)){
+//                        np.campos[1].setBorder(BorderFactory.createMatteBorder(1,1,1,1,Color.decode("#00B050")));
+//                    }
+                    //Si el texto del JTextField es DISTINTO y el JTextField NO está vacío -> ROJO
+                }else if(PeticionDatosSwing.checkNIF_NIE(dni)!=0 &&  !dni.equals("")){
+                    np.campos[1].setBorder(BorderFactory.createMatteBorder(1,1,1,1,Color.decode("#C00000")));
+                    bottomType2.text.setVisible(false);
+                    //En en caso de que este vacío vuelve a su color -> INICIAL
+                }else{
+                    np.campos[1].setBorder(BorderFactory.createMatteBorder(1,1,1,1,Color.decode("#414141")));
+                    bottomType2.text.setVisible(false);
+                }
+            }
+        });
+        //NOMBRE
+        np.campos[2].getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void removeUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void insertUpdate(DocumentEvent e) {
+                warn();
+            }
+
+            public void warn() {
+                //En el caso de que este vacío vuelve a su color -> INICIAL
+                if(np.campos[2].getText().equals("")){
+                    np.campos[2].setBorder(defaultBorder);
+                    //Si el texto del JTextField cumple las restricciones -> VERDE
+                }else if(PeticionDatosSwing.checkCadenaLimite(false, true,50,np.campos[2].getText())==0) {
+                    np.campos[2].setBorder(greenBorder);
+                    //Si el texto del JTextField imcumple alguna de las restricciones -> ROJO
+                }else if(PeticionDatosSwing.checkCadenaLimite(false, true,50,np.campos[2].getText())!=0){
+                    np.campos[2].setBorder(redBorder);
+                }
+            }
+        });
+        //AP1
+        np.campos[3].getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void removeUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void insertUpdate(DocumentEvent e) {
+                warn();
+            }
+
+            public void warn() {
+                //En el caso de que este vacío vuelve a su color -> INICIAL
+                if(np.campos[3].getText().equals("")){
+                    np.campos[3].setBorder(defaultBorder);
+                    //Si el texto del JTextField cumple las restricciones -> VERDE
+                }else if(PeticionDatosSwing.checkCadenaLimite(false, true,50,np.campos[3].getText())==0) {
+                    np.campos[3].setBorder(greenBorder);
+                    //Si el texto del JTextField imcumple alguna de las restricciones -> ROJO
+                }else if(PeticionDatosSwing.checkCadenaLimite(false, true,50,np.campos[3].getText())!=0){
+                    np.campos[3].setBorder(redBorder);
+                }
+            }
+        });
+        //AP2
+        np.campos[4].getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void removeUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void insertUpdate(DocumentEvent e) {
+                warn();
+            }
+
+            public void warn() {
+                //En el caso de que este vacío vuelve a su color -> INICIAL
+                if(np.campos[4].getText().equals("")){
+                    np.campos[4].setBorder(defaultBorder);
+                    //Si el texto del JTextField cumple las restricciones -> VERDE
+                }else if(PeticionDatosSwing.checkCadenaLimite(false, true,50,np.campos[4].getText())==0) {
+                    np.campos[4].setBorder(greenBorder);
+                    //Si el texto del JTextField imcumple alguna de las restricciones -> ROJO
+                }else if(PeticionDatosSwing.checkCadenaLimite(false, true,50,np.campos[4].getText())!=0){
+                    np.campos[4].setBorder(redBorder);
+                }
+            }
+        });
+        //SEXO
+        np.campos[5].getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void removeUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void insertUpdate(DocumentEvent e) {
+                warn();
+            }
+
+            public void warn() {
+                //En el caso de que este vacío vuelve a su color -> INICIAL
+                if(np.campos[5].getText().equals("")){
+                    np.campos[5].setBorder(defaultBorder);
+                    //Si el texto del JTextField cumple las restricciones -> VERDE
+                }else if(Persona.validarGenero(np.campos[5].getText())) {
+                    np.campos[5].setBorder(greenBorder);
+                    //Si el texto del JTextField imcumple alguna de las restricciones -> ROJO
+                }else if(!Persona.validarGenero(np.campos[5].getText())){
+                    np.campos[5].setBorder(redBorder);
+                }
+            }
+        });
+        //FECHA NAC
+        np.campos[6].getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void removeUpdate(DocumentEvent e) {
+                warn();
+            }
+            public void insertUpdate(DocumentEvent e) {
+                warn();
+            }
+
+            public void warn() {
+                //En el caso de que este vacío vuelve a su color -> INICIAL
+                if(np.campos[6].getText().equals("")){
+                    np.campos[6].setBorder(defaultBorder);
+                    //Si el texto del JTextField cumple las restricciones -> VERDE
+                }else if(PeticionDatosSwing.checkEnteroPositivo(np.campos[6].getText())==0) {
+                    np.campos[6].setBorder(greenBorder);
+                    //Si el texto del JTextField imcumple alguna de las restricciones -> ROJO
+                }else if(PeticionDatosSwing.checkEnteroPositivo(np.campos[6].getText())!=0){
+                    np.campos[6].setBorder(redBorder);
+                }
+            }
+        });
+
+        bottomType2.opciones[0].addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+        bottomType2.opciones[1].addActionListener(evt-> volver(np, bottomType2));
+    }
+
+
+    /**
+     * Muestra un panel-menu para gestionar a una persona ya registrada
+     * @param anterior
+     * @param p - Persona a gestionar
+     * */
+    protected void gestionPersonaRegistrada(JPanel anterior, Persona p){
+        Menu gpr=new Menu(4, bgColorCentral);
+        continuar(bottomType2,bottomType3, anterior, gpr, "Inicio>Gestionar Persona>"+p.getNombre()+" "+p.getApellido1()+" "+p.getApellido2());
+
+        gpr.opciones[0].setText("Modificar Datos");
+        gpr.opciones[1].setText("Modificar Ubicación");
+        if(p instanceof Medico || p instanceof Administrativo){
+            gpr.opciones[2].setText("Añadir día trabajado");
+            gpr.opciones[3].setText("Despedir");
+            gpr.opciones[3].addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+
+                    int opcion=JOptionPane.showConfirmDialog(null, "Está apunto de eliminar del sistema este trabajador ¿Desea continuar?", "Despedir trabajador", JOptionPane.OK_CANCEL_OPTION);
+
+                    if(opcion==0){
+                        if(app.fireWorker(p.getDni())) {
+                            bottomType3.text.setText(p.getNombre() + " " + p.getApellido1() + " " + p.getApellido2() + " ha sido despedido");
+                            bottomType3.text.setForeground(Color.decode("#CDCDCD"));
+                            bottomType3.text.setIcon(info);
+                            bottomType3.text.setVisible(true);
+                        }else{
+                            bottomType3.text.setText("Operación fallida");
+                            bottomType3.text.setForeground(Color.decode("#CDCDCD"));
+                            bottomType3.text.setIcon(error);
+                            bottomType3.text.setVisible(true);
+                        }
+                    }
+                }
+            });
+        }else{
+            gpr.opciones[2].setText("Añadir visita médica");
+            gpr.opciones[3].setText("Dar de alta");
+        }
+
+        setStyleMenu(gpr);
+        bottomType3.opciones[0].addActionListener(evt-> volver(gpr, bottomType3));
+    }
+
+
+    /**
+     * Crea un panel-datos para mostrar informacion en texto plano
+     * @param tipo de centro
+     * @param anterior - panel-central
+     * */
     protected void mostrarDatos(int tipo, JPanel anterior){
 
         Centro c=getSelectedCenter(anterior);
@@ -471,13 +789,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             type="Clínica";
         }
 
-         DataPanel dp=new DataPanel(bgColorCentral);
-//        central.add(nuevoCentro);
-        bottomType2.setVisible(false);
-        frame.add(bottomType3, BorderLayout.SOUTH);
-//        bottomType3.setVisible(true);
+        DataPanel dp=new DataPanel(bgColorCentral);
         bottomType3.opciones[0].addActionListener(evt-> volver(dp, bottomType3));
-        continuar(anterior, dp, "Inicio>Gestionar "+type+">Mostrar Datos");
+        continuar(bottomType2,bottomType3,anterior, dp, "Inicio>Gestionar "+type+">Mostrar Datos");
         setStyleJTextArea(dp.texto);
 
         //COMPONENTES
@@ -493,6 +807,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Da formato a los JLabel
+     * @param label
+     * */
     protected void setStyleJLabel(JLabel label){
         label.setBackground(bgColorCentral);
         label.setForeground(Color.decode("#CDCDCD"));
@@ -500,6 +818,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Da formato a los JTextArea
+     * @param label
+     * */
     protected void setStyleJTextArea(JTextArea label){
         label.setBackground(bgColorCentral);
         label.setForeground(Color.decode("#CDCDCD"));
@@ -546,6 +868,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Da formato a los JComboBox
+     * @param combo - JComboBox a modificar
+     * */
     protected void setStyleJComboBox(JComboBox combo){
 
         combo.setBackground(Color.decode("#3C3C3C"));
@@ -621,6 +947,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Da formato a las JTable
+     * @param tabla - JTable a modificar
+     * */
     protected void setStyleJTable(JTable tabla){
 //        mp.tabla.setEnabled(false); Desactiva la interacción del raton
         tabla.setDefaultEditor(Object.class, null); //Deshabilita la edicion de las celdas
@@ -641,7 +971,12 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
-    protected void mostrarPersonas(int tipo, JPanel anterior, String arr[]){
+    /**
+     * Guarda las personas encontradas segun el tipo elegido en un arrayList de Persona
+     * @param tipo de persona elegida
+     * @param anterior - panel-central
+     * */
+    protected void mostrarPersonas(int tipo, JPanel anterior/*, String arr[]*/){
         String type, t, text="";
         DataPanel mp;
 
@@ -657,10 +992,8 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             mp=new DataPanel(bgColorCentral, columnNames);
         }
 
-        bottomType2.setVisible(false);
-        frame.add(bottomType3, BorderLayout.SOUTH);
         bottomType3.opciones[0].addActionListener(evt-> volver(mp, bottomType3));
-        continuar(anterior, mp, "Inicio>Gestionar "+t+">Mostrar "+type);
+        continuar(bottomType2,bottomType3,anterior, mp, "Inicio>Gestionar "+t+">Mostrar "+type);
 
         //COMPONENTES
         ArrayList<Persona> personas=app.mostrarPersonas(tipo);
@@ -705,6 +1038,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Crea un panel-formulario que pide los datos para crear un nuevo centro.
+     * @param tipoCentro
+     * @param anterior - panel-central
+     * */
     protected void nuevoCentroPanel(int tipoCentro, JPanel anterior){
         String type;
         if(tipoCentro ==1){
@@ -723,12 +1061,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             nuevo = new InputForm(5, 24, bgColorCentral);
         }
 
-        continuar(anterior, nuevo, "Inicio>Gestionar "+type+">Crear "+type);
-        bottomType3.setVisible(false);
-        rmActionListener(bottomType2);
-        frame.add(bottomType2, BorderLayout.SOUTH);
-        bottomType2.setVisible(true);
-
+        continuar(bottomType3,bottomType2,anterior, nuevo, "Inicio>Gestionar "+type+">Crear "+type);
 
         //Texto para los campos
         nuevo.titulos[0].setText("Identificador:");
@@ -748,13 +1081,6 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         info.setVisible(false);
 
         //Restricciones Campos
-
-        //Bordes para los JTextField
-        Border greenBorder=new MatteBorder(1,1,1,1,Color.decode("#00B050"));
-        Border redBorder=new MatteBorder(1,1,1,1,Color.decode("#C00000"));
-        Border defaultBorder= new MatteBorder(1,1,1,1,Color.decode("#414141"));
-
-
         nuevo.campos[0].getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
                 warn();
@@ -1017,6 +1343,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Obtiene el objeto Centro del JRadioButton seleccionado.
+     * @param actual - panel-central
+     * */
     protected Centro getSelectedCenter(JPanel actual){
         int idCentro=0;
 
@@ -1039,6 +1369,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Crea un panel-formulario que pide los datos del centro elegido mediante JTextFields
+     * @param tipo de centro elegido
+     * @param anterior - panel-central
+     * */
     protected void modificarCentro(int tipo, JPanel anterior){
 
         Centro c=getSelectedCenter(anterior);
@@ -1054,11 +1389,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             modCentro=new InputForm(3, 20, bgColorCentral);
         }
 
-        continuar(anterior, modCentro,"Inicio>Gestionar "+type+">Modificar Datos");
-        bottomType3.setVisible(false);
-        rmActionListener(bottomType2);
-        frame.add(bottomType2, BorderLayout.SOUTH);
-        bottomType2.setVisible(true);
+        continuar(bottomType3,bottomType2,anterior, modCentro,"Inicio>Gestionar "+type+">Modificar Datos");
 
         //Texto para los campos
         if(tipo==1) {
@@ -1250,14 +1581,14 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Crea un panel-stats (formulario) que pide los datos necesarios para mostrar las stats de un centro
+     * @param anterior - panel-central
+     * */
     protected void statsCentros(JPanel anterior){
         int tipo=1; //TODO
         Stats sc=new Stats(4, bgColorCentral);
-        bottomType1.setVisible(false);
-        rmActionListener(bottomType1);
-        frame.add(bottomType2, BorderLayout.SOUTH);
-        bottomType2.setVisible(true);
-        continuar(anterior, sc, "Inicio>Estadísticas de los centros");
+        continuar(bottomType1,bottomType2,anterior, sc, "Inicio>Estadísticas de los centros");
 
         sc.t1.setText("Elige el mes del que obtener la información: ");
         sc.t1.setForeground(Color.decode("#CDCDCD"));
@@ -1294,6 +1625,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Crea un panel-stats (formulario) que pide los datos necesarios para mostrar las stats de una persona
+     * @param anterior - panel-central
+     * */
     protected void statsPersonas(JPanel anterior){
         int tipo=2; //TODO
         int tipoPersona;
@@ -1301,11 +1636,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         String centro[]={"Torrecárdenas", "Mediterráneo", "Virgen del Mar"};
 
         Stats sc=new Stats(3, centro, bgColorCentral);
-        bottomType1.setVisible(false);
-        rmActionListener(bottomType1);
-        frame.add(bottomType2, BorderLayout.SOUTH);
-        bottomType2.setVisible(true);
-        continuar(anterior, sc, "Inicio>Estadísticas de las personas");
+        continuar(bottomType1,bottomType2,anterior, sc, "Inicio>Estadísticas de las personas");
 
         sc.t1.setText("Elige el mes del que obtener la información: ");
         sc.t1.setForeground(Color.decode("#CDCDCD"));
@@ -1433,11 +1764,6 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         int mes=getMes(anterior);
         Centro c=getSelectedCenter(anterior);
 
-        bottomType2.setVisible(false);
-        rmActionListener(bottomType2);
-        frame.add(bottomType3, BorderLayout.SOUTH);
-        bottomType3.setVisible(true);
-
         Hospital h=null;
         Clinica cl=null;
 
@@ -1452,7 +1778,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         if(tipoPersona==1 && c instanceof Hospital) {
             int nulo=mostrarPacientes(h);
             DataPanel pacientes=new DataPanel(pacientesHospital,bgColorCentral);
-            continuar(anterior, pacientes, "Inicio>Estadísticas de los centros>Estadísticas de "+mesP);
+            continuar(bottomType2,bottomType3,anterior, pacientes, "Inicio>Estadísticas de los centros>Estadísticas de "+mesP);
             bottomType3.opciones[0].addActionListener(evt-> volver(pacientes, bottomType3));
 
             pacientes.t1.setText("Pacientes de "+h.getNombre()+": ");
@@ -1488,7 +1814,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
         }else if(tipoPersona==1 && c instanceof Clinica){
             DataPanel pacientes=new DataPanel(cl.consultas, 1, bgColorCentral);
-            continuar(anterior, pacientes, "Inicio>Estadísticas de los centros>Estadísticas de "+mesP);
+            continuar(bottomType2,bottomType3,anterior, pacientes, "Inicio>Estadísticas de los centros>Estadísticas de "+mesP);
             bottomType3.opciones[0].addActionListener(evt-> volver(pacientes, bottomType3));
 
             pacientes.t1.setText("Pacientes de "+cl.getNombre()+": ");
@@ -1518,7 +1844,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
         }else if(tipoPersona==2){
             DataPanel medicos=new DataPanel(c.trabajadores, 2, bgColorCentral);
-            continuar(anterior, medicos, "Inicio>Estadísticas de los centros>Estadísticas de "+mesP);
+            continuar(bottomType2,bottomType3,anterior, medicos, "Inicio>Estadísticas de los centros>Estadísticas de "+mesP);
             bottomType3.opciones[0].addActionListener(evt-> volver(medicos, bottomType3));
 
             medicos.t1.setText("Médicos de "+c.getNombre()+": ");
@@ -1547,7 +1873,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
         }else if(tipoPersona==3){
             DataPanel admins=new DataPanel(c.trabajadores, 3, bgColorCentral);
-            continuar(anterior, admins, "Inicio>Estadísticas de los centros>Estadísticas de "+mesP);
+            continuar(bottomType2,bottomType3,anterior, admins, "Inicio>Estadísticas de los centros>Estadísticas de "+mesP);
             bottomType3.opciones[0].addActionListener(evt-> volver(admins, bottomType3));
 
             admins.t1.setText("Administrativos de "+c.getNombre()+": ");
@@ -1578,6 +1904,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Crea un panel-datos para mostrar las estadísticas del centro elegido.
+     * @param anterior - panel-central
+     * @param mesP - mes del que sacar los datos
+     * */
     protected void mostrarStatsCentros(JPanel anterior, String  mesP){
         int mes=getMes(anterior);
         Centro centro=getSelectedCenter(anterior);
@@ -1600,20 +1931,13 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             consultas[0] = "Todas las consultas libres";
         }
 
-
         DataPanel msc=new DataPanel(bgColorCentral, true, consultas);
-        continuar(anterior, msc, "Inicio>Estadísticas de centros>"+centro.getNombre()+", "+mesP);
-
-        bottomType2.setVisible(false);
-        rmActionListener(bottomType2);
-        frame.add(bottomType3, BorderLayout.SOUTH);
-        bottomType3.setVisible(true);
+        continuar(bottomType2,bottomType3,anterior, msc, "Inicio>Estadísticas de centros>"+centro.getNombre()+", "+mesP);
 
         setStyleJLabel(msc.t1);
         msc.t1.setText("CONSULTAS");
         msc.t1.setFont(new Font("Tahoma", 1, 16));
-//        msc.t2.setText("HABITACIONES");
-//        setStyleJTextArea(msc.texto);
+
         setStyleScrollPane(msc.scroll);
         setStyleJList(msc.estadoConsultas);
         msc.estadoConsultas.setPreferredSize(new Dimension(350, 0));
@@ -1677,7 +2001,22 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
-    protected void continuar(JPanel anterior, JPanel siguiente, String path){
+    /**
+     * Funcion que permite "avanzar" quitando los paneles antiguos y añadiendo los nuevos.
+     * @param anteriorBottom panel-sur anterior
+     * @param nuevoBottom panel-sur nuevo
+     * @param anterior panel-central
+     * @param siguiente panel-central
+     * @param path - ubicación actual para situar al usuario dentro de la aplicación
+     * */
+    protected void continuar(Bottom anteriorBottom, Bottom nuevoBottom, JPanel anterior, JPanel siguiente, String path){
+        anteriorBottom.setVisible(false);
+        rmActionListener(anteriorBottom);
+        anteriorBottom.text.setText("");
+        anteriorBottom.text.setVisible(false);
+        frame.add(nuevoBottom, BorderLayout.SOUTH);
+        nuevoBottom.setVisible(true);
+
         anterior.setVisible(false);
         central.add(siguiente);
         siguiente.setVisible(true);
@@ -1685,10 +2024,17 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Funcion que permite volver al panel principal, no al anterior.
+     * @param currentCentral panel-central actual
+     * @param currentBottom panel-sur actual
+     * */
     protected void volver(JPanel currentCentral, Bottom currentBottom){
         rmActionListener(currentBottom);
         currentCentral.setVisible(false);
         currentBottom.setVisible(false);
+        currentBottom.text.setText("");
+        currentBottom.text.setVisible(false);
         frame.add(bottomType1, BorderLayout.SOUTH);
         central.add(m, c);
         frame.add(central, BorderLayout.CENTER);
@@ -1717,6 +2063,13 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
 
+    /**
+     * Funcion que pide al usuario confirmar la eliminación de un centro mediante uin JOptionPane
+     * @param c - centro que se quiere borrar
+     * @param actual - panel-central
+     * @param anterior - panel-central anterior
+     * @param nuevo - panel-central
+     * */
     protected void confirmRmCentro(Centro c, JPanel actual, JPanel anterior, JPanel nuevo){
 
         int opcion=JOptionPane.showConfirmDialog(null, "Está apunto de eliminar el objeto ¿Está seguro?", "Confirmación de la operación", JOptionPane.OK_CANCEL_OPTION);
@@ -1737,15 +2090,5 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             System.out.println("Operación cancelada");
         }
     }
-
-
-//    public static void main(String args[]) {
-//        /* Create and display the form */
-//        java.awt.EventQueue.invokeLater(new Runnable() {
-//            public void run() {
-//                new VentanaPrincipal();
-//            }
-//        });
-//    }
 
 }

@@ -8,6 +8,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
+/**
+ * Clase que crea un panel-formulario para realizar operaciones sobre los centros listados
+ * */
 public class GestionCentro extends JPanel{
 
     protected GridBagConstraints c;

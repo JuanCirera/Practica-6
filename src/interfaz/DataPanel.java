@@ -7,6 +7,9 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 
+/**
+ * Clase que crea un panel-datos que segun el constructor muestra texto plano, una tabla o un JList
+ * */
 public class DataPanel extends JPanel {
 
     protected JTextArea texto;

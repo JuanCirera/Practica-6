@@ -4,12 +4,18 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
+/**
+ * Clase que crea un panel-formulario con JTextFields
+ * */
 public class InputForm extends JPanel {
 
     protected GridBagConstraints c;
     public JTextField campos[];
     protected JLabel titulos[];
 
+    /**
+     * Constructor
+     * */
     public InputForm(int nCampos, int anchoCampo, Color bg){
         //LAYOUT
         GridBagLayout layout=new GridBagLayout();
