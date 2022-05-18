@@ -7,10 +7,10 @@ import java.awt.*;
 public class InputForm extends JPanel {
 
     protected GridBagConstraints c;
-    protected JTextField campos[];
+    public JTextField campos[];
     protected JLabel titulos[];
 
-    public InputForm(int nCampos, Color bg){
+    public InputForm(int nCampos, int anchoCampo, Color bg){
         //LAYOUT
         GridBagLayout layout=new GridBagLayout();
         c = new GridBagConstraints();
@@ -42,11 +42,11 @@ public class InputForm extends JPanel {
 
         c.gridx=1;
         c.gridy=0;
-        c.anchor=GridBagConstraints.CENTER;
+        c.anchor=GridBagConstraints.WEST;
         c.insets= new Insets(0,0,30,0);
 
         for(int i=0;i<campos.length;i++){
-            JTextField campo= new JTextField( 25);
+            JTextField campo= new JTextField( anchoCampo);
             campos[i]=campo;
             add(campos[i], c);
             campos[i].setFont(new Font("Tahoma", 0, 18));

@@ -30,6 +30,21 @@ public class Hospital extends Centro{
         return totalTrabajadores;
     }
 
+    public int getPlantas() {
+        return plantas;
+    }
+
+    public int getHabitacionesPorPlanta() {
+        return habitacionesPorPlanta;
+    }
+
+    public void setPlantas(int plantas) {
+        this.plantas = plantas;
+    }
+
+    public void setHabitacionesPorPlanta(int habitacionesPorPlanta) {
+        this.habitacionesPorPlanta = habitacionesPorPlanta;
+    }
 
     //FUNCIONES-METODOS
 

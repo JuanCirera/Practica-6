@@ -1,10 +1,13 @@
 package logica;
 
+import interfaz.InputForm;
 import utilidades.Faker;
 import utilidades.Fecha;
 import utilidades.PeticionDatos;
 
+import javax.swing.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -365,15 +368,51 @@ public class GestionMedica implements Serializable {
 
 
     /**
-     * Pide los datos del centro y los actualiza mediante los setter del objeto
+     * Obtiene los datos del formulario y los actualiza mediante los setter del objeto
      * @param c - objeto centro a actualizar
+     * @param panel formulario de donde obtener los datos.
+     * @return boolean - true si se han setteado bien los datos, false si no.
      * */
-    protected static void modificarCentro(Centro c){
-        //El id no tiene sentido cambiarlo, para eso es mejor eliminarlo entero
-        String nombre = PeticionDatos.pedirCadenaLimite(false, true, 70, "> nombre ("+c.getNombre()+")"+": ");
-        String direccion = PeticionDatos.pedirCadenaLimite(true, true, 70, "> dirección ("+c.getDireccionCentro()+")"+": ");
-        c.setNombreCentro(nombre);
-        c.setDireccion(direccion);
+    public boolean modificarCentro(Centro c, JPanel panel){
+        //El id no tiene sentido cambiarlo, para eso es mejor eliminarlo entero. Decido que no se pueda modificar
+        try {
+            InputForm form = (InputForm) panel;
+            String nombre = form.campos[0].getText();
+            String direccion = form.campos[1].getText();
+            int consultas = Integer.parseInt(form.campos[2].getText());
+            if (c instanceof Hospital) {
+                Hospital h = (Hospital) c;
+                int plantas = Integer.parseInt(form.campos[3].getText());
+                int habitaciones = Integer.parseInt(form.campos[4].getText());
+
+                //Saco estos dos campos del if para que se puedan modificar aunque
+                h.setNombreCentro(nombre);
+                h.setDireccion(direccion);
+
+                if (h.getPlantas() <= plantas && h.getHabitacionesPorPlanta() <= habitaciones && h.getLimiteConsultas() <= consultas) {
+                    h.setLimiteConsultas(consultas);
+                    h.setPlantas(plantas);
+                    h.setHabitacionesPorPlanta(habitaciones);
+                } else {
+                    return false;
+                }
+                return true;
+            }
+
+            c.setNombreCentro(nombre);
+            c.setDireccion(direccion);
+            if (c.getLimiteConsultas() <= consultas) {
+                c.setLimiteConsultas(consultas);
+            } else {
+                return false;
+            }
+            return true;
+
+        }catch (NumberFormatException e){
+            return false;
+        }catch (Exception e){
+            return false;
+        }
     }
 
 
@@ -411,7 +450,7 @@ public class GestionMedica implements Serializable {
                                         System.out.println(h.toString());
                                         break;
                                     case 2:
-                                        modificarCentro(h);
+//                                        modificarCentro(h);
                                         break;
                                     case 3:
                                         System.out.println(" ");//linea
@@ -435,7 +474,7 @@ public class GestionMedica implements Serializable {
                                         System.out.println(cl.toString());
                                         break;
                                     case 2:
-                                        modificarCentro(cl);
+//                                        modificarCentro(cl);
                                         break;
                                     case 3:
                                         System.out.println(" ");
@@ -955,7 +994,7 @@ public class GestionMedica implements Serializable {
      * @param dni del objeto persona.
      * @return logica.Centro - objeto centro donde trabaja esa persona.
      * */
-    protected Centro whereWorking(String dni){
+    public Centro whereWorking(String dni){
         Centro workingHere=null;
         for(Centro c:centrosMedicos){
             if(c!=null){
@@ -975,7 +1014,7 @@ public class GestionMedica implements Serializable {
      * @param dni del objeto persona.
      * @return logica.Centro - objeto centro donde esta ese paciente.
      * */
-    protected Centro whereAdmitted(String dni){
+    public Centro whereAdmitted(String dni){
         Centro admittedHere=null;
         for(Centro c:centrosMedicos){
             if(c!=null){
@@ -990,6 +1029,37 @@ public class GestionMedica implements Serializable {
                     for(int i=0;i<h.habitaciones.length;i++){
                         for(int x=0;x<h.habitaciones[i].length;x++) {
                             if (h.habitaciones[i][x] != null && h.habitaciones[i][x].getDni().equals(dni)) {
+                                admittedHere = c;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return admittedHere;
+    }
+
+
+    /**
+     * Funcion que comprueba el centro donde está ingresado o en consulta un paciente
+     * @param idPaciente del objeto persona.
+     * @return logica.Centro - objeto centro donde esta ese paciente.
+     * */
+    public Centro whereAdmitted(int idPaciente){
+        Centro admittedHere=null;
+        for(Centro c:centrosMedicos){
+            if(c!=null){
+                for(Persona p: c.consultas){
+                    if(p!=null && p.getID()==idPaciente){
+                        admittedHere=c;
+                    }
+                }
+                //Si no lo encuentra arriba hay que comprobar las habitaciones, claro solo si es un hospital
+                if(c instanceof Hospital){
+                    Hospital h=(Hospital) c;
+                    for(int i=0;i<h.habitaciones.length;i++){
+                        for(int x=0;x<h.habitaciones[i].length;x++) {
+                            if (h.habitaciones[i][x] != null && h.habitaciones[i][x].getID()==idPaciente) {
                                 admittedHere = c;
                             }
                         }
@@ -1470,10 +1540,14 @@ public class GestionMedica implements Serializable {
 
     /**
      * Muestra todas las personas registradas.
+     * @param tipo de persona
+     * @return ArrayList(String) - personas encontradas
      * */
-    protected void mostrarPersonas(int tipo){
+    public ArrayList<Persona> mostrarPersonas(int tipo){
         String mensaje="";
-        System.out.println(" ");//linea
+//        System.out.println(" ");//linea
+        ArrayList<Persona> personas=new ArrayList<>();
+
         for(Centro c: centrosMedicos){
             if(c!=null) {
                 if(c instanceof Hospital){
@@ -1483,7 +1557,9 @@ public class GestionMedica implements Serializable {
                         ordenarPorIDpersona(h.trabajadores);
                         for (Persona worker : h.trabajadores) {
                             if (worker != null) {
-                                System.out.println(worker.toString());
+//                                System.out.println(worker.toString());
+                                personas.add(worker);
+
 //                                return true;
                             }
 //                            else {
@@ -1494,7 +1570,8 @@ public class GestionMedica implements Serializable {
                         ordenarPorIDpersona(h.consultas);
                         for (Paciente paciente : h.consultas) {
                             if (paciente != null) {
-                                System.out.println(paciente.toString());
+//                                System.out.println(paciente.toString());
+                                personas.add(paciente);
 //                                return true;
                             } else {
                                 mensaje = ANSI_YELLOW + "Aún no hay pacientes registrados." + ANSI_RESET;
@@ -1504,7 +1581,8 @@ public class GestionMedica implements Serializable {
                         for (int x = 0; x < h.habitaciones.length; x++) {
                             for (int z = 0; z < h.habitaciones[x].length; z++) {
                                 if (h.habitaciones[x][z] != null) {
-                                    System.out.println(h.habitaciones[x][z].toString());
+//                                    System.out.println(h.habitaciones[x][z].toString());
+                                    personas.add(h.habitaciones[x][z]);
 //                                    return true;
                                 } else {
                                     mensaje = ANSI_YELLOW + "Aún no hay pacientes registrados." + ANSI_RESET;
@@ -1518,7 +1596,8 @@ public class GestionMedica implements Serializable {
                         ordenarPorIDpersona(cl.trabajadores);
                         for (Persona worker : cl.trabajadores) {
                             if (worker != null) {
-                                System.out.println(worker.toString());
+//                                System.out.println(worker.toString());
+                                personas.add(worker);
 //                                return true;
                             }
 //                            else {
@@ -1529,7 +1608,8 @@ public class GestionMedica implements Serializable {
                         ordenarPorIDpersona(cl.consultas);
                         for (Paciente paciente : cl.consultas) {
                             if (paciente != null) {
-                                System.out.println(paciente.toString());
+//                                System.out.println(paciente.toString());
+                                personas.add(paciente);
 //                                return true;
                             } else {
                                 mensaje = ANSI_YELLOW + "Aún no hay pacientes registrados." + ANSI_RESET;
@@ -1545,6 +1625,7 @@ public class GestionMedica implements Serializable {
         }
 
         System.out.println(mensaje);
+        return personas;
 //        return false;
     }
 
@@ -1811,7 +1892,7 @@ public class GestionMedica implements Serializable {
      * @param staticPath ruta del archivo para los atributos de clase.
      * @return boolean - true si se ha guardado bie, false si no.
      * */
-    protected boolean guardarEstado(String objPath, String staticPath){
+    public boolean guardarEstado(String objPath, String staticPath){
         try{
             //GUARDAR OBJETO
             ObjectOutputStream oos=new ObjectOutputStream(new FileOutputStream(objPath));
@@ -1832,7 +1913,9 @@ public class GestionMedica implements Serializable {
             return true;
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println(ANSI_RED + "Ha ocurrido un error mientras se guardaba." + ANSI_RESET);
+//            System.out.println(ANSI_RED + "Ha ocurrido un error mientras se guardaba." + ANSI_RESET);
+            return false;
+        }catch (Exception e){
             return false;
         }
     }

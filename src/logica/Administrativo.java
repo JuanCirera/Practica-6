@@ -27,6 +27,10 @@ public class Administrativo extends Persona{
         this.ingresado = ingresado;
     }
 
+    public String getArea() {
+        return area;
+    }
+
     //FUNCIONES-METODOS
 
     @Override

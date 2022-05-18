@@ -54,6 +54,11 @@ public class Centro implements Estadistica, Serializable {
         this.direccionCentro = direccionCentro;
     }
 
+    public void setLimiteConsultas(int limiteConsultas) {
+        this.limiteConsultas = limiteConsultas;
+    }
+
+
     //GETTERS
     public int getID() {
         return identificador;

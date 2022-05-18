@@ -28,6 +28,9 @@ public class Medico extends Persona{
         this.ingresado = ingresado;
     }
 
+    public String getEspecialidad() {
+        return especialidad;
+    }
 
     //FUNCIONES-METODOS
 
