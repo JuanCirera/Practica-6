@@ -369,7 +369,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         gc.opciones[1].setText("Modificar");
 
         gc.opciones[2].addActionListener(evt-> nuevoCentroPanel(tipo, gc));
-        gc.opciones[2].setEnabled(false);
+        gc.opciones[2].setEnabled(true);
         gc.opciones[2].setText("+ Nuevo");
 
         gc.opciones[3].addActionListener(evt-> confirmRmCentro(getSelectedCenter(gc), gc, anterior, gc));
@@ -1071,14 +1071,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         nuevo.titulos[4].setText("Trabajadores:");
 
         //Mensaje informativo
-        JLabel info=new JLabel();
-        nuevo.c.gridx=1;
-        nuevo.c.gridy+=1;
-        nuevo.add(info, nuevo.c);
-        setStyleJLabel(info);
-        info.setForeground(Color.decode("#92D050"));
-        info.setText("Nuevo centro añadido");
-        info.setVisible(false);
+        bottomType2.text.setText("Nuevo centro añadido");
+        bottomType2.text.setForeground(Color.decode("#CDCDCD"));
+        bottomType2.text.setIcon(info);
 
         //Restricciones Campos
         nuevo.campos[0].getDocument().addDocumentListener(new DocumentListener() {
@@ -1093,7 +1088,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
 
             public void warn() {
-                info.setVisible(false);
+                bottomType2.text.setVisible(false);
                 String campo=nuevo.campos[0].getText();
 //                int idCentro=Integer.parseInt(campo);
 
@@ -1127,7 +1122,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
 
             public void warn() {
-                info.setVisible(false);
+                bottomType2.text.setVisible(false);
                 //En el caso de que este vacío vuelve a su color -> INICIAL
                 if(nuevo.campos[1].getText().equals("")){
                     nuevo.campos[1].setBorder(defaultBorder);
@@ -1153,7 +1148,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
 
             public void warn() {
-                info.setVisible(false);
+                bottomType2.text.setVisible(false);
                 //En el caso de que este vacío vuelve a su color -> INICIAL
                 if(nuevo.campos[2].getText().equals("")){
                     nuevo.campos[2].setBorder(defaultBorder);
@@ -1179,7 +1174,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
 
             public void warn() {
-                info.setVisible(false);
+                bottomType2.text.setVisible(false);
                 //En el caso de que este vacío vuelve a su color -> INICIAL
                 if(nuevo.campos[3].getText().equals("")){
                     nuevo.campos[3].setBorder(defaultBorder);
@@ -1205,7 +1200,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
 
             public void warn() {
-                info.setVisible(false);
+                bottomType2.text.setVisible(false);
                 //En el caso de que este vacío vuelve a su color -> INICIAL
                 if(nuevo.campos[4].getText().equals("")){
                     nuevo.campos[4].setBorder(defaultBorder);
@@ -1232,7 +1227,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 }
 
                 public void warn() {
-                    info.setVisible(false);
+                    bottomType2.text.setVisible(false);
                     //En el caso de que este vacío vuelve a su color -> INICIAL
                     if(nuevo.campos[5].getText().equals("")){
                         nuevo.campos[5].setBorder(defaultBorder);
@@ -1257,7 +1252,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 }
 
                 public void warn() {
-                    info.setVisible(false);
+                    bottomType2.text.setVisible(false);
                     //En el caso de que este vacío vuelve a su color -> INICIAL
                     if(nuevo.campos[6].getText().equals("")){
                         nuevo.campos[6].setBorder(defaultBorder);
@@ -1275,7 +1270,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         bottomType2.opciones[0].addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(!nuevoCentro(nuevo.campos, info, tipoCentro)){
+                if(!nuevoCentro(nuevo.campos, bottomType2.text, tipoCentro)){
                     JOptionPane.showMessageDialog(null, "Todos los campos son obligatorios", "Error al aplicar los cambios", JOptionPane.WARNING_MESSAGE);
                 }
             }
@@ -1410,14 +1405,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         }
 
         //Mensaje informativo
-        JLabel info=new JLabel();
-        modCentro.c.gridx=1;
-        modCentro.c.gridy+=1;
-        modCentro.add(info, modCentro.c);
-        setStyleJLabel(info);
-        info.setForeground(Color.decode("#92D050"));
-        info.setText("Datos modificados correctamente");
-        info.setVisible(false);
+        bottomType2.text.setText("Datos modificados correctamente");
+        bottomType2.text.setForeground(Color.decode("#CDCDCD"));
+        bottomType2.text.setIcon(info);
 
         //Bordes para los JTextField
         Border greenBorder=new MatteBorder(1,1,1,1,Color.decode("#00B050"));
@@ -1438,7 +1428,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
 
             public void warn() {
-                info.setVisible(false);
+                bottomType2.text.setVisible(false);
                 //En el caso de que este vacío vuelve a su color -> INICIAL
                 if(modCentro.campos[0].getText().equals("")){
                     modCentro.campos[0].setBorder(defaultBorder);
@@ -1464,7 +1454,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
 
             public void warn() {
-                info.setVisible(false);
+                bottomType2.text.setVisible(false);
                 //En el caso de que este vacío vuelve a su color -> INICIAL
                 if(modCentro.campos[1].getText().equals("")){
                     modCentro.campos[1].setBorder(defaultBorder);
@@ -1490,7 +1480,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
 
             public void warn() {
-                info.setVisible(false);
+                bottomType2.text.setVisible(false);
                 //En el caso de que este vacío vuelve a su color -> INICIAL
                 if(modCentro.campos[2].getText().equals("")){
                     modCentro.campos[2].setBorder(defaultBorder);
@@ -1519,7 +1509,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 }
 
                 public void warn() {
-                    info.setVisible(false);
+                    bottomType2.text.setVisible(false);
                     //En el caso de que este vacío vuelve a su color -> INICIAL
                     if (modCentro.campos[3].getText().equals("")) {
                         modCentro.campos[3].setBorder(defaultBorder);
@@ -1547,7 +1537,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 }
 
                 public void warn() {
-                    info.setVisible(false);
+                    bottomType2.text.setVisible(false);
                     //En el caso de que este vacío vuelve a su color -> INICIAL
                     if (modCentro.campos[4].getText().equals("")) {
                         modCentro.campos[4].setBorder(defaultBorder);
@@ -1573,7 +1563,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                         campo.setText("");
                     }
                     //Y se informa al usuario
-                    info.setVisible(true);
+                    bottomType2.text.setVisible(true);
                 }
             }
         });
